@@ -717,7 +717,50 @@ p {
       0 3px 0 #4d321f55;
   }
 }
+/* ANIMACIÓN DE FICHAS */
+.token.moving-piece {
+  animation: pieceMove .28s ease-out;
+}
 
+@keyframes pieceMove {
+  0% {
+    transform: scale(.82);
+    opacity:.65;
+  }
+
+  60% {
+    transform: scale(1.14);
+    opacity:1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity:1;
+  }
+}
+
+/* Pequeño rebote al llegar */
+.token.arrived {
+  animation: pieceArrived .32s ease-out;
+}
+
+@keyframes pieceArrived {
+  0% {
+    transform:scale(1);
+  }
+
+  45% {
+    transform:scale(1.18);
+  }
+
+  75% {
+    transform:scale(.94);
+  }
+
+  100% {
+    transform:scale(1);
+  }
+}
 .legend {
   display:flex;
   flex-wrap:wrap;
@@ -2363,188 +2406,152 @@ render();
 }
 
 function move(color,id) {
+function move(color,id) {
 
-if(
+  if(
+    state.phase!=="playing"||
+    color!==state.players[state.active]||
+    state.roll===null||
+    !state.valid.has(`${color}-${id}`)||
+    state.moving
+  ) return;
 
-state.phase!=="playing" ||
+  const n=state.roll;
+  const token=state.tokens[color][id];
 
-color!==state.players[state.active] ||
+  const startProgress =
+    token.progress===-1
+    ?0
+    :token.progress;
 
-state.roll===null ||
+  const finalProgress =
+    token.progress===-1
+    ?0
+    :token.progress+n;
 
-!state.valid.has(
-`${color}-${id}`
-) ||
+  state.moving=true;
+  state.valid=new Set();
+  state.message="Moviendo ficha…";
+  render();
 
-state.moving
+  let currentProgress=startProgress;
 
-)
-return;
+  function animateStep(){
 
-const n=state.roll;
+    if(currentProgress>=finalProgress){
 
-const token =
-state.tokens[color][id];
+      finishMove();
+      return;
+    }
 
-const next =
+    currentProgress++;
 
-token.progress===-1
+    state.tokens[color]=state.tokens[color].map(t =>
+      t.id===id
+      ?{...t,progress:currentProgress}
+      :t
+    );
 
-?
-0
-:
-token.progress+n;
+    render();
 
-state.moving=true;
+    setTimeout(animateStep,150);
+  }
 
-state.valid=new Set();
+  function finishMove(){
 
-state.message =
-"Moviendo ficha…";
+    let captured=false;
 
-render();
+    const updated={
+      ...state.tokens,
+      [color]:
+        state.tokens[color].map(t =>
+          t.id===id
+          ?{...t,progress:finalProgress}
+          :t
+        )
+    };
 
-setTimeout(()=>{
+    const landing=trackIndex(color,finalProgress);
 
-let captured=false;
+    if(
+      landing!==null &&
+      !safe.has(landing)
+    ){
 
-const updated={
+      state.players
+      .filter(c=>c!==color)
+      .forEach(opponent=>{
 
-...state.tokens,
+        updated[opponent]=
+          updated[opponent].map(t=>{
 
-[color]:
+            if(
+              trackIndex(opponent,t.progress)===landing
+            ){
 
-state.tokens[color].map(
-t=>
+              captured=true;
 
-t.id===id
+              return {
+                ...t,
+                progress:-1
+              };
 
-?
-{
-...t,
-progress:next
+            }
+
+            return t;
+
+          });
+
+      });
+
+    }
+
+    state.tokens=updated;
+    state.moving=false;
+
+    if(
+      updated[color]
+      .every(t=>t.progress===57)
+    ){
+
+      state.winner=color;
+      state.phase="winner";
+      state.roll=null;
+
+      render();
+      return;
+    }
+
+    if(n===6 || captured){
+
+      state.roll=null;
+
+      state.message=
+        captured
+        ?"¡Captura! Lanza otra vez."
+        :"¡Un seis! Lanza otra vez.";
+
+      render();
+
+    } else {
+
+      state.roll=null;
+
+      state.active=
+        (state.active+1)%
+        state.players.length;
+
+      state.message=
+        "Turno pasado. Lanza el dado cuando estés listo.";
+
+      render();
+
+    }
+
+  }
+
+  animateStep();
 }
-
-:
-t
-
-)
-
-};
-
-const landing =
-trackIndex(
-color,
-next
-);
-
-if(
-
-landing!==null &&
-
-!safe.has(landing)
-
-) {
-
-state.players
-
-.filter(
-c=>c!==color
-)
-
-.forEach(opponent=>{
-
-updated[opponent] =
-
-updated[opponent].map(t=>{
-
-if(
-
-trackIndex(
-opponent,
-t.progress
-)===landing
-
-) {
-
-captured=true;
-
-return {
-...t,
-progress:-1
-};
-
-}
-
-return t;
-
-});
-
-});
-
-}
-
-state.tokens=updated;
-
-state.moving=false;
-
-if(
-
-updated[color]
-
-.every(
-t=>t.progress===57
-)
-
-) {
-
-state.winner=color;
-
-state.phase="winner";
-
-state.roll=null;
-
-render();
-
-return;
-
-}
-
-if(n===6 || captured) {
-
-state.roll=null;
-
-state.message =
-
-captured
-
-?
-"¡Captura! Lanza otra vez."
-:
-"¡Un seis! Lanza otra vez.";
-
-render();
-
-} else {
-
-state.roll=null;
-
-state.active =
-
-(state.active+1) %
-state.players.length;
-
-state.message =
-"Turno pasado. Lanza el dado cuando estés listo.";
-
-render();
-
-}
-
-},280);
-
-}
-
 render();
 
 })();
