@@ -564,20 +564,112 @@ p {
   z-index:6;
   display:grid;
   place-items:center;
+
   width:76%;
   height:76%;
   left:12%;
   top:12%;
-  border:2px solid #ffffffc9;
+
+  border:2px solid #ffffffdd;
   border-radius:50%;
+
   color:#fff;
-  font:700 clamp(7px,1vw,12px) monospace;
-  box-shadow:
-    0 3px 0 #4d321f55,
-    0 4px 8px #4d321f33;
+  font:800 clamp(7px,1vw,12px) monospace;
+
   cursor:default;
+
+  background:
+    radial-gradient(
+      circle at 32% 27%,
+      #ffffffaa 0 9%,
+      transparent 10%
+    ),
+    radial-gradient(
+      circle at 50% 55%,
+      #ffffff22 0 35%,
+      transparent 36%
+    ),
+    currentColor;
+
+  box-shadow:
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 3px 0 #4d321f55,
+    0 5px 9px #4d321f40;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
 }
 
+.token.red {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#f58b80,#c94338);
+}
+
+.token.green {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#63b986,#27784e);
+}
+
+.token.yellow {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#f4d66a,#c39319);
+}
+
+.token.blue {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#7198d2,#31588f);
+}
+
+.yard .token {
+  position:relative;
+  width:100%;
+  height:100%;
+  left:auto;
+  top:auto;
+}
+
+.token.valid {
+  cursor:pointer;
+  outline:2px solid #fffbe4;
+  outline-offset:3px;
+
+  animation:
+    pulse 1.15s infinite;
+
+  filter:brightness(1.08);
+}
+
+.token.valid:hover {
+  transform:scale(1.15);
+}
+
+.token:disabled {
+  opacity:1;
+}
+
+.token.finished {
+  background:
+    radial-gradient(circle at 32% 27%,#ffffffaa 0 9%,transparent 10%),
+    linear-gradient(145deg,#fff8d9,#e7c866)!important;
+
+  color:#8b692d;
+
+  border-color:#a77b32;
+
+  box-shadow:
+    inset 0 2px 3px #ffffffaa,
+    inset 0 -3px 5px #00000018,
+    0 3px 0 #80632955,
+    0 5px 9px #4d321f30;
+}
+  
 .yard .token {
   position:relative;
   width:100%;
