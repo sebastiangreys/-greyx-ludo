@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#f7f1e6" />
 <title>Ludo Greyx</title>
+
 <style>
 :root {
   --paper:#f7f1e6;
@@ -17,28 +18,59 @@
   --blue:#426ba8;
   --safe:#b6914e;
 }
-* { box-sizing:border-box; }
+
+* {
+  box-sizing:border-box;
+}
+
 body {
   margin:0;
   min-width:320px;
-  background:radial-gradient(circle at 82% 0%,#fff7d7 0,transparent 30%),var(--paper);
+  background:
+    radial-gradient(
+      circle at 82% 0%,
+      #fff7d7 0,
+      transparent 30%
+    ),
+    var(--paper);
   color:var(--ink);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
-button { font:inherit; }
-.app { min-height:100vh; }
-.shell { width:min(1320px,calc(100% - 32px)); margin:auto; padding:18px 0 44px; }
+
+button {
+  font:inherit;
+}
+
+.app {
+  min-height:100vh;
+}
+
+.shell {
+  width:min(1320px,calc(100% - 32px));
+  margin:auto;
+  padding:18px 0 44px;
+}
+
 .topbar {
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:56px;
 }
+
 .brand {
   display:flex;
   align-items:center;
   gap:12px;
 }
+
 .brand-logo {
   display:grid;
   place-items:center;
@@ -49,7 +81,12 @@ button { font:inherit; }
   color:#fff;
   overflow:hidden;
 }
-.brand-logo svg { width:31px;height:31px; }
+
+.brand-logo svg {
+  width:31px;
+  height:31px;
+}
+
 .brand-name {
   display:block;
   font-size:1.12rem;
@@ -57,6 +94,7 @@ button { font:inherit; }
   letter-spacing:-.05em;
   line-height:1;
 }
+
 .brand-caption {
   display:block;
   margin-top:5px;
@@ -65,6 +103,7 @@ button { font:inherit; }
   letter-spacing:.11em;
   text-transform:uppercase;
 }
+
 .setup {
   display:grid;
   grid-template-columns:1fr minmax(360px,530px);
@@ -72,6 +111,7 @@ button { font:inherit; }
   gap:clamp(46px,8vw,130px);
   min-height:650px;
 }
+
 .eyebrow {
   display:flex;
   align-items:center;
@@ -81,13 +121,21 @@ button { font:inherit; }
   letter-spacing:.18em;
   text-transform:uppercase;
 }
+
 .eyebrow::before {
   content:"";
   width:24px;
   height:2px;
   background:#e4ac42;
 }
-h1,h2,h3,p { margin-top:0; }
+
+h1,
+h2,
+h3,
+p {
+  margin-top:0;
+}
+
 .setup-title {
   margin:20px 0 23px;
   max-width:650px;
@@ -95,16 +143,19 @@ h1,h2,h3,p { margin-top:0; }
   line-height:.82;
   letter-spacing:-.1em;
 }
+
 .setup-title em {
   color:var(--coral);
   font-style:normal;
 }
+
 .setup-lead {
   max-width:500px;
   color:#687384;
   font-size:clamp(1rem,1.35vw,1.2rem);
   line-height:1.55;
 }
+
 .setup-note {
   display:flex;
   align-items:center;
@@ -113,17 +164,21 @@ h1,h2,h3,p { margin-top:0; }
   color:#67717c;
   font-size:.82rem;
 }
-.setup-card,.panel {
+
+.setup-card,
+.panel {
   border:1px solid #e5dfd3;
   background:#fffdf9ed;
   box-shadow:0 22px 50px #6c58301c;
   border-radius:26px;
 }
+
 .setup-card {
   position:relative;
   overflow:hidden;
   padding:38px;
 }
+
 .setup-card::after {
   content:"";
   position:absolute;
@@ -134,24 +189,29 @@ h1,h2,h3,p { margin-top:0; }
   border-radius:50%;
   background:#fff2c7;
 }
+
 .setup-card>* {
   position:relative;
   z-index:1;
 }
+
 .setup-card h2 {
   margin-bottom:8px;
   font-size:1.7rem;
   letter-spacing:-.05em;
 }
+
 .setup-card p {
   color:var(--muted);
   font-size:.9rem;
 }
+
 .player-options {
   display:grid;
   gap:10px;
   margin:27px 0 20px;
 }
+
 .player-option {
   display:flex;
   align-items:center;
@@ -166,44 +226,69 @@ h1,h2,h3,p { margin-top:0; }
   cursor:pointer;
   transition:.2s;
 }
+
 .player-option:hover {
   transform:translateY(-2px);
   border-color:#cda83c;
 }
+
 .player-option.selected {
   border:2px solid #d5aa3d;
   padding:14px 16px;
   box-shadow:0 7px 18px #b1872020;
 }
+
 .player-option strong,
 .player-option small {
   display:block;
 }
-.player-option strong { font-size:.98rem; }
+
+.player-option strong {
+  font-size:.98rem;
+}
+
 .player-option small {
   margin-top:4px;
   color:var(--muted);
   font-size:.72rem;
 }
+
 .dots {
   display:flex;
   gap:5px;
 }
-.dot,.score-dot {
+
+.dot,
+.score-dot {
   display:inline-block;
   border-radius:50%;
 }
+
 .dot {
   width:12px;
   height:12px;
   border:1px solid #fff;
   box-shadow:0 1px 2px #0003;
 }
-.red { background:var(--coral); }
-.green { background:var(--green); }
-.yellow { background:var(--yellow); }
-.blue { background:var(--blue); }
-.primary-button,.roll-button {
+
+.red {
+  background:var(--coral);
+}
+
+.green {
+  background:var(--green);
+}
+
+.yellow {
+  background:var(--yellow);
+}
+
+.blue {
+  background:var(--blue);
+}
+
+.primary-button,
+.roll-button {
   display:flex;
   align-items:center;
   justify-content:center;
@@ -219,10 +304,13 @@ h1,h2,h3,p { margin-top:0; }
   box-shadow:0 4px 0 #304868;
   transition:.15s;
 }
-.primary-button:hover,.roll-button:hover {
+
+.primary-button:hover,
+.roll-button:hover {
   filter:brightness(1.08);
   transform:translateY(-1px);
 }
+
 .mini-board {
   position:fixed;
   bottom:26px;
@@ -236,6 +324,7 @@ h1,h2,h3,p { margin-top:0; }
   transform:rotate(3deg);
   opacity:.78;
 }
+
 .mini-board i {
   display:block;
   width:29px;
@@ -243,15 +332,43 @@ h1,h2,h3,p { margin-top:0; }
   border-radius:10px;
   background:#f7edca;
 }
-.mini-board i:nth-child(1){background:#f5bdca}
-.mini-board i:nth-child(2){background:#b6e3df}
-.mini-board i:nth-child(3){background:#c8d7ed}
-.mini-board i:nth-child(4){background:#c9d7ee}
-.mini-board i:nth-child(5){background:#fff3cf}
-.mini-board i:nth-child(6){background:#efd8a0}
-.mini-board i:nth-child(7){background:#f7edca}
-.mini-board i:nth-child(8){background:#d6ae44}
-.mini-board i:nth-child(9){background:#f7edca}
+
+.mini-board i:nth-child(1) {
+  background:#f5bdca;
+}
+
+.mini-board i:nth-child(2) {
+  background:#b6e3df;
+}
+
+.mini-board i:nth-child(3) {
+  background:#c8d7ed;
+}
+
+.mini-board i:nth-child(4) {
+  background:#c9d7ee;
+}
+
+.mini-board i:nth-child(5) {
+  background:#fff3cf;
+}
+
+.mini-board i:nth-child(6) {
+  background:#efd8a0;
+}
+
+.mini-board i:nth-child(7) {
+  background:#f7edca;
+}
+
+.mini-board i:nth-child(8) {
+  background:#d6ae44;
+}
+
+.mini-board i:nth-child(9) {
+  background:#f7edca;
+}
+
 .game-intro {
   display:flex;
   justify-content:space-between;
@@ -259,16 +376,19 @@ h1,h2,h3,p { margin-top:0; }
   gap:20px;
   margin-bottom:18px;
 }
+
 .game-intro h1 {
   margin:0;
   font-size:clamp(2rem,4vw,3.1rem);
   letter-spacing:-.08em;
 }
+
 .game-intro p {
   margin:8px 0 0;
   color:var(--muted);
   font-size:.9rem;
 }
+
 .turn-chip {
   padding:9px 11px;
   border:1px solid #e1d9cb;
@@ -278,13 +398,18 @@ h1,h2,h3,p { margin-top:0; }
   font:700 .65rem monospace;
   white-space:nowrap;
 }
+
 .game-layout {
   display:grid;
   grid-template-columns:minmax(0,1fr) 310px;
   gap:clamp(18px,3vw,42px);
   align-items:start;
 }
-.board-wrap { min-width:0; }
+
+.board-wrap {
+  min-width:0;
+}
+
 .board-frame {
   padding:9px;
   border:1px solid #c4a35e;
@@ -292,6 +417,7 @@ h1,h2,h3,p { margin-top:0; }
   background:#d8b86f;
   box-shadow:0 21px 35px #7d5d2028;
 }
+
 .board {
   display:grid;
   position:relative;
@@ -302,26 +428,56 @@ h1,h2,h3,p { margin-top:0; }
   border-radius:18px;
   background:#f8edcf;
 }
+
 .cell {
   position:relative;
   display:grid;
   place-items:center;
   border:1px solid #e8dcc1;
 }
-.cell.track { background:#fff9e7; }
-.cell.lane-red { background:#e98b7e; }
-.cell.lane-green { background:#80c398; }
-.cell.lane-yellow { background:#eed17b; }
-.cell.lane-blue { background:#8ca9d6; }
-.cell.start-red { background:#f2b1a7; }
-.cell.start-green { background:#a9d9b8; }
-.cell.start-yellow { background:#f4e3a8; }
-.cell.start-blue { background:#bbcbeb; }
+
+.cell.track {
+  background:#fff9e7;
+}
+
+.cell.lane-red {
+  background:#e98b7e;
+}
+
+.cell.lane-green {
+  background:#80c398;
+}
+
+.cell.lane-yellow {
+  background:#eed17b;
+}
+
+.cell.lane-blue {
+  background:#8ca9d6;
+}
+
+.cell.start-red {
+  background:#f2b1a7;
+}
+
+.cell.start-green {
+  background:#a9d9b8;
+}
+
+.cell.start-yellow {
+  background:#f4e3a8;
+}
+
+.cell.start-blue {
+  background:#bbcbeb;
+}
+
 .cell.safe::before {
   content:"★";
   color:#b6914e;
   font-size:clamp(10px,1.4vw,17px);
 }
+
 .finish {
   position:absolute;
   z-index:2;
@@ -339,6 +495,7 @@ h1,h2,h3,p { margin-top:0; }
   );
   transform:rotate(45deg);
 }
+
 .finish::after {
   content:"";
   width:45%;
@@ -347,7 +504,16 @@ h1,h2,h3,p { margin-top:0; }
   background:#fff8da;
   box-shadow:0 0 0 3px #c19e4e;
 }
-/* CASAS CORREGIDAS */
+
+/* =====================================================
+   CASAS
+   ORDEN FINAL:
+   ROJO   = ARRIBA IZQUIERDA
+   AZUL   = ARRIBA DERECHA
+   VERDE  = ABAJO IZQUIERDA
+   AMARILLO = ABAJO DERECHA
+   ===================================================== */
+
 .home {
   position:absolute;
   z-index:3;
@@ -356,22 +522,31 @@ h1,h2,h3,p { margin-top:0; }
   padding:7%;
   border-radius:10%;
 }
+
+/* Arriba izquierda */
 .home.red {
   inset:0 60% 60% 0;
   background:#df6d62;
 }
+
+/* Arriba derecha */
 .home.blue {
   inset:0 0 60% 60%;
   background:#7191c5;
 }
+
+/* Abajo izquierda */
 .home.green {
-  inset:60% 0 0 60%;
+  inset:60% 60% 0 0;
   background:#63aa7d;
 }
+
+/* Abajo derecha */
 .home.yellow {
-  inset:60% 60% 0 0;
+  inset:60% 0 0 60%;
   background:#eac34f;
 }
+
 .yard {
   display:grid;
   grid-template:repeat(2,1fr)/repeat(2,1fr);
@@ -383,6 +558,7 @@ h1,h2,h3,p { margin-top:0; }
   background:#fff8decc;
   box-shadow:inset 0 0 0 1px #76551e22;
 }
+
 .token {
   position:absolute;
   z-index:6;
@@ -396,9 +572,12 @@ h1,h2,h3,p { margin-top:0; }
   border-radius:50%;
   color:#fff;
   font:700 clamp(7px,1vw,12px) monospace;
-  box-shadow:0 3px 0 #4d321f55,0 4px 8px #4d321f33;
+  box-shadow:
+    0 3px 0 #4d321f55,
+    0 4px 8px #4d321f33;
   cursor:default;
 }
+
 .yard .token {
   position:relative;
   width:100%;
@@ -406,28 +585,47 @@ h1,h2,h3,p { margin-top:0; }
   left:auto;
   top:auto;
 }
+
 .token.valid {
   cursor:pointer;
   outline:2px solid #fffbe4;
   outline-offset:2px;
   animation:pulse 1.15s infinite;
 }
+
 .token.valid:hover {
   transform:scale(1.18);
 }
+
 .token.finished {
   background:#fff5cf!important;
   color:#8b692d;
   border-color:#a77b32;
 }
-.stack-1 { margin-left:13%;margin-top:13%; }
-.stack-2 { margin-left:-13%;margin-top:13%; }
-.stack-3 { margin-left:13%;margin-top:-13%; }
+
+.stack-1 {
+  margin-left:13%;
+  margin-top:13%;
+}
+
+.stack-2 {
+  margin-left:-13%;
+  margin-top:13%;
+}
+
+.stack-3 {
+  margin-left:13%;
+  margin-top:-13%;
+}
+
 @keyframes pulse {
   50% {
-    box-shadow:0 0 0 6px #fff9dc55,0 3px 0 #4d321f55;
+    box-shadow:
+      0 0 0 6px #fff9dc55,
+      0 3px 0 #4d321f55;
   }
 }
+
 .legend {
   display:flex;
   flex-wrap:wrap;
@@ -437,55 +635,71 @@ h1,h2,h3,p { margin-top:0; }
   color:var(--muted);
   font-size:.7rem;
 }
+
 .legend span {
   display:flex;
   align-items:center;
   gap:5px;
 }
+
 .legend b {
   width:8px;
   height:8px;
   border-radius:50%;
   background:var(--safe);
 }
+
 .sidebar {
   display:grid;
   gap:14px;
 }
-.panel { padding:18px; }
+
+.panel {
+  padding:18px;
+}
+
 .status-label {
   color:#9b7438;
   font:700 .65rem monospace;
   letter-spacing:.11em;
   text-transform:uppercase;
 }
+
 .status-player {
   display:flex;
   align-items:center;
   gap:10px;
   margin:12px 0 17px;
 }
+
 .orb {
   width:15px;
   height:15px;
   border-radius:50%;
 }
+
 .status-player strong,
 .status-player small {
   display:block;
 }
-.status-player strong { font-size:1.05rem; }
+
+.status-player strong {
+  font-size:1.05rem;
+}
+
 .status-player small {
   margin-top:3px;
   color:var(--muted);
   font-size:.72rem;
 }
+
 .dice-row {
   display:grid;
   grid-template-columns:62px 1fr;
   gap:12px;
   align-items:center;
 }
+
 .die {
   display:grid;
   grid-template:repeat(3,1fr)/repeat(3,1fr);
@@ -497,6 +711,7 @@ h1,h2,h3,p { margin-top:0; }
   border-radius:15px;
   background:#fff5cf;
 }
+
 .pip {
   width:100%;
   height:100%;
@@ -504,15 +719,21 @@ h1,h2,h3,p { margin-top:0; }
   background:#455f89;
   opacity:0;
 }
-.pip.on { opacity:1; }
+
+.pip.on {
+  opacity:1;
+}
+
 .rolling {
   animation:roll .45s ease-in-out infinite;
 }
+
 @keyframes roll {
   50% {
     transform:rotate(14deg) scale(1.06);
   }
 }
+
 .hint {
   min-height:34px;
   margin:15px 0 0;
@@ -520,48 +741,63 @@ h1,h2,h3,p { margin-top:0; }
   font-size:.78rem;
   line-height:1.4;
 }
-.hint.pass { color:#a36938; }
+
+.hint.pass {
+  color:#a36938;
+}
+
 .panel h3 {
   margin:0 0 15px;
   font-size:.93rem;
 }
+
 .score-grid {
   display:grid;
   grid-template-columns:1fr 38px 48px 38px;
   align-items:center;
   gap:7px;
 }
+
 .score-head {
   color:#a08763;
   font:700 .57rem monospace;
   text-align:center;
 }
+
 .score-name {
   display:flex;
   align-items:center;
   gap:7px;
   font-size:.77rem;
 }
+
 .score-dot {
   width:8px;
   height:8px;
 }
+
 .score-value {
   color:#5b6674;
   font:700 .77rem monospace;
   text-align:center;
 }
+
 .rules {
   color:#667283;
   font-size:.75rem;
   line-height:1.4;
 }
+
 .rule {
   display:flex;
   gap:8px;
   margin:10px 0;
 }
-.rule b { color:#ad7d35; }
+
+.rule b {
+  color:#ad7d35;
+}
+
 .outline {
   width:100%;
   min-height:42px;
@@ -572,6 +808,7 @@ h1,h2,h3,p { margin-top:0; }
   font-weight:750;
   cursor:pointer;
 }
+
 .winner {
   position:fixed;
   z-index:20;
@@ -581,6 +818,7 @@ h1,h2,h3,p { margin-top:0; }
   padding:20px;
   background:#1c283dcc;
 }
+
 .winner-card {
   width:min(420px,100%);
   padding:34px;
@@ -588,6 +826,7 @@ h1,h2,h3,p { margin-top:0; }
   background:#fffdf8;
   text-align:center;
 }
+
 .winner-seal {
   display:grid;
   place-items:center;
@@ -599,185 +838,380 @@ h1,h2,h3,p { margin-top:0; }
   color:#fff;
   font-size:2rem;
 }
+
 .winner-card h2 {
   margin-bottom:10px;
   font-size:2rem;
 }
+
 .winner-card p {
   color:var(--muted);
   line-height:1.5;
 }
+
 .winner-actions {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
   margin-top:23px;
 }
+
 .winner-actions button {
   min-height:44px;
   border-radius:12px;
   cursor:pointer;
   font-weight:750;
 }
+
 .winner-actions .secondary {
   border:1px solid #d9c59a;
   background:transparent;
   color:#7f622e;
 }
+
 .winner-actions .primary {
   border:0;
   background:var(--navy);
   color:#fff;
 }
+
 @media (max-width:920px) {
+
   .setup {
     grid-template-columns:1fr;
     gap:35px;
     padding:25px 0;
   }
-  .setup-copy { text-align:center; }
+
+  .setup-copy {
+    text-align:center;
+  }
+
   .eyebrow,
   .setup-note {
     justify-content:center;
   }
+
   .setup-lead {
     margin-left:auto;
     margin-right:auto;
   }
-  .mini-board { display:none; }
+
+  .mini-board {
+    display:none;
+  }
+
   .game-layout {
     grid-template-columns:1fr;
   }
+
   .sidebar {
     grid-template-columns:1fr 1fr;
   }
+
   .status-panel,
   .rules {
     grid-column:1/-1;
   }
 }
+
 @media (max-width:560px) {
+
   .shell {
     width:min(100% - 22px,500px);
     padding-top:12px;
   }
+
   .topbar {
     margin-bottom:24px;
   }
+
   .brand-logo {
     width:36px;
     height:36px;
   }
+
   .brand-name {
     font-size:1rem;
   }
+
   .brand-caption {
     display:none;
   }
+
   .setup {
     min-height:auto;
     padding:22px 0 35px;
   }
+
   .setup-title {
     margin-top:18px;
     font-size:clamp(3.2rem,16vw,5rem);
   }
+
   .setup-lead {
     font-size:.93rem;
   }
+
   .setup-card {
     padding:22px 20px;
     border-radius:22px;
   }
+
   .game-intro {
     display:block;
   }
+
   .game-intro h1 {
     font-size:2rem;
   }
+
   .turn-chip {
     display:inline-block;
     margin-top:12px;
   }
+
   .board-frame {
     padding:5px;
     border-radius:17px;
   }
+
   .board {
     border-radius:12px;
   }
+
   .legend {
     font-size:.58rem;
     gap:7px 10px;
   }
+
   .sidebar {
     display:grid;
     grid-template-columns:1fr;
   }
+
   .status-panel,
   .rules {
     grid-column:auto;
   }
+
   .winner-card {
     padding:27px 20px;
   }
 }
 </style>
 </head>
+
 <body>
+
 <div id="app" class="app"></div>
+
 <script>
 (() => {
+
 const colors = ["red","green","yellow","blue"];
+
 const names = {
   red:"Coral",
   green:"Pradera",
   yellow:"Sol",
   blue:"Puerto"
 };
+
 const playersByCount = {
   2:["red","yellow"],
   3:["red","green","yellow"],
   4:["red","green","yellow","blue"]
 };
+
+/*
+===========================================================
+RECORRIDO PRINCIPAL
+
+Ahora las entradas están alineadas con las nuevas casas:
+
+ROJO     → arriba izquierda
+AZUL     → arriba derecha
+VERDE    → abajo izquierda
+AMARILLO → abajo derecha
+===========================================================
+*/
+
 const track = [
-[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],
-[9,5],[10,5],[11,5],[12,5],[13,5],[14,5],[14,6],
-[14,7],[13,7],[12,7],[11,7],[10,7],[9,7],
-[8,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],
-[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],
-[5,9],[4,9],[3,9],[2,9],[1,9],[0,9],[0,8],
-[0,7],[1,7],[2,7],[3,7],[4,7],[5,7],
-[6,6],[6,5],[6,4],[6,3],[6,2],[6,1]
+
+[6,0],
+[7,0],
+[8,0],
+[8,1],
+[8,2],
+[8,3],
+[8,4],
+
+[9,5],
+[10,5],
+[11,5],
+[12,5],
+[13,5],
+[14,5],
+
+[14,6],
+[14,7],
+
+[13,7],
+[12,7],
+[11,7],
+[10,7],
+[9,7],
+
+[8,8],
+[8,9],
+[8,10],
+[8,11],
+[8,12],
+[8,13],
+[8,14],
+
+[7,14],
+[6,14],
+[6,13],
+[6,12],
+[6,11],
+[6,10],
+
+[5,9],
+[4,9],
+[3,9],
+[2,9],
+[1,9],
+[0,9],
+
+[0,8],
+[0,7],
+
+[1,7],
+[2,7],
+[3,7],
+[4,7],
+[5,7],
+
+[6,6],
+[6,5],
+[6,4],
+[6,3],
+[6,2],
+[6,1]
+
 ];
+
+/*
+Entradas actualizadas:
+
+ROJO     = 0
+VERDE    = 14
+AMARILLO = 26
+AZUL     = 40
+*/
+
 const startIndex = {
   red:0,
-  green:13,
+  green:14,
   yellow:26,
-  blue:39
+  blue:40
 };
-/* PASILLOS CENTRADOS */
+
+/*
+===========================================================
+PASILLOS FINALES
+
+ROJO:
+izquierda → centro
+
+AZUL:
+arriba derecha → centro
+RECTO por la columna 7
+
+VERDE:
+abajo izquierda → centro
+RECTO por la columna 7
+
+AMARILLO:
+derecha → centro
+===========================================================
+*/
+
 const lanes = {
-  red:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
-  green:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],
-  yellow:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
-  blue:[[1,8],[2,8],[3,8],[4,8],[5,8],[6,8]]
+
+  red:[
+    [7,1],
+    [7,2],
+    [7,3],
+    [7,4],
+    [7,5],
+    [7,6]
+  ],
+
+  blue:[
+    [1,7],
+    [2,7],
+    [3,7],
+    [4,7],
+    [5,7],
+    [6,7]
+  ],
+
+  green:[
+    [13,7],
+    [12,7],
+    [11,7],
+    [10,7],
+    [9,7],
+    [8,7]
+  ],
+
+  yellow:[
+    [7,13],
+    [7,12],
+    [7,11],
+    [7,10],
+    [7,9],
+    [7,8]
+  ]
+
 };
+
+/*
+Estrellas seguras.
+
+Se actualizan las casillas de salida
+de verde y azul.
+*/
+
 const safe = new Set([
-0,8,13,21,26,34,39,47
+  0,
+  8,
+  14,
+  21,
+  26,
+  34,
+  40,
+  47
 ]);
+
 const app = document.getElementById("app");
+
 const blankTokens = () =>
-[0,1,2,3].map(id => ({
-  id,
-  progress:-1
-}));
+  [0,1,2,3].map(id => ({
+    id,
+    progress:-1
+  }));
+
 const freshTokens = () => ({
   red:blankTokens(),
   green:blankTokens(),
   yellow:blankTokens(),
   blue:blankTokens()
 });
+
 const state = {
   phase:"setup",
   count:4,
@@ -789,124 +1223,262 @@ const state = {
   rolling:false,
   moving:false,
   valid:new Set(),
-  message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
+  message:
+    "Lanza el dado para comenzar. Un seis saca una ficha de casa.",
   winner:null
 };
+
 function logoMarkup() {
+
 return `
 <span class="brand-logo">
+
 <svg viewBox="0 0 80 80">
-<path fill="#fff" d="M18 18h42L51 27H31c-8 0-14 6-14 14s6 14 14 14h8l-9 9h-1C15 64 7 54 7 41S15 18 18 18Z"/>
-<path fill="#fff" d="M37 37h27l-9 9H43l-6 7-7-8 7-8Z"/>
-<path fill="#6d21ff" d="M44 48h15l-7 7h-15l7-7Z"/>
+
+<path
+fill="#fff"
+d="M18 18h42L51 27H31c-8 0-14 6-14 14s6 14 14 14h8l-9 9h-1C15 64 7 54 7 41S15 18 18 18Z"
+/>
+
+<path
+fill="#fff"
+d="M37 37h27l-9 9H43l-6 7-7-8 7-8Z"
+/>
+
+<path
+fill="#6d21ff"
+d="M44 48h15l-7 7h-15l7-7Z"
+/>
+
 </svg>
+
 </span>`;
+
 }
+
 function logoHeader() {
+
 return `
 <header class="topbar">
+
 <div class="brand">
+
 ${logoMarkup()}
+
 <span>
-<span class="brand-name">Ludo Greyx</span>
-<span class="brand-caption">La mesa para compartir</span>
+
+<span class="brand-name">
+Ludo Greyx
 </span>
+
+<span class="brand-caption">
+La mesa para compartir
+</span>
+
+</span>
+
 </div>
+
 ${
 state.phase !== "setup"
-? '<button class="outline" data-action="setup" style="width:auto;padding:0 14px">Reiniciar</button>'
-:""
+?
+'<button class="outline" data-action="setup" style="width:auto;padding:0 14px">Reiniciar</button>'
+:
+""
 }
+
 </header>`;
+
 }
+
 function setupMarkup() {
+
 return `
+
 <main class="setup">
+
 <section class="setup-copy">
-<div class="eyebrow">Pasen el tablero</div>
+
+<div class="eyebrow">
+Pasen el tablero
+</div>
+
 <h1 class="setup-title">
 Ludo,<br>
 <em>Greyx.</em>
 </h1>
+
 <p class="setup-lead">
+
 Una carrera colorida alrededor del tablero.
 Elijan su grupo, compartan la pantalla y dejen que empiecen los seises.
+
 </p>
+
 <div class="setup-note">
 ♙ Una pantalla · sin cuentas · todo local
 </div>
+
 </section>
+
 <section class="setup-card">
-<h2>¿Quiénes juegan?</h2>
+
+<h2>
+¿Quiénes juegan?
+</h2>
+
 <p>
 Elijan cuántas personas se sentarán alrededor de la mesa.
 </p>
+
 <div class="player-options">
+
 ${[2,3,4].map(n => `
+
 <button
 class="player-option ${state.count===n?"selected":""}"
 data-action="count"
 data-count="${n}"
 >
+
 <span>
-<strong>${n} jugadores</strong>
+
+<strong>
+${n} jugadores
+</strong>
+
 <small>
 ${playersByCount[n].map(c=>names[c]).join(" · ")}
 </small>
+
 </span>
+
 <span class="dots">
-${playersByCount[n].map(c=>`<i class="dot ${c}"></i>`).join("")}
+
+${playersByCount[n]
+.map(c=>`<i class="dot ${c}"></i>`)
+.join("")}
+
 </span>
+
 </button>
+
 `).join("")}
+
 </div>
-<button class="primary-button" data-action="start">
+
+<button
+class="primary-button"
+data-action="start"
+>
 Empezar partida <span>→</span>
 </button>
+
 </section>
+
 <div class="mini-board">
-${Array.from({length:9},()=>"<i></i>").join("")}
+
+${Array.from(
+  {length:9},
+  () => "<i></i>"
+).join("")}
+
 </div>
+
 </main>`;
+
 }
+
 function coord(color,progress) {
-if(progress<0 || progress>57) return null;
-if(progress===57) return [7,7];
+
+if(progress<0 || progress>57)
+  return null;
+
+if(progress===57)
+  return [7,7];
+
 if(progress<=51) {
+
 return track[
 (startIndex[color]+progress)%track.length
 ];
+
 }
+
 return lanes[color][progress-52] || null;
+
 }
+
 function trackIndex(color,progress) {
+
 return progress>=0 && progress<=51
-? (startIndex[color]+progress)%track.length
-:null;
+?
+(startIndex[color]+progress)%track.length
+:
+null;
+
 }
+
 function die(n,rolling) {
+
 const positions = {
+
 1:[4],
+
 2:[0,8],
+
 3:[0,4,8],
+
 4:[0,2,6,8],
+
 5:[0,2,4,6,8],
+
 6:[0,2,3,5,6,8]
+
 };
+
 return `
+
 <div class="die ${rolling?"rolling":""}">
-${Array.from({length:9},(_,i)=>`
-<i class="pip ${n && positions[n].includes(i)?"on":""}"></i>
-`).join("")}
-</div>`;
+
+${Array.from(
+  {length:9},
+  (_,i)=>`
+
+<i
+class="pip ${
+  n && positions[n].includes(i)
+  ?"on"
+  :""
+}">
+</i>
+
+`
+).join("")}
+
+</div>
+
+`;
+
 }
+
 function boardMarkup() {
+
 const at = new Map();
+
 state.players.forEach(color => {
+
 state.tokens[color].forEach(token => {
-const c = coord(color,token.progress);
+
+const c = coord(
+  color,
+  token.progress
+);
+
 if(c) {
+
 const key = c.join("-");
+
 at.set(
 key,
 [
@@ -914,448 +1486,977 @@ key,
 {color,token}
 ]
 );
+
 }
+
 });
+
 });
+
 const laneAt = (r,c) =>
+
 colors.find(color =>
-lanes[color].some(([rr,cc]) =>
+
+lanes[color].some(
+([rr,cc]) =>
 rr===r && cc===c
 )
+
 );
+
 const trackAt = (r,c) =>
-track.findIndex(([rr,cc]) =>
+
+track.findIndex(
+([rr,cc]) =>
 rr===r && cc===c
 );
+
 let cells="";
+
 for(let i=0;i<225;i++) {
+
 const r=Math.floor(i/15);
 const c=i%15;
+
 const ti=trackAt(r,c);
+
 const lane=laneAt(r,c);
+
 const key=`${r}-${c}`;
+
 const stack=at.get(key)||[];
+
 const start =
 ti>=0
-? colors.find(color=>startIndex[color]===ti)
-:"";
+?
+colors.find(
+color =>
+startIndex[color]===ti
+)
+:
+"";
+
 const tokenHtml=stack.map(
 ({color,token},slot)=>`
+
 <button
+
 class="token ${color}
-${state.valid.has(`${color}-${token.id}`)?"valid":""}
-${token.progress===57?"finished":""}
-${slot?`stack-${Math.min(slot,3)}`:""}"
+${
+state.valid.has(
+`${color}-${token.id}`
+)
+?
+"valid"
+:
+""
+}
+${
+token.progress===57
+?
+"finished"
+:
+""
+}
+${
+slot
+?
+`stack-${Math.min(slot,3)}`
+:
+""
+}"
+
 data-action="token"
+
 data-color="${color}"
+
 data-token="${token.id}"
-${state.valid.has(`${color}-${token.id}`)?"":"disabled"}
+
+${
+state.valid.has(
+`${color}-${token.id}`
+)
+?
+""
+:
+"disabled"
+}
+
 >
+
 ${token.id+1}
+
 </button>
-`).join("");
+
+`
+).join("");
+
 cells+=`
+
 <div
+
 class="cell
+
 ${ti>=0?"track":""}
+
 ${lane?`lane-${lane}`:""}
-${ti>=0 && safe.has(ti)?"safe":""}
+
+${
+ti>=0 && safe.has(ti)
+?
+"safe"
+:
+""
+}
+
 ${start?`start-${start}`:""}"
-style="grid-row:${r+1};grid-column:${c+1}"
+
+style="
+grid-row:${r+1};
+grid-column:${c+1}
+"
+
 >
+
 ${tokenHtml}
+
 </div>
+
 `;
+
 }
-const homes=state.players.map(color=>`
+
+const homes=state.players.map(
+color=>`
+
 <div class="home ${color}">
+
 <div class="yard">
+
 ${state.tokens[color]
-.filter(t=>t.progress===-1)
+
+.filter(
+t=>t.progress===-1
+)
+
 .map(t=>`
+
 <button
+
 class="token ${color}
-${state.valid.has(`${color}-${t.id}`)?"valid":""}"
+${
+state.valid.has(
+`${color}-${t.id}`
+)
+?
+"valid"
+:
+""
+}"
+
 data-action="token"
+
 data-color="${color}"
+
 data-token="${t.id}"
-${state.valid.has(`${color}-${t.id}`)?"":"disabled"}
+
+${
+state.valid.has(
+`${color}-${t.id}`
+)
+?
+""
+:
+"disabled"
+}
+
 >
+
 ${t.id+1}
+
 </button>
-`).join("")}
+
+`)
+.join("")}
+
 </div>
+
 </div>
-`).join("");
+
+`
+).join("");
+
 return `
+
 <div class="board-frame">
+
 <div class="board">
+
 ${cells}
+
 <div class="finish"></div>
+
 ${homes}
+
 </div>
+
 </div>
+
 <div class="legend">
+
 <span>
-<b></b> Estrella segura
+<b></b>
+Estrella segura
 </span>
+
 <span>
+
 <b style="background:#e5b33b"></b>
+
 Seis para salir de casa
+
 </span>
+
 <span>
+
 <b style="background:#49668f"></b>
+
 Número exacto para llegar
+
 </span>
+
 </div>
+
 `;
+
 }
+
 function scores() {
+
 return `
+
 <section class="panel">
-<h3>Marcador de la mesa</h3>
+
+<h3>
+Marcador de la mesa
+</h3>
+
 <div class="score-grid">
+
 <span></span>
-<span class="score-head">CASA</span>
-<span class="score-head">TABLERO</span>
-<span class="score-head">META</span>
-${state.players.map(color=>{
-const home=
-state.tokens[color]
-.filter(t=>t.progress===-1).length;
-const done=
-state.tokens[color]
-.filter(t=>t.progress===57).length;
-return `
-<span class="score-name">
-<i class="score-dot ${color}"></i>
-${names[color]}
+
+<span class="score-head">
+CASA
 </span>
-<span class="score-value">${home}</span>
-<span class="score-value">${4-home-done}</span>
-<span class="score-value">${done}</span>
-`;
-}).join("")}
-</div>
-</section>`;
-}
-function gameMarkup() {
-const color=state.players[state.active];
-const shown=state.roll||state.lastRoll;
-const pass=state.message.startsWith("No hay");
+
+<span class="score-head">
+TABLERO
+</span>
+
+<span class="score-head">
+META
+</span>
+
+${state.players.map(color=>{
+
+const home =
+state.tokens[color]
+.filter(
+t=>t.progress===-1
+).length;
+
+const done =
+state.tokens[color]
+.filter(
+t=>t.progress===57
+).length;
+
 return `
+
+<span class="score-name">
+
+<i class="score-dot ${color}"></i>
+
+${names[color]}
+
+</span>
+
+<span class="score-value">
+${home}
+</span>
+
+<span class="score-value">
+${4-home-done}
+</span>
+
+<span class="score-value">
+${done}
+</span>
+
+`;
+
+}).join("")}
+
+</div>
+
+</section>
+
+`;
+
+}
+
+function gameMarkup() {
+
+const color =
+state.players[state.active];
+
+const shown =
+state.roll ||
+state.lastRoll;
+
+const pass =
+state.message.startsWith("No hay");
+
+return `
+
 <main>
+
 <div class="game-intro">
+
 <div>
-<h1>Tu turno.</h1>
+
+<h1>
+Tu turno.
+</h1>
+
 <p>
 Pasen el dispositivo después de cada jugada.
 El tablero se encarga del resto.
 </p>
+
 </div>
+
 <div class="turn-chip">
-PARTIDA EN CURSO · ${state.players.length} JUGADORES
+
+PARTIDA EN CURSO ·
+${state.players.length}
+JUGADORES
+
 </div>
+
 </div>
+
 <div class="game-layout">
+
 <section class="board-wrap">
+
 ${boardMarkup()}
+
 <p class="legend">
+
 Si caes sobre un rival, vuelve a casa.
 Las estrellas son seguras.
+
 </p>
+
 </section>
+
 <aside class="sidebar">
+
 <section class="panel status-panel">
+
 <span class="status-label">
 Turno actual
 </span>
+
 <div class="status-player">
+
 <i class="orb ${color}"></i>
+
 <div>
-<strong>${names[color]}</strong>
+
+<strong>
+${names[color]}
+</strong>
+
 <small>
 Jugador ${state.active+1} · pasa la pantalla
 </small>
+
 </div>
+
 </div>
+
 <div class="dice-row">
-${die(shown,state.rolling)}
+
+${die(
+  shown,
+  state.rolling
+)}
+
 <button
+
 class="roll-button"
+
 data-action="roll"
-${state.rolling||state.moving||state.roll!==null?"disabled":""}
+
+${
+state.rolling ||
+state.moving ||
+state.roll!==null
+?
+"disabled"
+:
+""
+}
+
 >
+
 ${
 state.rolling
-?"Lanzando…"
-:state.roll
-?"Elige una ficha"
-:"Lanzar dado"
+?
+"Lanzando…"
+:
+state.roll
+?
+"Elige una ficha"
+:
+"Lanzar dado"
 }
+
 </button>
+
 </div>
+
 <p class="hint ${pass?"pass":""}">
+
 ${state.message}
+
 </p>
+
 </section>
+
 ${scores()}
+
 <section class="panel rules">
-<h3>Reglas de la mesa</h3>
+
+<h3>
+Reglas de la mesa
+</h3>
+
 <div class="rule">
+
 <b>★</b>
+
 <span>
 Las estrellas protegen a todos los colores.
 </span>
+
 </div>
+
 <div class="rule">
+
 <b>6</b>
+
 <span>
 Los seises y las capturas dan otro turno.
 </span>
+
 </div>
+
 <div class="rule">
+
 <b>!</b>
+
 <span>
 Necesitas el número exacto para llegar al centro.
 </span>
+
 </div>
+
 </section>
+
 <button
 class="outline"
 data-action="setup"
 >
 Nueva partida
 </button>
+
 </aside>
+
 </div>
-</main>`;
+
+</main>
+
+`;
+
 }
+
 function winnerMarkup() {
+
 return `
+
 <div class="winner">
+
 <div class="winner-card">
-<div class="winner-seal">★</div>
+
+<div class="winner-seal">
+★
+</div>
+
 <h2>
 ¡Gana ${names[state.winner]}!
 </h2>
+
 <p>
 Todas sus fichas llegaron a la meta.
 Una gran vuelta alrededor del tablero.
 </p>
+
 <div class="winner-actions">
+
 <button
 class="secondary"
 data-action="setup"
 >
 Configurar
 </button>
+
 <button
 class="primary-button"
 data-action="again"
 >
 Jugar otra vez
 </button>
+
 </div>
+
 </div>
-</div>`;
+
+</div>
+
+`;
+
 }
+
 function render() {
+
 app.innerHTML=`
+
 <div class="shell">
+
 ${logoHeader()}
+
 ${
 state.phase==="setup"
-?setupMarkup()
-:gameMarkup()
+?
+setupMarkup()
+:
+gameMarkup()
 }
+
 </div>
+
 ${
 state.phase==="winner"
-?winnerMarkup()
-:""
+?
+winnerMarkup()
+:
+""
 }
+
 `;
+
 bind();
+
 }
+
 function bind() {
-app.querySelectorAll("[data-action]")
+
+app.querySelectorAll(
+"[data-action]"
+)
 .forEach(button=>{
-button.addEventListener("click",()=>{
-const action=button.dataset.action;
+
+button.addEventListener(
+"click",
+()=>{
+
+const action =
+button.dataset.action;
+
 if(action==="count") {
-state.count=Number(button.dataset.count);
+
+state.count =
+Number(button.dataset.count);
+
 render();
+
 }
-if(action==="start") start(state.count);
-if(action==="setup") setup();
-if(action==="again") start(state.players.length);
-if(action==="roll") rollDice();
+
+if(action==="start")
+  start(state.count);
+
+if(action==="setup")
+  setup();
+
+if(action==="again")
+  start(state.players.length);
+
+if(action==="roll")
+  rollDice();
+
 if(action==="token") {
+
 move(
 button.dataset.color,
 Number(button.dataset.token)
 );
+
 }
-});
-});
+
 }
+);
+
+});
+
+}
+
 function setup() {
+
 state.phase="setup";
 state.winner=null;
 state.valid=new Set();
 state.roll=null;
+
 render();
+
 }
+
 function start(count) {
-state.players=playersByCount[count];
-state.tokens=freshTokens();
+
+state.players =
+playersByCount[count];
+
+state.tokens =
+freshTokens();
+
 state.active=0;
+
 state.lastRoll=null;
 state.roll=null;
+
 state.valid=new Set();
+
 state.winner=null;
-state.message=
+
+state.message =
 "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+
 state.phase="playing";
+
 render();
+
 }
+
 function canMove(token,n) {
+
 return token.progress===-1
-?n===6
-:token.progress!==57 &&
+
+?
+
+n===6
+
+:
+
+token.progress!==57 &&
 token.progress+n<=57;
+
 }
+
 function nextTurn() {
-state.active=
-(state.active+1)%state.players.length;
+
+state.active =
+(state.active+1) %
+state.players.length;
+
 state.roll=null;
+
 state.valid=new Set();
+
 render();
+
 }
+
 function rollDice() {
+
 if(
-state.rolling||
-state.moving||
+state.rolling ||
+state.moving ||
 state.roll!==null
-) return;
+)
+return;
+
 state.rolling=true;
-state.message="El dado está rodando…";
+
+state.message =
+"El dado está rodando…";
+
 render();
+
 setTimeout(()=>{
-const n=Math.floor(Math.random()*6)+1;
-const color=state.players[state.active];
+
+const n =
+Math.floor(
+Math.random()*6
+)+1;
+
+const color =
+state.players[state.active];
+
 state.rolling=false;
+
 state.lastRoll=n;
 state.roll=n;
-state.valid=new Set(
+
+state.valid =
+new Set(
+
 state.tokens[color]
-.filter(t=>canMove(t,n))
-.map(t=>`${color}-${t.id}`)
-);
-if(!state.valid.size) {
-state.message=
-`No hay movimientos válidos para ${names[color]}. El turno pasará…`;
-render();
-setTimeout(()=>{
-nextTurn();
-state.message=
-"Turno pasado. Lanza el dado cuando estés listo.";
-render();
-},900);
-} else {
-state.message=
-state.valid.size===1
-?"Una ficha puede moverse. Tócala para jugar."
-:"Elige una ficha iluminada.";
-render();
-}
-},550);
-}
-function move(color,id) {
-if(
-state.phase!=="playing"||
-color!==state.players[state.active]||
-state.roll===null||
-!state.valid.has(`${color}-${id}`)||
-state.moving
-) return;
-const n=state.roll;
-const token=state.tokens[color][id];
-const next=
-token.progress===-1
-?0
-:token.progress+n;
-state.moving=true;
-state.valid=new Set();
-state.message="Moviendo ficha…";
-render();
-setTimeout(()=>{
-let captured=false;
-const updated={
-...state.tokens,
-[color]:
-state.tokens[color].map(t=>
-t.id===id
-?{...t,progress:next}
-:t
+
+.filter(
+t=>canMove(t,n)
 )
+
+.map(
+t=>`${color}-${t.id}`
+)
+
+);
+
+if(!state.valid.size) {
+
+state.message =
+`No hay movimientos válidos para ${names[color]}. El turno pasará…`;
+
+render();
+
+setTimeout(()=>{
+
+nextTurn();
+
+state.message =
+"Turno pasado. Lanza el dado cuando estés listo.";
+
+render();
+
+},900);
+
+} else {
+
+state.message =
+state.valid.size===1
+?
+"Una ficha puede moverse. Tócala para jugar."
+:
+"Elige una ficha iluminada.";
+
+render();
+
+}
+
+},550);
+
+}
+
+function move(color,id) {
+
+if(
+
+state.phase!=="playing" ||
+
+color!==state.players[state.active] ||
+
+state.roll===null ||
+
+!state.valid.has(
+`${color}-${id}`
+) ||
+
+state.moving
+
+)
+return;
+
+const n=state.roll;
+
+const token =
+state.tokens[color][id];
+
+const next =
+
+token.progress===-1
+
+?
+0
+:
+token.progress+n;
+
+state.moving=true;
+
+state.valid=new Set();
+
+state.message =
+"Moviendo ficha…";
+
+render();
+
+setTimeout(()=>{
+
+let captured=false;
+
+const updated={
+
+...state.tokens,
+
+[color]:
+
+state.tokens[color].map(
+t=>
+
+t.id===id
+
+?
+{
+...t,
+progress:next
+}
+
+:
+t
+
+)
+
 };
-const landing=trackIndex(color,next);
+
+const landing =
+trackIndex(
+color,
+next
+);
+
 if(
+
 landing!==null &&
+
 !safe.has(landing)
+
 ) {
+
 state.players
-.filter(c=>c!==color)
+
+.filter(
+c=>c!==color
+)
+
 .forEach(opponent=>{
-updated[opponent]=
+
+updated[opponent] =
+
 updated[opponent].map(t=>{
+
 if(
-trackIndex(opponent,t.progress)===landing
+
+trackIndex(
+opponent,
+t.progress
+)===landing
+
 ) {
+
 captured=true;
+
 return {
 ...t,
 progress:-1
 };
+
 }
+
 return t;
+
 });
+
 });
+
 }
+
 state.tokens=updated;
+
 state.moving=false;
+
 if(
+
 updated[color]
-.every(t=>t.progress===57)
+
+.every(
+t=>t.progress===57
+)
+
 ) {
+
 state.winner=color;
+
 state.phase="winner";
+
 state.roll=null;
+
 render();
+
 return;
+
 }
+
 if(n===6 || captured) {
+
 state.roll=null;
-state.message=
+
+state.message =
+
 captured
-?"¡Captura! Lanza otra vez."
-:"¡Un seis! Lanza otra vez.";
+
+?
+"¡Captura! Lanza otra vez."
+:
+"¡Un seis! Lanza otra vez.";
+
 render();
+
 } else {
+
 state.roll=null;
-state.active=
-(state.active+1)%
+
+state.active =
+
+(state.active+1) %
 state.players.length;
-state.message=
+
+state.message =
 "Turno pasado. Lanza el dado cuando estés listo.";
+
 render();
+
 }
+
 },280);
+
 }
+
 render();
+
 })();
 </script>
+
 </body>
 </html>
