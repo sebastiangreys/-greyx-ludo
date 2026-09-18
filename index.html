@@ -2610,7 +2610,7 @@ if (captured) {
       updated[color]
       .every(t=>t.progress===57)
     ){
-
+  playSound("winner");
       state.winner=color;
       state.phase="winner";
       state.roll=null;
