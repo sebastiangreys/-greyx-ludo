@@ -2597,12 +2597,28 @@ playSound("move");
       });
 
     }
-
 state.tokens = updated;
 state.moving = false;
 
 if (captured) {
   playSound("capture");
+}
+
+if (
+  updated[color].every(t => t.progress === 57)
+) {
+  playSound("winner");
+
+  state.winner = color;
+  state.phase = "winner";
+  state.roll = null;
+
+  render();
+  return;
+}
+
+if (!captured) {
+  playSound("land");
 }
 
     if(
