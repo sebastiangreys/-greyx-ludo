@@ -2619,14 +2619,18 @@ if (captured) {
       return;
     }
 
-    if(n===6 || captured){
+if(n===6 || captured){
 
-      state.roll=null;
+  state.roll=null;
 
-      state.message=
-        captured
-        ?"¡Captura! Lanza otra vez."
-        :"¡Un seis! Lanza otra vez.";
+  if (n === 6 && !captured) {
+    playSound("six");
+  }
+
+  state.message=
+    captured
+    ?"¡Captura! Lanza otra vez."
+    :"¡Un seis! Lanza otra vez.";
 
       render();
 
