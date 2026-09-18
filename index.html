@@ -2598,7 +2598,13 @@ playSound("move");
     }
 
     state.tokens=updated;
-    state.moving=false;
+state.moving=false;
+
+if (captured) {
+  playSound("capture");
+} else {
+  playSound("land");
+}
 
     if(
       updated[color]
