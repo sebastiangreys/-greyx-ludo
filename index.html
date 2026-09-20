@@ -2614,7 +2614,8 @@ function rollDice() {
   if (
     state.rolling ||
     state.moving ||
-    state.roll !== null
+    state.roll !== null ||
+    isBotTurn()
   ) {
     return;
   }
