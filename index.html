@@ -2115,7 +2115,11 @@ return `
 <div>
 
 <h1>
-Tu turno.
+${
+  state.mode === "solo" && color !== state.humanColor
+  ? "Turno del bot."
+  : "Tu turno."
+}
 </h1>
 
 <p>
