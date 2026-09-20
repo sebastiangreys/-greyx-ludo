@@ -2377,10 +2377,19 @@ button.dataset.action;
 
 if(action==="count") {
 
-state.count =
-Number(button.dataset.count);
+  state.count =
+    Number(button.dataset.count);
 
-render();
+  render();
+
+}
+
+if(action==="mode") {
+
+  state.mode =
+    button.dataset.mode;
+
+  render();
 
 }
 
