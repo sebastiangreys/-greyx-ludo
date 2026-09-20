@@ -1701,20 +1701,34 @@ function coord(color, progress) {
     return null;
   }
 
-  // La única posición de llegada es el centro
+  // Meta central
   if (progress === 57) {
-    return [7, 7];
+    return [7,7];
   }
 
-  // Recorrido exterior
+  let cell;
+
   if (progress <= 51) {
-    return track[
+    cell = track[
       (startIndex[color] + progress) % track.length
     ];
+  } else {
+    cell = lanes[color][progress - 52] || null;
   }
 
-  // Pasillo final: solo cinco casillas
-  return lanes[color][progress - 52] || null;
+  if (!cell) {
+    return null;
+  }
+
+  const key = `${cell[0]}-${cell[1]}`;
+
+  // Estas casillas existen visualmente,
+  // pero no pueden ser ocupadas por fichas.
+  if (blockedFinishEdges.has(key)) {
+    return null;
+  }
+
+  return cell;
 }
 
 function trackIndex(color, progress) {
