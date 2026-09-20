@@ -2169,7 +2169,11 @@ ${names[color]}
 </strong>
 
 <small>
-Jugador ${state.active+1} · pasa la pantalla
+${
+  state.mode === "solo" && color !== state.humanColor
+  ? "Bot automático"
+  : `Jugador ${state.active + 1} · tu turno`
+}
 </small>
 
 </div>
