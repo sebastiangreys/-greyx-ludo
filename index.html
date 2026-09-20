@@ -1245,7 +1245,6 @@ const track = [
   [7,0]
 ];
 
-
 /*
 Entradas de salida:
 
@@ -1281,7 +1280,6 @@ AMARILLO:
 derecha → centro
 ===========================================================
 */
-
 
 const lanes = {
   red: [
@@ -2525,10 +2523,10 @@ function chooseBotMove(color) {
   state.tokens[color].forEach(token => {
     if (!canMove(token, state.roll)) return;
 
-    let finalProgress =
-  token.progress === -1
-    ? 0
-    : token.progress + n;
+    const finalProgress =
+      token.progress === -1
+      ? 0
+      : token.progress + state.roll;
 
     let score = finalProgress;
 
@@ -2689,39 +2687,37 @@ const startProgress =
 
   let currentProgress = startProgress;
 
-    function animateStep() {
+  function animateStep() {
   let nextProgress = currentProgress + 1;
 
   /*
-    Saltar casillas bloqueadas, incluida la casilla
-    justo antes de la llegada.
+    Saltamos las casillas bloqueadas.
+    La ficha nunca se dibuja encima de ellas.
   */
   while (
-    nextProgress <= finalProgress &&
-    nextProgress < 57 &&
+    nextProgress < finalProgress &&
     coord(color, nextProgress) === null
   ) {
     nextProgress++;
   }
 
-  /*
-    Si el destino calculado cae en una casilla bloqueada,
-    la ficha entra directamente a la llegada.
-  */
-  if (
-    nextProgress === finalProgress &&
-    nextProgress < 57 &&
-    coord(color, nextProgress) === null
-  ) {
-    nextProgress = 57;
-  }
-
-  if (nextProgress > finalProgress && nextProgress < 57) {
+  if (nextProgress > finalProgress) {
     finishMove();
     return;
   }
 
   currentProgress = nextProgress;
+
+  if (currentProgress >= finalProgress) {
+    state.tokens[color] = state.tokens[color].map(t =>
+      t.id === id
+        ? { ...t, progress: finalProgress }
+        : t
+    );
+
+    finishMove();
+    return;
+  }
 
   playSound("move");
 
@@ -2733,13 +2729,9 @@ const startProgress =
 
   render();
 
-  if (currentProgress >= finalProgress || currentProgress === 57) {
-    setTimeout(finishMove, 150);
-    return;
-  }
-
   setTimeout(animateStep, 150);
 }
+
   function finishMove() {
     let captured = false;
 
