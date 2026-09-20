@@ -2702,34 +2702,21 @@ const startProgress =
   let currentProgress = startProgress;
 
     function animateStep() {
-    let nextProgress = currentProgress + 1;
+  let nextProgress = currentProgress + 1;
 
-    /*
-      Si la siguiente posición está bloqueada,
-      la ficha NO puede atravesarla.
-    */
-    if (
-      nextProgress < finalProgress &&
-      coord(color, nextProgress) === null
-    ) {
-      finishMove();
-      return;
-    }
+  /*
+    Las casillas bloqueadas NO se pueden atravesar.
+    La ficha debe seguir únicamente por casillas válidas.
+  */
+  if (
+    nextProgress <= finalProgress &&
+    coord(color, nextProgress) === null
+  ) {
+    finishMove();
+    return;
+  }
 
-    if (nextProgress > finalProgress) {
-      finishMove();
-      return;
-    }
-
-  currentProgress = nextProgress;
-
-  if (currentProgress >= finalProgress) {
-    state.tokens[color] = state.tokens[color].map(t =>
-      t.id === id
-        ? { ...t, progress: finalProgress }
-        : t
-    );
-
+  if (nextProgress > finalProgress) {
     finishMove();
     return;
   }
