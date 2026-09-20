@@ -1700,26 +1700,19 @@ ${Array.from(
 
 }
 
-function coord(color,progress) {
+function coord(color, progress) {
+  if (progress < 0 || progress > 57) return null;
+  if (progress === 57) return [7, 7];
 
-if(progress<0 || progress>57)
-  return null;
+  if (progress <= 51) {
+    const cell = track[(startIndex[color] + progress) % track.length];
+    const key = cell.join("-");
+    if (blockedCenter.has(key)) return null;
+    return cell;
+  }
 
-if(progress===57)
-  return [7,7];
-
-if(progress<=51) {
-
-return track[
-(startIndex[color]+progress)%track.length
-];
-
+  return lanes[color][progress - 52] || null;
 }
-
-return lanes[color][progress-52] || null;
-
-}
-
 function trackIndex(color,progress) {
 
 return progress>=0 && progress<=51
