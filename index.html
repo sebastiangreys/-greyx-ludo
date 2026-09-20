@@ -2443,9 +2443,7 @@ render();
 function start(count) {
 
   state.players =
-    state.mode === "solo"
-    ? ["red","green","yellow","blue"]
-    : playersByCount[count];
+    playersByCount[count];
 
   state.humanColor = "red";
 
@@ -2471,7 +2469,6 @@ function start(count) {
   state.phase = "playing";
 
   render();
-
 }
 
 function canMove(token,n) {
