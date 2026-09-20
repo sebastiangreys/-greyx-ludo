@@ -2693,13 +2693,17 @@ const startProgress =
   let nextProgress = currentProgress + 1;
 
   /*
-    Las casillas bloqueadas NO se pueden atravesar.
-    La ficha debe seguir únicamente por casillas válidas.
+    Saltamos las casillas bloqueadas.
+    La ficha nunca se dibuja encima de ellas.
   */
-  if (
-    nextProgress <= finalProgress &&
+  while (
+    nextProgress < finalProgress &&
     coord(color, nextProgress) === null
   ) {
+    nextProgress++;
+  }
+
+  if (nextProgress > finalProgress) {
     finishMove();
     return;
   }
