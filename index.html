@@ -2704,11 +2704,6 @@ const startProgress =
     return;
   }
 
-  if (nextProgress > finalProgress) {
-    finishMove();
-    return;
-  }
-
   playSound("move");
 
   state.tokens[color] = state.tokens[color].map(t =>
