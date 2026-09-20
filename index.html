@@ -2434,27 +2434,35 @@ render();
 
 function start(count) {
 
-state.players =
-playersByCount[count];
+  state.players =
+    state.mode === "solo"
+    ? ["red","green","yellow","blue"]
+    : playersByCount[count];
 
-state.tokens =
-freshTokens();
+  state.humanColor = "red";
 
-state.active=0;
+  state.tokens = freshTokens();
 
-state.lastRoll=null;
-state.roll=null;
+  state.active = 0;
 
-state.valid=new Set();
+  state.lastRoll = null;
+  state.roll = null;
 
-state.winner=null;
+  state.rolling = false;
+  state.moving = false;
 
-state.message =
-"Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+  state.valid = new Set();
 
-state.phase="playing";
+  state.winner = null;
 
-render();
+  state.message =
+    state.mode === "solo"
+    ? "Tu turno. Lanza el dado para comenzar."
+    : "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+
+  state.phase = "playing";
+
+  render();
 
 }
 
