@@ -1254,6 +1254,11 @@ AZUL     = 13  → [1,8]
 AMARILLO = 25  → [8,13]
 VERDE    = 38  → [13,6]
 */
+const blockedCenter = new Set([
+  "6-6","6-7","6-8",
+  "7-6","7-7","7-8",
+  "8-6","8-7","8-8"
+]);
 
 const startIndex = {
   red: 0,      // [6,1]
