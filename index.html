@@ -481,12 +481,19 @@ p {
 .finish {
   position:absolute;
   z-index:2;
-  inset:40% 40%;
+
+  /* Una sola casilla del tablero: 1 de 15 */
+  width:6.6667%;
+  height:6.6667%;
+  top:46.6667%;
+  left:46.6667%;
+
   display:grid;
   place-items:center;
-  overflow:hidden;
+
   border:1px solid #b89950;
-  border-radius:8px;
+  border-radius:4px;
+
   background:conic-gradient(
     from 45deg,
     var(--coral) 0 25%,
@@ -494,6 +501,7 @@ p {
     var(--blue) 50% 75%,
     var(--green) 75%
   );
+
   transform:none;
 }
 
