@@ -2571,7 +2571,9 @@ function isBotTurn() {
 
 function queueBotTurn(delay = 800) {
 
-  if (!isBotTurn()) return;
+  if (!isBotTurn()) {
+    return;
+  }
 
   setTimeout(() => {
 
@@ -2582,11 +2584,10 @@ function queueBotTurn(delay = 800) {
       !state.moving &&
       state.roll === null
     ) {
-      rollDice();
+      rollDice(true);
     }
 
   }, delay);
-
 }
 
 function nextTurn() {
