@@ -2693,20 +2693,35 @@ const startProgress =
   let nextProgress = currentProgress + 1;
 
   /*
-    Saltamos las casillas bloqueadas.
-    La ficha nunca se dibuja encima de ellas.
+    Saltar casillas bloqueadas, incluida la casilla
+    justo antes de la llegada.
   */
   while (
-    nextProgress < finalProgress &&
+    nextProgress <= finalProgress &&
+    nextProgress < 57 &&
     coord(color, nextProgress) === null
   ) {
     nextProgress++;
   }
 
-  if (nextProgress > finalProgress) {
+  /*
+    Si el destino calculado cae en una casilla bloqueada,
+    la ficha entra directamente a la llegada.
+  */
+  if (
+    nextProgress === finalProgress &&
+    nextProgress < 57 &&
+    coord(color, nextProgress) === null
+  ) {
+    nextProgress = 57;
+  }
+
+  if (nextProgress > finalProgress && nextProgress < 57) {
     finishMove();
     return;
   }
+
+  currentProgress = nextProgress;
 
   playSound("move");
 
@@ -2718,9 +2733,13 @@ const startProgress =
 
   render();
 
+  if (currentProgress >= finalProgress || currentProgress === 57) {
+    setTimeout(finishMove, 150);
+    return;
+  }
+
   setTimeout(animateStep, 150);
 }
-
   function finishMove() {
     let captured = false;
 
