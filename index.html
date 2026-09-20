@@ -2481,6 +2481,35 @@ token.progress+n<=57;
 
 }
 
+function isBotTurn() {
+
+  return (
+    state.mode === "solo" &&
+    state.players[state.active] !== state.humanColor
+  );
+
+}
+
+function queueBotTurn(delay = 800) {
+
+  if (!isBotTurn()) return;
+
+  setTimeout(() => {
+
+    if (
+      state.phase === "playing" &&
+      isBotTurn() &&
+      !state.rolling &&
+      !state.moving &&
+      state.roll === null
+    ) {
+      rollDice();
+    }
+
+  }, delay);
+
+}
+
 function nextTurn() {
 
 state.active =
