@@ -2735,7 +2735,8 @@ function move(color,id) {
     }
 
     currentProgress++;
-playSound("move");
+    playSound("move");
+
     state.tokens[color]=state.tokens[color].map(t =>
       t.id===id
       ?{...t,progress:currentProgress}
