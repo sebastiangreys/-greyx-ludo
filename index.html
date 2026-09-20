@@ -2690,21 +2690,49 @@ const startProgress =
   let currentProgress = startProgress;
 
   function animateStep() {
-    if (currentProgress >= finalProgress) {
-      finishMove();
-      return;
-    }
+  let nextProgress = currentProgress + 1;
 
-    currentProgress++;
-    playSound("move");
+  /*
+    Saltamos las casillas bloqueadas.
+    La ficha nunca se dibuja encima de ellas.
+  */
+  while (
+    nextProgress < finalProgress &&
+    coord(color, nextProgress) === null
+  ) {
+    nextProgress++;
+  }
 
+  if (nextProgress > finalProgress) {
+    finishMove();
+    return;
+  }
+
+  currentProgress = nextProgress;
+
+  if (currentProgress >= finalProgress) {
     state.tokens[color] = state.tokens[color].map(t =>
-      t.id === id ? { ...t, progress: currentProgress } : t
+      t.id === id
+        ? { ...t, progress: finalProgress }
+        : t
     );
 
-    render();
-    setTimeout(animateStep, 180);
+    finishMove();
+    return;
   }
+
+  playSound("move");
+
+  state.tokens[color] = state.tokens[color].map(t =>
+    t.id === id
+      ? { ...t, progress: currentProgress }
+      : t
+  );
+
+  render();
+
+  setTimeout(animateStep, 150);
+}
 
   function finishMove() {
     let captured = false;
