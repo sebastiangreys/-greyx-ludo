@@ -2525,10 +2525,10 @@ function chooseBotMove(color) {
   state.tokens[color].forEach(token => {
     if (!canMove(token, state.roll)) return;
 
-    const finalProgress =
-      token.progress === -1
-      ? 0
-      : token.progress + state.roll;
+    let finalProgress =
+  token.progress === -1
+    ? 0
+    : token.progress + n;
 
     let score = finalProgress;
 
