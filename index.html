@@ -2481,6 +2481,77 @@ token.progress+n<=57;
 
 }
 
+function chooseBotMove(color) {
+
+  const options = [];
+
+  state.tokens[color].forEach(token => {
+
+    if (!canMove(token, state.roll)) {
+      return;
+    }
+
+    const finalProgress =
+      token.progress === -1
+      ? 0
+      : token.progress + state.roll;
+
+    let score = finalProgress;
+
+    // Prioridad: sacar una ficha de casa
+    if (token.progress === -1) {
+      score += 40;
+    }
+
+    // Prioridad máxima: llegar a la meta
+    if (finalProgress === 57) {
+      score += 200;
+    }
+
+    const landing =
+      trackIndex(color, finalProgress);
+
+    // Prioridad: capturar rivales
+    if (
+      landing !== null &&
+      !safe.has(landing)
+    ) {
+
+      state.players
+        .filter(opponent => opponent !== color)
+        .forEach(opponent => {
+
+          state.tokens[opponent].forEach(enemy => {
+
+            if (
+              trackIndex(opponent, enemy.progress) === landing
+            ) {
+              score += 100;
+            }
+
+          });
+
+        });
+
+    }
+
+    options.push({
+      id: token.id,
+      score
+    });
+
+  });
+
+  if (!options.length) {
+    return null;
+  }
+
+  options.sort((a, b) => b.score - a.score);
+
+  return options[0].id;
+
+}
+
 function isBotTurn() {
 
   return (
