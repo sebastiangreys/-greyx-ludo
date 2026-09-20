@@ -1690,24 +1690,24 @@ ${Array.from(
 }
 
 function coord(color, progress) {
-  if (progress < 0 || progress > 57) return null;
-
-  if (progress === 57) return [7, 7];
-
-  if (progress <= 51) {
-    const cell = track[(startIndex[color] + progress) % track.length];
-    const key = `${cell[0]}-${cell[1]}`;
-    if (blockedCenter.has(key)) return null;
-    return cell;
+  if (progress < 0 || progress > 57) {
+    return null;
   }
 
-  const cell = lanes[color][progress - 52] || null;
-  if (!cell) return null;
+  // La única posición de llegada es el centro
+  if (progress === 57) {
+    return [7, 7];
+  }
 
-  const key = `${cell[0]}-${cell[1]}`;
-  if (blockedCenter.has(key)) return null;
+  // Recorrido exterior
+  if (progress <= 51) {
+    return track[
+      (startIndex[color] + progress) % track.length
+    ];
+  }
 
-  return cell;
+  // Pasillo final: solo cinco casillas
+  return lanes[color][progress - 52] || null;
 }
 
 function trackIndex(color, progress) {
