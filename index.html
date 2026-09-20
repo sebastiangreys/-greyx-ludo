@@ -1556,8 +1556,69 @@ Elijan su grupo, compartan la pantalla y dejen que empiecen los seises.
 </h2>
 
 <p>
-Elijan cuántas personas se sentarán alrededor de la mesa.
+Elijan cómo quieren jugar esta partida.
 </p>
+
+<div class="player-options">
+
+<button
+class="player-option ${state.mode==="solo"?"selected":""}"
+data-action="mode"
+data-mode="solo"
+>
+
+<span>
+
+<strong>
+Jugar contra bots
+</strong>
+
+<small>
+Tú eres Coral · 3 rivales automáticos
+</small>
+
+</span>
+
+<span class="dots">
+
+<i class="dot red"></i>
+<i class="dot green"></i>
+<i class="dot yellow"></i>
+<i class="dot blue"></i>
+
+</span>
+
+</button>
+
+<button
+class="player-option ${state.mode==="local"?"selected":""}"
+data-action="mode"
+data-mode="local"
+>
+
+<span>
+
+<strong>
+Partida local</strong>
+
+<small>
+Todos juegan en la misma pantalla
+</small>
+
+</span>
+
+<span class="dots">
+
+<i class="dot red"></i>
+<i class="dot green"></i>
+<i class="dot yellow"></i>
+<i class="dot blue"></i>
+
+</span>
+
+</button>
+
+</div>
 
 <div class="player-options">
 
