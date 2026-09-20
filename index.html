@@ -2795,7 +2795,9 @@ if (captured) {
 }
 
 if (
-  updated[color].every(t => t.progress === 57)
+  updated[color].every(
+    token => token.progress === 57
+  )
 ) {
   playSound("winner");
 
