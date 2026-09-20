@@ -1713,14 +1713,15 @@ function coord(color, progress) {
 
   return lanes[color][progress - 52] || null;
 }
-function trackIndex(color,progress) {
-
-return progress>=0 && progress<=51
-?
-(startIndex[color]+progress)%track.length
-:
-null;
-
+function trackIndex(color, progress) {
+  if (progress >= 0 && progress <= 51) {
+    const idx = (startIndex[color] + progress) % track.length;
+    const cell = track[idx];
+    const key = cell.join("-");
+    if (blockedCenter.has(key)) return null;
+    return idx;
+  }
+  return null;
 }
 
 function die(n,rolling) {
