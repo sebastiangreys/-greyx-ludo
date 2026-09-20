@@ -2515,15 +2515,6 @@ token.progress+n<=57;
 
 }
 
-function isBotTurn() {
-
-  return (
-    state.mode === "solo" &&
-    state.players[state.active] !== state.humanColor
-  );
-
-}
-
 function chooseBotMove(color) {
   const options = [];
 
