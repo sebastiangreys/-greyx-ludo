@@ -2732,7 +2732,10 @@ function move(color, id) {
   const n = state.roll;
   const token = state.tokens[color][id];
 
-  const startProgress = token.progress === -1 ? 0 : token.progress;
+const startProgress =
+  token.progress === -1
+  ? -1
+  : token.progress;
   const finalProgress = token.progress === -1 ? 0 : token.progress + n;
 
   state.moving = true;
