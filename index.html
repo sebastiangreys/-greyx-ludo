@@ -1317,6 +1317,13 @@ const lanes = {
   ]
 };
 
+const blockedFinishEdges = new Set([
+  "7-5", // entrada roja
+  "5-7", // entrada azul
+  "7-9", // entrada amarilla
+  "9-7"  // entrada verde
+]);
+
 /*
 Estrellas seguras.
 
