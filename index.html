@@ -477,22 +477,21 @@ p {
   color:#b6914e;
   font-size:clamp(10px,1.4vw,17px);
 }
-
 .finish {
   position:absolute;
   z-index:2;
 
-  /* Una sola casilla del tablero: 1 de 15 */
-  width:6.6667%;
-  height:6.6667%;
-  top:46.6667%;
-  left:46.6667%;
+  width:20%;
+  height:20%;
+  left:40%;
+  top:40%;
 
   display:grid;
   place-items:center;
+  overflow:hidden;
 
   border:1px solid #b89950;
-  border-radius:4px;
+  border-radius:6px;
 
   background:conic-gradient(
     from 45deg,
@@ -507,8 +506,8 @@ p {
 
 .finish::after {
   content:"";
-  width:48%;
-  height:48%;
+  width:38%;
+  height:38%;
   border-radius:50%;
   background:#fff8da;
   box-shadow:0 0 0 2px #c19e4e;
