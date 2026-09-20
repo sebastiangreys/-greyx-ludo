@@ -2689,24 +2689,25 @@ const startProgress =
 
   let currentProgress = startProgress;
 
-  function animateStep() {
-  let nextProgress = currentProgress + 1;
+    function animateStep() {
+    let nextProgress = currentProgress + 1;
 
-  /*
-    Saltamos las casillas bloqueadas.
-    La ficha nunca se dibuja encima de ellas.
-  */
-  while (
-    nextProgress < finalProgress &&
-    coord(color, nextProgress) === null
-  ) {
-    nextProgress++;
-  }
+    /*
+      Si la siguiente posición está bloqueada,
+      la ficha NO puede atravesarla.
+    */
+    if (
+      nextProgress < finalProgress &&
+      coord(color, nextProgress) === null
+    ) {
+      finishMove();
+      return;
+    }
 
-  if (nextProgress > finalProgress) {
-    finishMove();
-    return;
-  }
+    if (nextProgress > finalProgress) {
+      finishMove();
+      return;
+    }
 
   currentProgress = nextProgress;
 
