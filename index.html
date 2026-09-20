@@ -1633,11 +1633,19 @@ data-count="${n}"
 <span>
 
 <strong>
-${n} jugadores
+${
+  state.mode === "solo"
+  ? `${n - 1} ${n - 1 === 1 ? "bot" : "bots"}`
+  : `${n} jugadores`
+}
 </strong>
 
 <small>
-${playersByCount[n].map(c=>names[c]).join(" · ")}
+${
+  state.mode === "solo"
+  ? `Tú + ${n - 1} ${n - 1 === 1 ? "rival automático" : "rivales automáticos"}`
+  : playersByCount[n].map(c => names[c]).join(" · ")
+}
 </small>
 
 </span>
@@ -1645,8 +1653,8 @@ ${playersByCount[n].map(c=>names[c]).join(" · ")}
 <span class="dots">
 
 ${playersByCount[n]
-.map(c=>`<i class="dot ${c}"></i>`)
-.join("")}
+  .map(c => `<i class="dot ${c}"></i>`)
+  .join("")}
 
 </span>
 
