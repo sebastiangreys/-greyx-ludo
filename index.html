@@ -2532,84 +2532,88 @@ function nextTurn() {
 
 function rollDice() {
 
-if(
-state.rolling ||
-state.moving ||
-state.roll!==null
-)
-return;
+  if (
+    state.rolling ||
+    state.moving ||
+    state.roll !== null
+  ) {
+    return;
+  }
 
-state.rolling=true;
+  state.rolling = true;
 
-playSound("dice");
+  if (isBotTurn()) {
+    state.message =
+      `${names[state.players[state.active]]} está lanzando el dado…`;
+  } else {
+    state.message =
+      "El dado está rodando…";
+  }
 
-state.message =
-  "El dado está rodando…";
+  playSound("dice");
+  render();
 
-render();
+  setTimeout(() => {
 
-setTimeout(()=>{
+    const n =
+      Math.floor(Math.random() * 6) + 1;
 
-const n =
-Math.floor(
-Math.random()*6
-)+1;
+    const color =
+      state.players[state.active];
 
-const color =
-state.players[state.active];
+    state.rolling = false;
+    state.lastRoll = n;
+    state.roll = n;
 
-state.rolling=false;
+    state.valid = new Set(
+      state.tokens[color]
+        .filter(token => canMove(token, n))
+        .map(token => `${color}-${token.id}`)
+    );
 
-state.lastRoll=n;
-state.roll=n;
+    if (!state.valid.size) {
 
-state.valid =
-new Set(
+      state.message =
+        `No hay movimientos válidos para ${names[color]}.`;
 
-state.tokens[color]
+      render();
 
-.filter(
-t=>canMove(t,n)
-)
+      setTimeout(() => {
+        nextTurn();
+      }, 900);
 
-.map(
-t=>`${color}-${t.id}`
-)
+      return;
+    }
 
-);
+    if (isBotTurn()) {
 
-if(!state.valid.size) {
+      state.message =
+        `${names[color]} está eligiendo una ficha…`;
 
-state.message =
-`No hay movimientos válidos para ${names[color]}. El turno pasará…`;
+      render();
 
-render();
+      setTimeout(() => {
 
-setTimeout(()=>{
+        const tokenId =
+          chooseBotMove(color);
 
-nextTurn();
+        if (tokenId !== null) {
+          move(color, tokenId);
+        }
 
-state.message =
-"Turno pasado. Lanza el dado cuando estés listo.";
+      }, 700);
 
-render();
+      return;
+    }
 
-},900);
+    state.message =
+      state.valid.size === 1
+      ? "Una ficha puede moverse. Tócala para jugar."
+      : "Elige una ficha iluminada.";
 
-} else {
+    render();
 
-state.message =
-state.valid.size===1
-?
-"Una ficha puede moverse. Tócala para jugar."
-:
-"Elige una ficha iluminada.";
-
-render();
-
-}
-
-},550);
+  }, 550);
 
 }
 
