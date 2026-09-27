@@ -2616,6 +2616,17 @@ function rollDice(fromBot = false) {
         .filter(token => canMove(token, n))
         .map(token => `${color}-${token.id}`)
     );
+    
+    if (state.valid.size === 1) {
+       const onlyToken = [...state.valid][0];
+       const id = Number(onlyToken.split("-")[1]);
+
+    setTimeout(() => {
+      move(color, id);
+      }, 300);
+
+     return;
+ }
 
     if (!state.valid.size) {
       state.message = `No hay movimientos válidos para ${names[color]}.`;
