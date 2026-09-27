@@ -2756,41 +2756,74 @@ const startProgress =
 }
 
   function finishMove() {
-    let captured = false;
+  let capturedTokens = [];
 
-    const updated = {
-      ...state.tokens,
-      [color]: state.tokens[color].map(t =>
-        t.id === id ? { ...t, progress: finalProgress } : t
-      )
-    };
+  const updated = {
+    ...state.tokens,
+    [color]: state.tokens[color].map(t =>
+      t.id === id
+        ? { ...t, progress: finalProgress }
+        : t
+    )
+  };
 
-    const landing = trackIndex(color, finalProgress);
+  const landing = trackIndex(color, finalProgress);
 
-    if (landing !== null && !safe.has(landing)) {
-      state.players
-        .filter(c => c !== color)
-        .forEach(opponent => {
-          updated[opponent] = updated[opponent].map(t => {
-  if (trackIndex(opponent, t.progress) === landing) {
-    captured = true;
-    return {
-      ...t,
-      progress: -1
-    };
+  if (landing !== null && !safe.has(landing)) {
+    state.players
+      .filter(c => c !== color)
+      .forEach(opponent => {
+        updated[opponent] = updated[opponent].map(t => {
+          if (trackIndex(opponent, t.progress) === landing) {
+            capturedTokens.push({
+              color: opponent,
+              id: t.id
+            });
+
+            return {
+              ...t,
+              progress: t.progress,
+              captured: true
+            };
+          }
+
+          return t;
+        });
+      });
   }
 
-  return t;
-});
-        });
-    }
+  state.tokens = updated;
+  state.moving = false;
 
-    state.tokens = updated;
-    state.moving = false;
+  /*
+    Si hubo captura:
+    primero mostramos la ficha siendo capturada,
+    esperamos a que termine la animación
+    y después la mandamos a casa.
+  */
+  if (capturedTokens.length) {
+    playSound("capture");
+    render();
 
-    if (captured) playSound("capture");
+    setTimeout(() => {
+      capturedTokens.forEach(({ color: capturedColor, id: capturedId }) => {
+        state.tokens[capturedColor] = state.tokens[capturedColor].map(t =>
+          t.id === capturedId
+            ? { ...t, progress: -1, captured: false }
+            : t
+        );
+      });
 
-    if (updated[color].every(token => token.progress === 57)) {
+      continueAfterMove();
+    }, 450);
+
+  } else {
+    continueAfterMove();
+  }
+
+  function continueAfterMove() {
+
+    if (state.tokens[color].every(token => token.progress === 57)) {
       playSound("winner");
       state.winner = color;
       state.phase = "winner";
@@ -2799,22 +2832,29 @@ const startProgress =
       return;
     }
 
-    if (!captured) playSound("land");
+    if (!capturedTokens.length) {
+      playSound("land");
+    }
 
-    if (n === 6 || captured) {
+    if (n === 6 || capturedTokens.length) {
       state.roll = null;
 
-      if (n === 6 && !captured) playSound("six");
+      if (n === 6 && !capturedTokens.length) {
+        playSound("six");
+      }
 
       state.message =
-        captured
+        capturedTokens.length
           ? "¡Captura! Tienes otro turno."
           : "¡Un seis! Tienes otro turno.";
 
       render();
       queueBotTurn();
+
     } else {
-      state.active = (state.active + 1) % state.players.length;
+      state.active =
+        (state.active + 1) % state.players.length;
+
       state.roll = null;
 
       state.message = isBotTurn()
@@ -2825,6 +2865,7 @@ const startProgress =
       queueBotTurn();
     }
   }
+}
 
   animateStep();
 }
