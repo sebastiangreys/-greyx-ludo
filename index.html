@@ -747,6 +747,28 @@ p {
   }
 }
 
+/* ANIMACIÓN DE CAPTURA */
+.token.captured {
+  animation: pieceCaptured .42s ease-in forwards;
+}
+
+@keyframes pieceCaptured {
+  0% {
+    transform:scale(1);
+    opacity:1;
+  }
+
+  35% {
+    transform:scale(1.28);
+    opacity:1;
+  }
+
+  100% {
+    transform:scale(.35);
+    opacity:0;
+  }
+}
+
 /* Pequeño rebote al llegar */
 .token.arrived {
   animation: pieceArrived .32s ease-out;
@@ -2750,12 +2772,16 @@ const startProgress =
         .filter(c => c !== color)
         .forEach(opponent => {
           updated[opponent] = updated[opponent].map(t => {
-            if (trackIndex(opponent, t.progress) === landing) {
-              captured = true;
-              return { ...t, progress: -1 };
-            }
-            return t;
-          });
+  if (trackIndex(opponent, t.progress) === landing) {
+    captured = true;
+    return {
+      ...t,
+      progress: -1
+    };
+  }
+
+  return t;
+});
         });
     }
 
