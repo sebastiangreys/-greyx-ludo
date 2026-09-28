@@ -2070,6 +2070,15 @@ token.progress===57
 ""
 }
 ${
+state.arrived &&
+state.arrived.color === color &&
+state.arrived.id === token.id
+?
+"arrived"
+:
+""
+}
+${
 slot
 ?
 `stack-${Math.min(slot,3)}`
