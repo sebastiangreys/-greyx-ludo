@@ -2149,7 +2149,7 @@ t=>t.progress===-1
 class="token ${color}
 ${
 state.valid.has(
-`${color}-${token.id}`
+`${color}-${t.id}`
 )
 ?
 "valid"
@@ -2157,7 +2157,7 @@ state.valid.has(
 ""
 }
 ${
-state.movingToken === `${color}-${token.id}`
+state.movingToken === `${color}-${t.id}`
 ?
 "moving-piece"
 :
