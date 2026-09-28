@@ -1647,6 +1647,7 @@ const freshTokens = () => ({
 
 const state = {
   phase:"setup",
+  arrived:null,
   count:4,
   mode:"solo",
   humanColor:"red",
@@ -3012,6 +3013,18 @@ const startProgress =
   }
 
   function continueAfterMove() {
+    if (finalProgress === 57) {
+  state.arrived = {
+    color: color,
+    id: id
+  };
+
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 750));
+
+  state.arrived = null;
+}
 
     if (state.tokens[color].every(token => token.progress === 57)) {
       playSound("winner");
