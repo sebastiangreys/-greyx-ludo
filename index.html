@@ -966,12 +966,62 @@ p {
 }
 
 .rolling {
-  animation:roll .45s ease-in-out infinite;
+  animation:
+    diceRoll .18s ease-in-out infinite,
+    diceShake .55s ease-in-out infinite;
+  transform-origin:center;
 }
 
-@keyframes roll {
+@keyframes diceRoll {
+  0% {
+    transform:rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform:rotate(18deg) scale(1.06);
+  }
+
   50% {
-    transform:rotate(14deg) scale(1.06);
+    transform:rotate(-18deg) scale(1.1);
+  }
+
+  75% {
+    transform:rotate(12deg) scale(1.06);
+  }
+
+  100% {
+    transform:rotate(0deg) scale(1);
+  }
+}
+
+@keyframes diceShake {
+  0%,100% {
+    filter:brightness(1);
+  }
+
+  50% {
+    filter:brightness(1.12);
+  }
+}
+
+.die.result {
+  animation:diceResult .3s ease-out;
+}
+
+@keyframes diceResult {
+  0% {
+    transform:scale(.82) rotate(-8deg);
+    opacity:.65;
+  }
+
+  55% {
+    transform:scale(1.12) rotate(4deg);
+    opacity:1;
+  }
+
+  100% {
+    transform:scale(1) rotate(0);
+    opacity:1;
   }
 }
 
@@ -1847,7 +1897,7 @@ const positions = {
 
 return `
 
-<div class="die ${rolling?"rolling":""}">
+<div class="die ${rolling ? "rolling" : n ? "result" : ""}">
 
 ${Array.from(
   {length:9},
