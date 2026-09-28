@@ -3005,14 +3005,14 @@ const startProgress =
         );
       });
 
-      continueAfterMove();
+      continueAfterMove(finalProgress);
     }, 1550);
 
   } else {
     continueAfterMove();
   }
 
-  function continueAfterMove() {
+  async function continueAfterMove(finalProgress) {
     if (finalProgress === 57) {
   state.arrived = {
     color: color,
@@ -3025,7 +3025,18 @@ const startProgress =
 
   state.arrived = null;
 }
+  if (finalProgress === 57) {
+  state.arrived = {
+    color: color,
+    id: id
+  };
 
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 750));
+
+  state.arrived = null;
+}
     if (state.tokens[color].every(token => token.progress === 57)) {
       playSound("winner");
       state.winner = color;
