@@ -701,19 +701,43 @@ p {
 
 .token.valid {
   cursor:pointer;
+
   outline:2px solid #fffbe4;
   outline-offset:3px;
 
   animation:
-    pulse 1.15s infinite;
+    selectablePiece 1.15s ease-in-out infinite;
 
-  filter:brightness(1.08);
+  filter:brightness(1.1);
+
+  transform:translateY(-3px) scale(1.05);
+
+  box-shadow:
+    0 0 0 5px #fff9dc66,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 6px 0 #4d321f55,
+    0 9px 13px #4d321f40;
 }
 
 .token.valid:hover {
-  transform:scale(1.15);
+  transform:translateY(-5px) scale(1.13);
+  filter:brightness(1.18);
 }
 
+.token.valid:active {
+  transform:translateY(0) scale(.94);
+  transition:transform .08s ease;
+}
+@keyframes selectablePiece {
+  0%,100% {
+    transform:translateY(-3px) scale(1.05);
+  }
+
+  50% {
+    transform:translateY(-6px) scale(1.1);
+  }
+}
 .token:disabled {
   opacity:1;
 }
@@ -740,17 +764,6 @@ p {
   height:100%;
   left:auto;
   top:auto;
-}
-
-.token.valid {
-  cursor:pointer;
-  outline:2px solid #fffbe4;
-  outline-offset:2px;
-  animation:pulse 1.15s infinite;
-}
-
-.token.valid:hover {
-  transform:scale(1.18);
 }
 
 .token.finished {
