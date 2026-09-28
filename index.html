@@ -2602,7 +2602,17 @@ Nueva partida
 `;
 
 }
-
+function celebrationMarkup() {
+  return `
+    <div class="celebration">
+      <div class="celebration-card">
+        <div class="celebration-trophy">🏆</div>
+        <h2>¡Las 4 fichas llegaron!</h2>
+        <p>¡Increíble partida, ${names[state.winner || state.players[state.active]]}!</p>
+      </div>
+    </div>
+  `;
+}
 function winnerMarkup() {
 
 return `
