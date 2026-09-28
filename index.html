@@ -701,16 +701,31 @@ p {
 
 .token.valid {
   cursor:pointer;
+  outline:3px solid #fffbe4;
+  outline-offset:4px;
 
-  outline:2px solid #fffbe4;
-  outline-offset:3px;
+  animation:selectablePiece 1s ease-in-out infinite;
 
-  animation:
-    selectablePiece 1.15s ease-in-out infinite;
+  filter:brightness(1.12);
 
-  filter:brightness(1.1);
+  transform:translateY(-4px) scale(1.08);
 
-  transform:translateY(-3px) scale(1.05);
+  box-shadow:
+    0 0 0 6px #fff9dc88,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 7px 0 #4d321f55,
+    0 11px 15px #4d321f45;
+}
+
+.token.valid:hover {
+  transform:translateY(-7px) scale(1.16);
+  filter:brightness(1.2);
+}
+
+.token.valid:active {
+  transform:translateY(0) scale(.92);
+}
 
   box-shadow:
     0 0 0 5px #fff9dc66,
@@ -786,7 +801,19 @@ p {
   margin-left:13%;
   margin-top:-13%;
 }
+@keyframes selectablePiece {
 
+  0%,100% {
+    transform:translateY(-4px) scale(1.08);
+    filter:brightness(1.1);
+  }
+
+  50% {
+    transform:translateY(-8px) scale(1.13);
+    filter:brightness(1.22);
+  }
+
+}
 @keyframes pulse {
   50% {
     box-shadow:
