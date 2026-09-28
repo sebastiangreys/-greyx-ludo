@@ -2872,13 +2872,9 @@ function move(color, id) {
 
 const startProgress =
   token.progress === -1
-  ? 0
+  ? -1
   : token.progress;
-
-const finalProgress =
-  token.progress === -1
-    ? 0
-    : token.progress + n;
+  const finalProgress = token.progress === -1 ? 0 : token.progress + n;
 
   state.moving = true;
   state.movingToken = `${color}-${id}`;
@@ -2890,46 +2886,8 @@ const finalProgress =
 
   function animateStep() {
 
-  // Ficha saliendo de casa
-  if (token.progress === -1 && currentProgress === 0) {
-
-    state.tokens[color] = state.tokens[color].map(t =>
-      t.id === id
-        ? { ...t, progress: 0 }
-        : t
-    );
-
-    playSound("move");
-    render();
-
-    setTimeout(finishMove, 120);
-    return;
-  }
-
   const nextProgress = currentProgress + 1;
 
-  if (nextProgress > finalProgress) {
-    finishMove();
-    return;
-  }
-
-  currentProgress = nextProgress;
-
-  state.tokens[color] = state.tokens[color].map(t =>
-    t.id === id
-      ? { ...t, progress: currentProgress }
-      : t
-  );
-
-  playSound("move");
-  render();
-
-  if (currentProgress < finalProgress) {
-    setTimeout(animateStep, 180);
-  } else {
-    setTimeout(finishMove, 120);
-  }
-}
   // Si ya llegamos al destino, terminamos.
   if (nextProgress > finalProgress) {
     finishMove();
