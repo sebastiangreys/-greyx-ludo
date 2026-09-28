@@ -423,7 +423,7 @@ p {
   background:var(--coral);
 
   box-shadow:
-    0 0 0 4px #d64e4320;
+  0 0 0 4px #e5393520;
 
   animation:turnPulse 1.5s ease-in-out infinite;
 }
@@ -2259,7 +2259,7 @@ El tablero se encarga del resto.
 ${
   state.mode === "solo" && color !== state.humanColor
     ? `🤖 TURNO DE ${names[color].toUpperCase()}`
-    : `🟠 TU TURNO · ${names[color].toUpperCase()}`
+    : `🔴 TU TURNO · ${names[color].toUpperCase()}`
 }
 
 </div>
