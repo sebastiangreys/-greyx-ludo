@@ -886,25 +886,38 @@ p {
   }
 }
 /* Pequeño rebote al llegar */
+/* Animación al llegar a la meta */
 .token.arrived {
-  animation: pieceArrived .32s ease-out;
+  animation: pieceArrived .75s cubic-bezier(.2,.85,.3,1.25) both;
+  z-index: 25;
 }
 
 @keyframes pieceArrived {
   0% {
-    transform:scale(1);
+    transform: scale(.65) translateY(8px);
+    filter: brightness(1);
+  }
+
+  25% {
+    transform: scale(1.28) translateY(-10px);
+    filter: brightness(1.45);
   }
 
   45% {
-    transform:scale(1.18);
+    transform: scale(.92) translateY(2px);
   }
 
-  75% {
-    transform:scale(.94);
+  65% {
+    transform: scale(1.12) translateY(-3px);
+  }
+
+  82% {
+    transform: scale(.97);
   }
 
   100% {
-    transform:scale(1);
+    transform: scale(1);
+    filter: brightness(1);
   }
 }
 .legend {
