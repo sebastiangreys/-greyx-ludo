@@ -390,15 +390,52 @@ p {
 }
 
 .turn-chip {
-  padding:9px 11px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  padding:11px 16px;
+
   border:1px solid #e1d9cb;
   border-radius:999px;
-  color:#9a743b;
+
+  color:var(--ink);
   background:#fffaf0;
-  font:700 .65rem monospace;
+
+  font:800 .72rem monospace;
+
   white-space:nowrap;
+
+  box-shadow:0 4px 12px #6c583018;
+
+  transition:
+    background .25s ease,
+    border-color .25s ease,
+    transform .25s ease;
 }
 
+.turn-chip::before {
+  content:"";
+  width:10px;
+  height:10px;
+
+  border-radius:50%;
+
+  background:var(--coral);
+
+  box-shadow:
+    0 0 0 4px #d64e4320;
+
+  animation:turnPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes turnPulse {
+  50% {
+    transform:scale(1.18);
+    box-shadow:
+      0 0 0 7px #d64e4312;
+  }
+}
 .game-layout {
   display:grid;
   grid-template-columns:minmax(0,1fr) 310px;
