@@ -2229,11 +2229,13 @@ El tablero se encarga del resto.
 
 </div>
 
-<div class="turn-chip">
+<div class="turn-chip ${state.mode === "solo" && color !== state.humanColor ? "bot-turn" : "human-turn"}">
 
-PARTIDA EN CURSO ·
-${state.players.length}
-JUGADORES
+${
+  state.mode === "solo" && color !== state.humanColor
+    ? `🤖 TURNO DE ${names[color].toUpperCase()}`
+    : `🟠 TU TURNO · ${names[color].toUpperCase()}`
+}
 
 </div>
 
