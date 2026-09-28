@@ -722,21 +722,27 @@ p {
   transform:translateY(-7px) scale(1.16);
   filter:brightness(1.2);
 }
+
+.token.valid:active {
+  transform:translateY(0) scale(.92);
+}
+
+  box-shadow:
+    0 0 0 5px #fff9dc66,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 6px 0 #4d321f55,
+    0 9px 13px #4d321f40;
+}
+
+.token.valid:hover {
+  transform:translateY(-5px) scale(1.13);
+  filter:brightness(1.18);
+}
+
 .token.valid:active {
   transform:translateY(0) scale(.94);
   transition:transform .08s ease;
-}
-
-@keyframes selectablePiece {
-  0%,100% {
-    transform:translateY(-4px) scale(1.08);
-    filter:brightness(1.1);
-  }
-
-  50% {
-    transform:translateY(-8px) scale(1.13);
-    filter:brightness(1.22);
-  }
 }
 @keyframes selectablePiece {
   0%,100% {
@@ -815,28 +821,24 @@ p {
       0 3px 0 #4d321f55;
   }
 }
-/* ANIMACIÓN DE FICHAS EN MOVIMIENTO */
+/* ANIMACIÓN DE FICHAS */
 .token.moving-piece {
-  animation: pieceMove .18s ease-out;
+  animation: pieceMove .28s ease-out;
 }
 
 @keyframes pieceMove {
   0% {
-    transform: translateY(5px) scale(.90);
-    opacity:.85;
+    transform: scale(.82);
+    opacity:.65;
   }
 
-  45% {
-    transform: translateY(-7px) scale(1.10);
+  60% {
+    transform: scale(1.14);
     opacity:1;
   }
 
-  75% {
-    transform: translateY(-2px) scale(1.04);
-  }
-
   100% {
-    transform: translateY(0) scale(1);
+    transform: scale(1);
     opacity:1;
   }
 }
@@ -1642,7 +1644,6 @@ const state = {
   roll:null,
   rolling:false,
   moving:false,
-  movingToken:null,
   valid:new Set(),
   message:
     "Lanza el dado para comenzar. Un seis saca una ficha de casa.",
@@ -2069,6 +2070,16 @@ data-color="${color}"
 
 data-token="${token.id}"
 
+${
+state.valid.has(
+`${color}-${token.id}`
+)
+?
+""
+:
+"disabled"
+}
+
 >
 
 ${token.id+1}
@@ -2139,14 +2150,7 @@ state.valid.has(
 "valid"
 :
 ""
-}
-${
-state.movingToken === `${color}-${t.id}`
-?
-"moving-piece"
-:
-""
-}
+}"
 
 data-action="token"
 
@@ -2816,6 +2820,17 @@ function rollDice(fromBot = false) {
         .filter(token => canMove(token, n))
         .map(token => `${color}-${token.id}`)
     );
+    
+    if (state.valid.size === 1) {
+       const onlyToken = [...state.valid][0];
+       const id = Number(onlyToken.split("-")[1]);
+
+    setTimeout(() => {
+      move(color, id);
+      }, 300);
+
+     return;
+ }
 
     if (!state.valid.size) {
       state.message = `No hay movimientos válidos para ${names[color]}.`;
@@ -2871,7 +2886,6 @@ const startProgress =
   const finalProgress = token.progress === -1 ? 0 : token.progress + n;
 
   state.moving = true;
-  state.movingToken = `${color}-${id}`;
   state.valid = new Set();
   state.message = "Moviendo ficha…";
   render();
@@ -2948,7 +2962,7 @@ const startProgress =
 
   state.tokens = updated;
   state.moving = false;
-  state.movingToken = null;
+
   /*
     Si hubo captura:
     primero mostramos la ficha siendo capturada,
@@ -3018,8 +3032,9 @@ const startProgress =
       render();
       queueBotTurn();
     }
-}
   }
+}
+
   animateStep();
 }
 
