@@ -1648,6 +1648,7 @@ const state = {
   roll:null,
   rolling:false,
   moving:false,
+  movingToken:null,
   valid:new Set(),
   message:
     "Lanza el dado para comenzar. Un seis saca una ficha de casa.",
@@ -2148,13 +2149,20 @@ t=>t.progress===-1
 class="token ${color}
 ${
 state.valid.has(
-`${color}-${t.id}`
+`${color}-${token.id}`
 )
 ?
 "valid"
 :
 ""
-}"
+}
+${
+state.movingToken === `${color}-${token.id}`
+?
+"moving-piece"
+:
+""
+}
 
 data-action="token"
 
@@ -2890,6 +2898,7 @@ const startProgress =
   const finalProgress = token.progress === -1 ? 0 : token.progress + n;
 
   state.moving = true;
+  state.movingToken = `${color}-${id}`;
   state.valid = new Set();
   state.message = "Moviendo ficha…";
   render();
@@ -2965,8 +2974,8 @@ const startProgress =
   }
 
   state.tokens = updated;
-  state.moving = false;
-
+state.moving = false;
+state.movingToken = null;
   /*
     Si hubo captura:
     primero mostramos la ficha siendo capturada,
