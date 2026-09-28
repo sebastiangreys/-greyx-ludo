@@ -2247,22 +2247,28 @@ El tablero se encarga del resto.
 </div>
 
 <div class="turn-chip ${
-  color === "green"
+  color === "red"
+    ? "red-turn"
+    : color === "green"
     ? "green-turn"
     : color === "yellow"
     ? "yellow-turn"
-    : state.mode === "solo" && color !== state.humanColor
-    ? "bot-turn"
-    : "human-turn"
+    : "blue-turn"
 }">
 
 ${
   state.mode === "solo" && color !== state.humanColor
     ? `🤖 TURNO DE ${names[color].toUpperCase()}`
-    : `🔴 TU TURNO · ${names[color].toUpperCase()}`
+    : `${
+        color === "red"
+          ? "🔴"
+          : color === "green"
+          ? "🟢"
+          : color === "yellow"
+          ? "🟡"
+          : "🔵"
+      } TU TURNO · ${names[color].toUpperCase()}`
 }
-
-</div>
 
 </div>
 
