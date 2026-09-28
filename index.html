@@ -2246,7 +2246,15 @@ El tablero se encarga del resto.
 
 </div>
 
-<div class="turn-chip ${state.mode === "solo" && color !== state.humanColor ? "bot-turn" : "human-turn"}">
+<div class="turn-chip ${
+  color === "green"
+    ? "green-turn"
+    : color === "yellow"
+    ? "yellow-turn"
+    : state.mode === "solo" && color !== state.humanColor
+    ? "bot-turn"
+    : "human-turn"
+}">
 
 ${
   state.mode === "solo" && color !== state.humanColor
