@@ -2893,19 +2893,10 @@ const startProgress =
   let currentProgress = startProgress;
 
   function animateStep() {
-  let nextProgress = currentProgress + 1;
 
-  /*
-    Saltamos las casillas bloqueadas.
-    La ficha nunca se dibuja encima de ellas.
-  */
-  while (
-    nextProgress < finalProgress &&
-    coord(color, nextProgress) === null
-  ) {
-    nextProgress++;
-  }
+  const nextProgress = currentProgress + 1;
 
+  // Si ya llegamos al destino, terminamos.
   if (nextProgress > finalProgress) {
     finishMove();
     return;
@@ -2913,28 +2904,23 @@ const startProgress =
 
   currentProgress = nextProgress;
 
-  if (currentProgress >= finalProgress) {
-    state.tokens[color] = state.tokens[color].map(t =>
-      t.id === id
-        ? { ...t, progress: finalProgress }
-        : t
-    );
-
-    finishMove();
-    return;
-  }
-
-  playSound("move");
-
+  // Movemos la ficha exactamente una casilla.
   state.tokens[color] = state.tokens[color].map(t =>
     t.id === id
       ? { ...t, progress: currentProgress }
       : t
   );
 
+  playSound("move");
+
   render();
 
-  setTimeout(animateStep, 150);
+  // Pequeña pausa entre cada casilla.
+  if (currentProgress < finalProgress) {
+    setTimeout(animateStep, 180);
+  } else {
+    setTimeout(finishMove, 120);
+  }
 }
 
   function finishMove() {
