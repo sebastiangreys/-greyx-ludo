@@ -2947,8 +2947,8 @@ const startProgress =
   }
 
   state.tokens = updated;
-state.moving = false;
-state.movingToken = null;
+  state.moving = false;
+  state.movingToken = null;
   /*
     Si hubo captura:
     primero mostramos la ficha siendo capturada,
@@ -3018,8 +3018,6 @@ state.movingToken = null;
       render();
       queueBotTurn();
     }
-  }
-}
 
   animateStep();
 }
