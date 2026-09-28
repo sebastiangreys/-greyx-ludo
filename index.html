@@ -413,7 +413,6 @@ p {
     border-color .25s ease,
     transform .25s ease;
 }
-
 .turn-chip::before {
   content:"";
   width:10px;
@@ -427,6 +426,13 @@ p {
     0 0 0 4px #d64e4320;
 
   animation:turnPulse 1.5s ease-in-out infinite;
+}
+
+.turn-chip.bot-turn::before {
+  background:var(--blue);
+
+  box-shadow:
+    0 0 0 4px #426ba820;
 }
 
 @keyframes turnPulse {
