@@ -842,7 +842,42 @@ p {
     opacity:1;
   }
 }
+/* =========================================
+   LLEGADA AL CENTRO — 2 PEQUEÑOS SALTOS
+   ========================================= */
 
+.token.arrived {
+  animation: arrivalBounce 0.9s ease-out;
+  z-index: 30;
+}
+
+@keyframes arrivalBounce {
+
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  18% {
+    transform: translateY(-9px) scale(1.08);
+  }
+
+  34% {
+    transform: translateY(0) scale(1);
+  }
+
+  52% {
+    transform: translateY(-6px) scale(1.05);
+  }
+
+  68% {
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+}
 /* =====================================================
    ANIMACIÓN DE CAPTURA
    ===================================================== */
@@ -1566,6 +1601,49 @@ p {
 @keyframes trophyBounce {
   from { transform: translateY(0) rotate(-4deg); }
   to { transform: translateY(-10px) rotate(4deg); }
+}
+/* =========================================
+   CONFETI DE LLEGADA
+   ========================================= */
+
+.arrival-confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 90;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 7px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: confettiFall 2.8s ease-out forwards;
+}
+
+@keyframes confettiFall {
+
+  0% {
+    transform:
+      translate3d(0, -20px, 0)
+      rotate(0deg);
+    opacity: 1;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    transform:
+      translate3d(var(--confetti-x), 110vh, 0)
+      rotate(var(--confetti-r));
+    opacity: 0;
+  }
+
 }
 </style>
 </head>
@@ -3097,31 +3175,6 @@ ${homes}
 
 </div>
 
-<div class="legend">
-
-<span>
-<b></b>
-Estrella segura
-</span>
-
-<span>
-
-<b style="background:#e5b33b"></b>
-
-Seis para salir de casa
-
-</span>
-
-<span>
-
-<b style="background:#49668f"></b>
-
-Número exacto para llegar
-
-</span>
-
-</div>
-
 `;
 
 }
@@ -3260,32 +3313,16 @@ ${
 }
 
 </div>
-
 <div class="game-layout">
-
 <section class="board-wrap">
-
 ${boardMarkup()}
-
-<p class="legend">
-
-Si caes sobre un rival, vuelve a casa.
-Las estrellas son seguras.
-
-</p>
-
 </section>
-
 <aside class="sidebar">
-
 <section class="panel status-panel">
-
 <span class="status-label">
 Turno actual
 </span>
-
 <div class="status-player">
-
 <i class="orb ${color}"></i>
 
 <div>
@@ -3409,6 +3446,55 @@ Nueva partida
 </main>
 
 `;
+
+}
+function showArrivalConfetti() {
+
+  const container = document.createElement("div");
+
+  container.className = "arrival-confetti";
+
+  document.body.appendChild(container);
+
+  const pieces = 70;
+
+  for (let i = 0; i < pieces; i++) {
+
+    const piece = document.createElement("span");
+
+    piece.className = "confetti-piece";
+
+    piece.style.left =
+      `${Math.random() * 100}%`;
+
+    piece.style.setProperty(
+      "--confetti-x",
+      `${(Math.random() - 0.5) * 220}px`
+    );
+
+    piece.style.setProperty(
+      "--confetti-r",
+      `${Math.random() * 720 - 360}deg`
+    );
+
+    piece.style.animationDelay =
+      `${Math.random() * 0.55}s`;
+
+    const size =
+      5 + Math.random() * 5;
+
+    piece.style.width =
+      `${size}px`;
+
+    piece.style.height =
+      `${size * 1.6}px`;
+
+    container.appendChild(piece);
+  }
+
+  setTimeout(() => {
+    container.remove();
+  }, 3600);
 
 }
 function celebrationMarkup() {
@@ -4277,6 +4363,7 @@ if (capturedTokens.length) {
   async function continueAfterMove(finalProgress) {
     
     if (finalProgress === 57) {
+
   state.arrived = {
     color: color,
     id: id
@@ -4284,20 +4371,31 @@ if (capturedTokens.length) {
 
   render();
 
-  // Forzar la animación de llegada
   requestAnimationFrame(() => {
+
     const piece = document.querySelector(
-  `.token[data-color="${color}"][data-token="${id}"]`
+      `.token[data-color="${color}"][data-token="${id}"]`
     );
 
     if (piece) {
+
       piece.classList.remove("arrived");
+
       void piece.offsetWidth;
+
       piece.classList.add("arrived");
+
     }
+
   });
 
-  await new Promise(resolve => setTimeout(resolve, 900));
+  // Confeti al llegar al centro
+  showArrivalConfetti();
+
+  // Esperamos a que terminen los dos saltitos
+  await new Promise(resolve =>
+    setTimeout(resolve, 900)
+  );
 
   state.arrived = null;
 }
