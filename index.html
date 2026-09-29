@@ -2145,6 +2145,13 @@ state.arrived.id === token.id
 ""
 }
 ${
+token.captured
+?
+"captured"
+:
+""
+}
+${
 slot
 ?
 `stack-${Math.min(slot,3)}`
