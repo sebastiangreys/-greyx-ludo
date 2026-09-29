@@ -843,47 +843,126 @@ p {
   }
 }
 
-/* ANIMACIÓN DE CAPTURA */
+/* =====================================================
+   ANIMACIÓN DE CAPTURA
+   ===================================================== */
+
 .token.captured {
-  animation: pieceCaptured 1.5s ease-in-out forwards;
-  z-index: 20;
+  animation: capturedPiece 1.8s ease-in-out forwards;
+  z-index:20;
 }
 
-@keyframes pieceCaptured {
+/* Señal de captura */
+.token.captured::after {
+  content:"☠";
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  display:grid;
+  place-items:center;
+
+  width:155%;
+  height:155%;
+
+  transform:translate(-50%,-50%) scale(.2);
+
+  border-radius:50%;
+
+  background:#e53935;
+  color:#fff;
+
+  font-size:clamp(14px,2vw,25px);
+  line-height:1;
+
+  border:2px solid #fff;
+
+  box-shadow:
+    0 0 0 3px #e5393544,
+    0 5px 12px #0005;
+
+  opacity:0;
+
+  animation:captureMark 1.8s ease-out forwards;
+  pointer-events:none;
+}
+
+/* La ficha tiembla y después empieza a retirarse */
+@keyframes capturedPiece {
+
   0% {
-    transform: scale(1);
-    opacity: 1;
+    transform:scale(1);
+    opacity:1;
   }
 
-  15% {
-    transform: scale(1.35) rotate(-6deg);
-    opacity: 1;
+  8% {
+    transform:scale(1.15) rotate(-7deg);
   }
 
-  30% {
-    transform: scale(1.55) rotate(6deg);
-    opacity: 1;
+  16% {
+    transform:scale(1.18) rotate(7deg);
+  }
+
+  24% {
+    transform:scale(1.08) rotate(-5deg);
+  }
+
+  32% {
+    transform:scale(1) rotate(0);
+    opacity:1;
   }
 
   45% {
-    transform: scale(1.4) rotate(-4deg);
-    opacity: 1;
+    transform:scale(.95);
+    opacity:.95;
   }
 
-  60% {
-    transform: scale(1.2) rotate(3deg);
-    opacity: .95;
+  65% {
+    transform:scale(.78) translateY(4px);
+    opacity:.78;
   }
 
-  78% {
-    transform: scale(.8) rotate(0deg);
-    opacity: .7;
+  82% {
+    transform:scale(.58) translateY(8px);
+    opacity:.45;
   }
 
   100% {
-    transform: scale(.1);
-    opacity: 0;
+    transform:scale(.25) translateY(12px);
+    opacity:0;
   }
+
+}
+
+/* Aparece la calavera */
+@keyframes captureMark {
+
+  0% {
+    transform:translate(-50%,-50%) scale(.2) rotate(-15deg);
+    opacity:0;
+  }
+
+  12% {
+    transform:translate(-50%,-50%) scale(1.15) rotate(5deg);
+    opacity:1;
+  }
+
+  22% {
+    transform:translate(-50%,-50%) scale(1) rotate(0);
+    opacity:1;
+  }
+
+  55% {
+    transform:translate(-50%,-65%) scale(1);
+    opacity:1;
+  }
+
+  100% {
+    transform:translate(-50%,-95%) scale(.65);
+    opacity:0;
+  }
+
 }
 /* Pequeño rebote al llegar */
 /* Animación al llegar a la meta */
