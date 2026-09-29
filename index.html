@@ -3088,22 +3088,11 @@ const startProgress =
     }, 1550);
 
   } else {
-    continueAfterMove();
+    continueAfterMove(finalProgress);
   }
 
   async function continueAfterMove(finalProgress) {
-    if (finalProgress === 57) {
-  state.arrived = {
-    color: color,
-    id: id
-  };
-
-  render();
-
-  await new Promise(resolve => setTimeout(resolve, 750));
-
-  state.arrived = null;
-}
+    
   if (finalProgress === 57) {
   state.arrived = {
     color: color,
