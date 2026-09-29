@@ -2679,6 +2679,10 @@ gameMarkup()
 </div>
 
 ${
+state.celebrating
+?
+celebrationMarkup()
+:
 state.phase==="winner"
 ?
 winnerMarkup()
