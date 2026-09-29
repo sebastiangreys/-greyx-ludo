@@ -1877,6 +1877,10 @@ const freshTokens = () => ({
   blue:blankTokens()
 });
 
+function playerLabel(color) {
+  return state.playerNames[color].trim() || names[color];
+}
+
 const state = {
   phase:"setup",
   sound:true,
@@ -1890,7 +1894,14 @@ const state = {
   botCount:1,
   humanColor:"red",
 
-  players:[],
+playerNames:{
+  red:"",
+  green:"",
+  yellow:"",
+  blue:""
+},
+
+players:[],
   tokens:freshTokens(),
   active:0,
   lastRoll:null,
@@ -1967,9 +1978,9 @@ state.phase !== "setup"
 
 function setupMarkup() {
 
-  /* ===============================
-     PASO 1 — MODO DE JUEGO
-     =============================== */
+  /* =========================================
+     PASO 1 — ELEGIR MODO
+     ========================================= */
 
   if (state.setupStep === 1) {
 
@@ -1989,10 +2000,8 @@ function setupMarkup() {
         </h1>
 
         <p class="setup-lead">
-
           Una carrera colorida alrededor del tablero.
-          Elijan su grupo, compartan la pantalla y dejen que empiecen los seises.
-
+          Elijan cómo quieren jugar y comiencen la partida.
         </p>
 
         <div class="setup-note">
@@ -2008,42 +2017,48 @@ function setupMarkup() {
         </h2>
 
         <p>
-          Elige el modo y cuántos rivales participarán.
+          Elige el modo de juego.
         </p>
 
         <div class="lobby-menu">
-
-          <div class="lobby-section-title">
-            Jugadores
-          </div>
-
-         ${[2,3,4].map(n => `
-  <button
-    class="lobby-option ${
-      state.mode === "local" && state.count === n ? "selected" : ""
-    }"
-    data-action="count"
-    data-count="${n}"
-  >
-    <span class="lobby-option-left">
-      <span class="lobby-icon">👥</span>
-      <span>
-        <strong>${n} jugadores</strong>
-        <small>${playersByCount[n].map(c => names[c]).join(" · ")}</small>
-      </span>
-    </span>
-    <span class="lobby-check">✓</span>
-  </button>
-`).join("")}
 
           <div class="lobby-section-title">
             Modo de juego
           </div>
 
           <button
-            class="lobby-option ${
-              state.mode === "solo" ? "selected" : ""
-            }"
+            class="lobby-option"
+            data-action="local"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                👥
+              </span>
+
+              <span>
+
+                <strong>
+                  Local
+                </strong>
+
+                <small>
+                  Juega con otras personas en la misma pantalla
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="lobby-check">
+              ✓
+            </span>
+
+          </button>
+
+          <button
+            class="lobby-option"
             data-action="mode"
           >
 
@@ -2106,13 +2121,6 @@ function setupMarkup() {
 
         </div>
 
-        <button
-          class="primary-button"
-          data-action="start"
-        >
-          Empezar partida <span>→</span>
-        </button>
-
       </section>
 
       <div class="mini-board">
@@ -2130,11 +2138,164 @@ function setupMarkup() {
   }
 
 
-  /* ===============================
-     PASO 2 — CANTIDAD DE BOTS
-     =============================== */
+  /* =========================================
+     PASO 2 — LOCAL: CANTIDAD DE JUGADORES
+     ========================================= */
 
-  if (state.setupStep === 2) {
+  if (state.setupStep === 2 && state.mode === "local") {
+
+    return `
+
+    <main class="setup">
+
+      <section class="setup-copy">
+
+        <div class="eyebrow">
+          Modo local
+        </div>
+
+        <h1 class="setup-title">
+          Elige,<br>
+          <em>grupo.</em>
+        </h1>
+
+        <p class="setup-lead">
+          Decide cuántas personas van a compartir
+          la partida en esta pantalla.
+        </p>
+
+        <div class="setup-note">
+          👥 Una misma pantalla · turnos por jugador
+        </div>
+
+      </section>
+
+      <section class="setup-card">
+
+        <h2>
+          ¿Con cuántos jugadores?
+        </h2>
+
+        <p>
+          Elige cuántas personas jugarán.
+        </p>
+
+        <div class="lobby-menu">
+
+          <div class="lobby-section-title">
+            Jugadores
+          </div>
+
+          ${[2,3,4].map(n => `
+
+            <button
+              class="lobby-option ${
+                state.count === n
+                ? "selected"
+                : ""
+              }"
+              data-action="local-count"
+              data-count="${n}"
+            >
+
+              <span class="lobby-option-left">
+
+                <span class="lobby-icon">
+                  👥
+                </span>
+
+                <span>
+
+                  <strong>
+                    ${n} jugadores
+                  </strong>
+
+                  <small>
+                    ${playersByCount[n]
+                      .map(c => names[c])
+                      .join(" · ")}
+                  </small>
+
+                </span>
+
+              </span>
+
+              <span class="lobby-check">
+                ✓
+              </span>
+
+            </button>
+
+          `).join("")}
+
+          <button
+            class="lobby-option sound-option"
+            data-action="sound"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                ${state.sound ? "🔊" : "🔇"}
+              </span>
+
+              <span>
+
+                <strong>
+                  Sonido
+                </strong>
+
+                <small>
+                  Efectos y sonidos del juego
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="sound-status">
+              ${state.sound ? "ON" : "OFF"}
+            </span>
+
+          </button>
+
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:10px;
+        ">
+
+          <button
+            class="outline"
+            data-action="back-setup"
+          >
+            ← Volver
+          </button>
+
+          <button
+            class="primary-button"
+            data-action="local-continue"
+          >
+            Continuar →
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    `;
+  }
+
+
+  /* =========================================
+     PASO 2 — BOT: CANTIDAD DE BOTS
+     ========================================= */
+
+  if (state.setupStep === 2 && state.mode === "solo") {
 
     return `
 
@@ -2152,10 +2313,8 @@ function setupMarkup() {
         </h1>
 
         <p class="setup-lead">
-
           Decide cuántos rivales automáticos quieres
           tener en la partida.
-
         </p>
 
         <div class="setup-note">
@@ -2283,9 +2442,201 @@ function setupMarkup() {
   }
 
 
-  /* ===============================
-     PASO 3 — COLOR DEL JUGADOR
-     =============================== */
+  /* =========================================
+     PASO 3 — NOMBRES LOCALES
+     ========================================= */
+
+  if (state.setupStep === 3 && state.mode === "local") {
+
+    const localPlayers = playersByCount[state.count];
+
+    return `
+
+    <main class="setup">
+
+      <section class="setup-copy">
+
+        <div class="eyebrow">
+          Preparar partida
+        </div>
+
+        <h1 class="setup-title">
+          Pongan<br>
+          <em>sus nombres.</em>
+        </h1>
+
+        <p class="setup-lead">
+          Cada jugador puede colocar el nombre
+          que quiera para esta partida.
+        </p>
+
+        <div class="setup-note">
+          ✏️ Los nombres no se guardan
+        </div>
+
+      </section>
+
+      <section class="setup-card">
+
+        <h2>
+          ¿Quiénes van a jugar?
+        </h2>
+
+        <p>
+          Escribe un nombre para cada color.
+        </p>
+
+        <div class="lobby-menu">
+
+          <div class="lobby-section-title">
+            Jugadores
+          </div>
+
+          ${localPlayers.map(color => `
+
+            <div
+              class="player-name-row"
+              style="
+                display:flex;
+                align-items:center;
+                gap:12px;
+                padding:13px;
+                border:1px solid #e5dfd3;
+                border-radius:15px;
+                background:#fbf7ed;
+              "
+            >
+
+              <span
+                class="lobby-icon"
+                style="
+                  background:${
+                    color === "red"
+                    ? "#f5d4cf"
+                    : color === "green"
+                    ? "#d5eadc"
+                    : color === "yellow"
+                    ? "#f5e9bd"
+                    : "#dce5f4"
+                  };
+                  flex-shrink:0;
+                "
+              >
+                ${
+                  color === "red"
+                  ? "🔴"
+                  : color === "green"
+                  ? "🟢"
+                  : color === "yellow"
+                  ? "🟡"
+                  : "🔵"
+                }
+              </span>
+
+              <div style="flex:1;min-width:0;">
+
+                <strong
+                  style="
+                    display:block;
+                    font-size:.88rem;
+                    margin-bottom:6px;
+                  "
+                >
+                  ${names[color]}
+                </strong>
+
+                <input
+                  type="text"
+                  data-player-name="${color}"
+                  value="${state.playerNames[color]}"
+                  placeholder="${names[color]}"
+                  maxlength="18"
+                  autocomplete="off"
+                  style="
+                    width:100%;
+                    min-height:40px;
+                    padding:9px 11px;
+                    border:1px solid #d8cfbd;
+                    border-radius:11px;
+                    background:#fffdf9;
+                    color:var(--ink);
+                    font:700 .82rem inherit;
+                    outline:none;
+                  "
+                >
+
+              </div>
+
+            </div>
+
+          `).join("")}
+
+          <button
+            class="lobby-option sound-option"
+            data-action="sound"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                ${state.sound ? "🔊" : "🔇"}
+              </span>
+
+              <span>
+
+                <strong>
+                  Sonido
+                </strong>
+
+                <small>
+                  Efectos y sonidos del juego
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="sound-status">
+              ${state.sound ? "ON" : "OFF"}
+            </span>
+
+          </button>
+
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:10px;
+        ">
+
+          <button
+            class="outline"
+            data-action="back-setup"
+          >
+            ← Volver
+          </button>
+
+          <button
+            class="primary-button"
+            data-action="start"
+          >
+            Empezar partida →
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    `;
+  }
+
+
+  /* =========================================
+     PASO 3 — BOT: COLOR + NOMBRE
+     ========================================= */
 
   return `
 
@@ -2299,14 +2650,12 @@ function setupMarkup() {
 
       <h1 class="setup-title">
         Elige,<br>
-        <em>color.</em>
+        <em>tu color.</em>
       </h1>
 
       <p class="setup-lead">
-
-        Selecciona el color con el que quieres
-        recorrer todo el tablero.
-
+        Selecciona tu color y coloca tu nombre
+        para esta partida.
       </p>
 
       <div class="setup-note">
@@ -2378,12 +2727,12 @@ function setupMarkup() {
 
                 <small>
                   ${color === "red"
-                    ? "Coral"
+                    ? "Rojo"
                     : color === "green"
-                    ? "Pradera"
+                    ? "Verde"
                     : color === "yellow"
-                    ? "Sol"
-                    : "Puerto"}
+                    ? "Amarillo"
+                    : "Azul"}
                 </small>
 
               </span>
@@ -2397,6 +2746,50 @@ function setupMarkup() {
           </button>
 
         `).join("")}
+
+        <div
+          style="
+            margin-top:4px;
+            padding:14px;
+            border:1px solid #e5dfd3;
+            border-radius:15px;
+            background:#fbf7ed;
+          "
+        >
+
+          <div
+            style="
+              color:#9b7438;
+              font:700 .65rem monospace;
+              letter-spacing:.12em;
+              text-transform:uppercase;
+              margin-bottom:8px;
+            "
+          >
+            Tu nombre
+          </div>
+
+          <input
+            type="text"
+            data-player-name="${state.humanColor}"
+            value="${state.playerNames[state.humanColor]}"
+            placeholder="${names[state.humanColor]}"
+            maxlength="18"
+            autocomplete="off"
+            style="
+              width:100%;
+              min-height:43px;
+              padding:10px 12px;
+              border:1px solid #d8cfbd;
+              border-radius:11px;
+              background:#fffdf9;
+              color:var(--ink);
+              font:700 .84rem inherit;
+              outline:none;
+            "
+          >
+
+        </div>
 
         <button
           class="lobby-option sound-option"
@@ -2872,7 +3265,7 @@ return `
 
 <i class="score-dot ${color}"></i>
 
-${names[color]}
+${playerLabel(color)}
 
 </span>
 
@@ -2947,7 +3340,7 @@ El tablero se encarga del resto.
 
 ${
   state.mode === "solo" && color !== state.humanColor
-    ? `🤖 TURNO DE ${names[color].toUpperCase()}`
+    ? `🤖 TURNO DE ${playerLabel(color).toUpperCase()}
     : `${
         color === "red"
           ? "🔴"
@@ -2956,7 +3349,7 @@ ${
           : color === "yellow"
           ? "🟡"
           : "🔵"
-      } TU TURNO · ${names[color].toUpperCase()}`
+TU TURNO · ${playerLabel(color).toUpperCase()}
 }
 
 </div>
@@ -2991,7 +3384,7 @@ Turno actual
 <div>
 
 <strong>
-${names[color]}
+${playerLabel(color)}
 </strong>
 
 <small>
@@ -3117,7 +3510,7 @@ function celebrationMarkup() {
       <div class="celebration-card">
         <div class="celebration-trophy">🏆</div>
         <h2>¡Las 4 fichas llegaron!</h2>
-        <p>¡Increíble partida, ${names[state.winner || state.players[state.active]]}!</p>
+        <p>¡Increíble partida, ${playerLabel(state.winner || state.players[state.active])}!</p>
       </div>
     </div>
   `;
@@ -3135,7 +3528,7 @@ return `
 </div>
 
 <h2>
-¡Gana ${names[state.winner]}!
+¡Gana ${playerLabel(state.winner)}!
 </h2>
 
 <p>
@@ -3216,16 +3609,42 @@ function bind() {
 
 
         /* =========================
-           JUGADORES LOCALES
+           LOCAL
            ========================= */
 
-        if (action === "count") {
+        if (action === "local") {
+
+          state.mode = "local";
+          state.setupStep = 2;
+
+          render();
+
+        }
+
+
+        /* =========================
+           CANTIDAD LOCAL
+           ========================= */
+
+        if (action === "local-count") {
 
           state.count =
             Number(button.dataset.count);
 
           state.mode = "local";
-          state.setupStep = 1;
+
+          render();
+
+        }
+
+
+        /* =========================
+           CONTINUAR LOCAL
+           ========================= */
+
+        if (action === "local-continue") {
+
+          state.setupStep = 3;
 
           render();
 
@@ -3261,7 +3680,7 @@ function bind() {
 
 
         /* =========================
-           CONTINUAR AL COLOR
+           CONTINUAR BOT
            ========================= */
 
         if (action === "bot-continue") {
@@ -3279,6 +3698,21 @@ function bind() {
 
         if (action === "human-color") {
 
+          /*
+            Guardamos primero el nombre que
+            estaba escrito para el color anterior.
+          */
+
+          const oldInput =
+            app.querySelector(
+              `[data-player-name="${state.humanColor}"]`
+            );
+
+          if (oldInput) {
+            state.playerNames[state.humanColor] =
+              oldInput.value;
+          }
+
           state.humanColor =
             button.dataset.color;
 
@@ -3292,6 +3726,24 @@ function bind() {
            ========================= */
 
         if (action === "back-setup") {
+
+          /*
+            Si estamos escribiendo nombres locales,
+            guardamos lo que ya escribieron antes
+            de regresar.
+          */
+
+          app.querySelectorAll("[data-player-name]")
+            .forEach(input => {
+
+              const color =
+                input.dataset.playerName;
+
+              state.playerNames[color] =
+                input.value;
+
+            });
+
 
           if (state.setupStep === 3) {
 
@@ -3327,10 +3779,30 @@ function bind() {
 
         if (action === "start") {
 
+          /*
+            Guardamos todos los nombres
+            antes de comenzar.
+          */
+
+          app.querySelectorAll("[data-player-name]")
+            .forEach(input => {
+
+              const color =
+                input.dataset.playerName;
+
+              state.playerNames[color] =
+                input.value;
+
+            });
+
           start(state.count);
 
         }
 
+
+        /* =========================
+           CONFIGURACIÓN
+           ========================= */
 
         if (action === "setup") {
 
@@ -3339,6 +3811,10 @@ function bind() {
         }
 
 
+        /* =========================
+           OTRA PARTIDA
+           ========================= */
+
         if (action === "again") {
 
           start(state.players.length);
@@ -3346,12 +3822,20 @@ function bind() {
         }
 
 
+        /* =========================
+           DADO
+           ========================= */
+
         if (action === "roll") {
 
           rollDice();
 
         }
 
+
+        /* =========================
+           FICHA
+           ========================= */
 
         if (action === "token") {
 
@@ -3380,6 +3864,13 @@ function setup() {
   state.count = 4;
   state.botCount = 1;
   state.humanColor = "red";
+  
+  state.playerNames = {
+  red:"",
+  green:"",
+  yellow:"",
+  blue:""
+};
 
   render();
 
@@ -3518,7 +4009,7 @@ function nextTurn() {
   state.valid = new Set();
 
   state.message = isBotTurn()
-    ? `Turno de ${names[state.players[state.active]]}. El bot está pensando…`
+    ? `Turno de ${playerLabel(state.players[state.active])}. El bot está pensando…`
     : "Tu turno. Lanza el dado.";
 
   render();
@@ -3538,7 +4029,7 @@ function rollDice(fromBot = false) {
   state.rolling = true;
 
   if (isBotTurn()) {
-    state.message = `${names[state.players[state.active]]} está lanzando el dado…`;
+ state.message = `${playerLabel(state.players[state.active])} está lanzando el dado…`;
   } else {
     state.message = "El dado está rodando…";
   }
@@ -3572,7 +4063,7 @@ function rollDice(fromBot = false) {
  }
 
     if (!state.valid.size) {
-      state.message = `No hay movimientos válidos para ${names[color]}.`;
+state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
 
       render();
 
@@ -3584,8 +4075,8 @@ function rollDice(fromBot = false) {
     }
 
     if (isBotTurn()) {
-      state.message = `${names[color]} está eligiendo una ficha…`;
-      render();
+    state.message = `${names[color]} está eligiendo una ficha…`;
+      render();#
 
       setTimeout(() => {
         const tokenId = chooseBotMove(color);
