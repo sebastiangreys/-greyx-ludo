@@ -848,164 +848,111 @@ p {
    ===================================================== */
 
 .token.captured {
-  animation: capturedPiece 1.8s ease-in-out forwards;
-  z-index:20;
-}
-.token.capture-flying {
-  position:fixed !important;
-  z-index:9999 !important;
-  pointer-events:none !important;
-  margin:0 !important;
-  transition:none !important;
+  z-index: 50 !important;
 }
 
-/* Señal de captura */
-.token.captured::after {
-  content:"☠";
-  position:absolute;
+/* Señal visual de captura */
+.capture-mark {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
 
-  left:50%;
-  top:50%;
+  width: 42px;
+  height: 42px;
 
-  display:grid;
-  place-items:center;
+  display: grid;
+  place-items: center;
 
-  width:155%;
-  height:155%;
+  border-radius: 50%;
 
-  transform:translate(-50%,-50%) scale(.2);
+  background: #e53935;
+  color: white;
 
-  border-radius:50%;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
 
-  background:#e53935;
-  color:#fff;
-
-  font-size:clamp(14px,2vw,25px);
-  line-height:1;
-
-  border:2px solid #fff;
+  border: 3px solid white;
 
   box-shadow:
-    0 0 0 3px #e5393544,
-    0 5px 12px #0005;
+    0 0 0 4px #e5393555,
+    0 5px 14px #0006;
 
-  opacity:0;
+  transform: translate(-50%, -50%) scale(.2);
+  opacity: 0;
 
-  animation:captureMark 1.8s ease-out forwards;
-  pointer-events:none;
+  animation: captureMark 650ms cubic-bezier(.2,.8,.3,1) forwards;
 }
 
-/* La ficha tiembla y después empieza a retirarse */
-@keyframes capturedPiece {
+/* La ficha capturada tiembla */
+.token.captured {
+  animation: capturedShake 500ms ease-in-out forwards;
+}
+
+@keyframes capturedShake {
 
   0% {
-    transform:scale(1);
-    opacity:1;
+    transform: scale(1) rotate(0);
   }
 
-  8% {
-    transform:scale(1.15) rotate(-7deg);
+  15% {
+    transform: scale(1.15) rotate(-8deg);
   }
 
-  16% {
-    transform:scale(1.18) rotate(7deg);
-  }
-
-  24% {
-    transform:scale(1.08) rotate(-5deg);
-  }
-
-  32% {
-    transform:scale(1) rotate(0);
-    opacity:1;
+  30% {
+    transform: scale(1.18) rotate(8deg);
   }
 
   45% {
-    transform:scale(.95);
-    opacity:.95;
+    transform: scale(1.10) rotate(-5deg);
   }
 
-  65% {
-    transform:scale(.78) translateY(4px);
-    opacity:.78;
-  }
-
-  82% {
-    transform:scale(.58) translateY(8px);
-    opacity:.45;
+  60% {
+    transform: scale(1) rotate(3deg);
   }
 
   100% {
-    transform:scale(.25) translateY(12px);
-    opacity:0;
+    transform: scale(1) rotate(0);
   }
-
 }
 
-/* Aparece la calavera */
 @keyframes captureMark {
 
   0% {
-    transform:translate(-50%,-50%) scale(.2) rotate(-15deg);
-    opacity:0;
+    transform: translate(-50%, -50%) scale(.2) rotate(-15deg);
+    opacity: 0;
   }
 
-  12% {
-    transform:translate(-50%,-50%) scale(1.15) rotate(5deg);
-    opacity:1;
+  20% {
+    transform: translate(-50%, -50%) scale(1.25) rotate(5deg);
+    opacity: 1;
   }
 
-  22% {
-    transform:translate(-50%,-50%) scale(1) rotate(0);
-    opacity:1;
+  35% {
+    transform: translate(-50%, -50%) scale(1) rotate(0);
+    opacity: 1;
   }
 
-  55% {
-    transform:translate(-50%,-65%) scale(1);
-    opacity:1;
-  }
-
-  100% {
-    transform:translate(-50%,-95%) scale(.65);
-    opacity:0;
-  }
-
-}
-/* Pequeño rebote al llegar */
-/* Animación al llegar a la meta */
-.token.arrived {
-  animation: pieceArrived .75s cubic-bezier(.2,.85,.3,1.25) both;
-  z-index: 25;
-}
-
-@keyframes pieceArrived {
-  0% {
-    transform: scale(.65) translateY(8px);
-    filter: brightness(1);
-  }
-
-  25% {
-    transform: scale(1.28) translateY(-10px);
-    filter: brightness(1.45);
-  }
-
-  45% {
-    transform: scale(.92) translateY(2px);
-  }
-
-  65% {
-    transform: scale(1.12) translateY(-3px);
-  }
-
-  82% {
-    transform: scale(.97);
+  70% {
+    transform: translate(-50%, -70%) scale(1);
+    opacity: 1;
   }
 
   100% {
-    transform: scale(1);
-    filter: brightness(1);
+    transform: translate(-50%, -95%) scale(.75);
+    opacity: 0;
   }
 }
+
+/* Ficha que viaja lentamente hacia su casa */
+.token.capture-flying {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  transition: none !important;
+}
+
 .legend {
   display:flex;
   flex-wrap:wrap;
@@ -3171,11 +3118,12 @@ const startProgress =
     esperamos a que termine la animación
     y después la mandamos a casa.
   */
-  if (capturedTokens.length) {
+if (capturedTokens.length) {
+
   playSound("capture");
   render();
 
-  // Esperamos un momento para mostrar la captura
+  // Primero mostramos claramente la captura
   setTimeout(() => {
 
     const animations = capturedTokens.map(
@@ -3211,10 +3159,38 @@ const startProgress =
           const endY =
             homeRect.top + homeRect.height / 2;
 
-          // Ocultamos la ficha original
+
+          /* =========================================
+             CREAR LA X / CALAVERA
+             ========================================= */
+
+          const mark = document.createElement("div");
+
+          mark.className = "capture-mark";
+
+          /*
+             Puedes cambiar ☠ por ✕ si quieres
+             una X roja en lugar de calavera.
+          */
+          mark.textContent = "☠";
+
+          mark.style.left = `${startX}px`;
+          mark.style.top = `${startY}px`;
+
+          document.body.appendChild(mark);
+
+
+          /* =========================================
+             OCULTAR LA FICHA ORIGINAL
+             ========================================= */
+
           piece.style.visibility = "hidden";
 
-          // Creamos una copia que viajará hasta casa
+
+          /* =========================================
+             CREAR FICHA QUE VIAJA A CASA
+             ========================================= */
+
           const flyingPiece = piece.cloneNode(true);
 
           flyingPiece.classList.remove("captured");
@@ -3229,13 +3205,25 @@ const startProgress =
           flyingPiece.style.margin = "0";
           flyingPiece.style.zIndex = "9999";
           flyingPiece.style.pointerEvents = "none";
+
           flyingPiece.style.transform =
             "translate(-50%, -50%) scale(1)";
 
           document.body.appendChild(flyingPiece);
 
-          // Pequeño retraso para que la captura se sienta más marcada
+
+          /* =========================================
+             PEQUEÑO INSTANTE DESPUÉS DE LA CAPTURA
+             ========================================= */
+
           setTimeout(() => {
+
+            /*
+              La señal desaparece antes
+              de comenzar el viaje.
+            */
+            mark.remove();
+
 
             const animation = flyingPiece.animate(
               [
@@ -3246,25 +3234,30 @@ const startProgress =
                     "translate(-50%, -50%) scale(1)",
                   opacity: 1
                 },
+
                 {
                   left: `${endX}px`,
                   top: `${endY}px`,
                   transform:
                     "translate(-50%, -50%) scale(.55)",
-                  opacity: .65
+                  opacity: .7
                 }
               ],
               {
-                duration: 1000,
+                duration: 1400,
                 easing: "cubic-bezier(.35,.05,.7,1)",
                 fill: "forwards"
               }
             );
 
+
             animation.finished.then(() => {
 
               flyingPiece.remove();
 
+              /*
+                La ficha finalmente vuelve a casa.
+              */
               state.tokens[capturedColor] =
                 state.tokens[capturedColor].map(t =>
                   t.id === capturedId
@@ -3280,12 +3273,13 @@ const startProgress =
 
             });
 
-          }, index * 100);
+          }, 700 + index * 100);
 
         });
 
       }
     );
+
 
     Promise.all(animations).then(() => {
       continueAfterMove(finalProgress);
@@ -3294,7 +3288,9 @@ const startProgress =
   }, 500);
 
 } else {
+
   continueAfterMove(finalProgress);
+
 }
 
   async function continueAfterMove(finalProgress) {
