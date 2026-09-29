@@ -1252,6 +1252,133 @@ p {
   color:#fff;
 }
 
+/* =====================================================
+   MENÚ DEL LOBBY
+   ===================================================== */
+
+.lobby-menu {
+  display:grid;
+  gap:10px;
+  margin:25px 0 20px;
+}
+
+.lobby-section-title {
+  margin:4px 0 2px;
+  color:#9b7438;
+  font:700 .65rem monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.lobby-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  min-height:58px;
+  padding:12px 15px;
+
+  border:1px solid #e5dfd3;
+  border-radius:15px;
+
+  background:#fbf7ed;
+  color:var(--ink);
+
+  text-align:left;
+  cursor:pointer;
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+.lobby-option:hover {
+  transform:translateY(-2px);
+  border-color:#cda83c;
+}
+
+.lobby-option.selected {
+  border:2px solid #d5aa3d;
+  padding:11px 14px;
+
+  background:#fff9e7;
+
+  box-shadow:
+    0 7px 18px #b1872020;
+}
+
+.lobby-option-left {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.lobby-icon {
+  display:grid;
+  place-items:center;
+
+  width:35px;
+  height:35px;
+
+  border-radius:11px;
+
+  background:#f1e6cc;
+
+  font-size:1.1rem;
+}
+
+.lobby-option strong,
+.lobby-option small {
+  display:block;
+}
+
+.lobby-option strong {
+  font-size:.92rem;
+}
+
+.lobby-option small {
+  margin-top:3px;
+  color:var(--muted);
+  font-size:.68rem;
+}
+
+.lobby-check {
+  display:grid;
+  place-items:center;
+
+  width:22px;
+  height:22px;
+
+  border:2px solid #d6c8ad;
+  border-radius:50%;
+
+  color:transparent;
+  font-size:.7rem;
+  font-weight:900;
+}
+
+.lobby-option.selected .lobby-check {
+  border-color:#c79a31;
+  background:#d9a928;
+  color:#fff;
+}
+
+.sound-option {
+  margin-top:5px;
+}
+
+.sound-option .lobby-icon {
+  background:#e8edf5;
+}
+
+.sound-status {
+  color:#8a682e;
+  font:800 .65rem monospace;
+  letter-spacing:.05em;
+}
+
 @media (max-width:920px) {
 
   .setup {
@@ -1692,6 +1819,7 @@ function tone(
 }
 
 function playSound(type) {
+  if (!state.sound) return;
   if (type === "dice") {
     tone(180, 0.08, "square", 0.035);
     tone(260, 0.08, "square", 0.03, 0.09);
@@ -1873,108 +2001,114 @@ Elijan su grupo, compartan la pantalla y dejen que empiecen los seises.
 Elige el modo y cuántos rivales participarán.
 </p>
 
-<div class="player-options">
+<div class="lobby-menu">
 
-<button
-class="player-option ${state.mode==="solo"?"selected":""}"
-data-action="mode"
-data-mode="solo"
->
-
-<span>
-
-<strong>
-Jugar contra bots
-</strong>
-
-<small>
-Tú eres Coral · 3 rivales automáticos
-</small>
-
-</span>
-
-<span class="dots">
-
-<i class="dot red"></i>
-<i class="dot green"></i>
-<i class="dot yellow"></i>
-<i class="dot blue"></i>
-
-</span>
-
-</button>
-
-<button
-class="player-option ${state.mode==="local"?"selected":""}"
-data-action="mode"
-data-mode="local"
->
-
-<span>
-
-<strong>
-Partida local</strong>
-
-<small>
-Todos juegan en la misma pantalla
-</small>
-
-</span>
-
-<span class="dots">
-
-<i class="dot red"></i>
-<i class="dot green"></i>
-<i class="dot yellow"></i>
-<i class="dot blue"></i>
-
-</span>
-
-</button>
-
+<div class="lobby-section-title">
+Jugadores
 </div>
-
-<div class="player-options">
 
 ${[2,3,4].map(n => `
 
 <button
-class="player-option ${state.count===n?"selected":""}"
+class="lobby-option ${state.mode==="local" && state.count===n ? "selected" : ""}"
 data-action="count"
 data-count="${n}"
+data-mode-choice="local"
 >
+
+<span class="lobby-option-left">
+
+<span class="lobby-icon">
+👥
+</span>
 
 <span>
 
 <strong>
-${
-  state.mode === "solo"
-  ? `${n - 1} ${n - 1 === 1 ? "bot" : "bots"}`
-  : `${n} jugadores`
-}
+${n} jugadores
 </strong>
 
 <small>
-${
-  state.mode === "solo"
-  ? `Tú + ${n - 1} ${n - 1 === 1 ? "rival automático" : "rivales automáticos"}`
-  : playersByCount[n].map(c => names[c]).join(" · ")
-}
+${playersByCount[n].map(c => names[c]).join(" · ")}
 </small>
 
 </span>
 
-<span class="dots">
+</span>
 
-${playersByCount[n]
-  .map(c => `<i class="dot ${c}"></i>`)
-  .join("")}
-
+<span class="lobby-check">
+✓
 </span>
 
 </button>
 
 `).join("")}
+
+<div class="lobby-section-title">
+Modo de juego
+</div>
+
+<button
+class="lobby-option ${state.mode==="solo" ? "selected" : ""}"
+data-action="mode"
+data-mode="solo"
+>
+
+<span class="lobby-option-left">
+
+<span class="lobby-icon">
+🤖
+</span>
+
+<span>
+
+<strong>
+Contra bot
+</strong>
+
+<small>
+Tú eres Coral · rivales automáticos
+</small>
+
+</span>
+
+</span>
+
+<span class="lobby-check">
+✓
+</span>
+
+</button>
+
+<button
+class="lobby-option sound-option"
+data-action="sound"
+>
+
+<span class="lobby-option-left">
+
+<span class="lobby-icon">
+${state.sound ? "🔊" : "🔇"}
+</span>
+
+<span>
+
+<strong>
+Sonido
+</strong>
+
+<small>
+Efectos y sonidos del juego</small>
+
+</span>
+
+</span>
+
+<span class="sound-status">
+${state.sound ? "ON" : "OFF"}
+</span>
+
+</button>
 
 </div>
 
@@ -2763,6 +2897,8 @@ if(action==="count") {
   state.count =
     Number(button.dataset.count);
 
+  state.mode = "local";
+
   render();
 
 }
@@ -2771,6 +2907,14 @@ if(action==="mode") {
 
   state.mode =
     button.dataset.mode;
+
+  render();
+
+}
+
+if(action==="sound") {
+
+  state.sound = !state.sound;
 
   render();
 
