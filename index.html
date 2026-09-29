@@ -3452,26 +3452,40 @@ Nueva partida
 }
 function showArrivalConfetti() {
 
-  const container = document.createElement("div");
+  const container =
+    document.createElement("div");
 
-  container.className = "arrival-confetti";
+  container.className =
+    "arrival-confetti";
 
   document.body.appendChild(container);
 
-  const pieces = 70;
+  const pieces = 90;
 
   for (let i = 0; i < pieces; i++) {
 
-    const piece = document.createElement("span");
+    const piece =
+      document.createElement("span");
 
-    piece.className = "confetti-piece";
+    piece.className =
+      "confetti-piece";
 
     piece.style.left =
-      `${Math.random() * 100}%`;
+      `${Math.random() * 100}vw`;
+
+    piece.style.background =
+      [
+        "#e53935",
+        "#d9a928",
+        "#368f60",
+        "#426ba8",
+        "#f39c12",
+        "#9b59b6"
+      ][Math.floor(Math.random() * 6)];
 
     piece.style.setProperty(
       "--confetti-x",
-      `${(Math.random() - 0.5) * 220}px`
+      `${(Math.random() - 0.5) * 300}px`
     );
 
     piece.style.setProperty(
@@ -3480,23 +3494,18 @@ function showArrivalConfetti() {
     );
 
     piece.style.animationDelay =
-      `${Math.random() * 0.55}s`;
-
-    const size =
-      5 + Math.random() * 5;
-
-    piece.style.width =
-      `${size}px`;
-
-    piece.style.height =
-      `${size * 1.6}px`;
+      `${Math.random() * 0.6}s`;
 
     container.appendChild(piece);
   }
 
   setTimeout(() => {
-    container.remove();
-  }, 3600);
+
+    if (container.parentNode) {
+      container.remove();
+    }
+
+  }, 4000);
 
 }
 function celebrationMarkup() {
