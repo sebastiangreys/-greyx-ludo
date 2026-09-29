@@ -2777,19 +2777,14 @@ function start(count) {
   render();
 }
 
-function canMove(token,n) {
+function canMove(token, n) {
+  if (token.progress === 57) return false;
 
-return token.progress===-1
+  if (token.progress === -1) {
+    return n === 6;
+  }
 
-?
-
-n===6
-
-:
-
-token.progress!==57 &&
-token.progress+n<=57;
-
+  return token.progress + n <= 57;
 }
 
 function chooseBotMove(color) {
