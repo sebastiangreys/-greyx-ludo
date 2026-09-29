@@ -452,7 +452,7 @@ p {
   50% {
     transform:scale(1.18);
     box-shadow:
-      0 0 0 7px #e5393512;
+      0 0 0 7px ##e5393512;
   }
 }
 .game-layout {
@@ -723,6 +723,27 @@ p {
   filter:brightness(1.2);
 }
 
+.token.valid:active {
+  transform:translateY(0) scale(.92);
+}
+
+  box-shadow:
+    0 0 0 5px #fff9dc66,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 6px 0 #4d321f55,
+    0 9px 13px #4d321f40;
+}
+
+.token.valid:hover {
+  transform:translateY(-5px) scale(1.13);
+  filter:brightness(1.18);
+}
+
+.token.valid:active {
+  transform:translateY(0) scale(.94);
+  transition:transform .08s ease;
+}
 @keyframes selectablePiece {
   0%,100% {
     transform:translateY(-3px) scale(1.05);
@@ -1703,10 +1724,10 @@ const state = {
   rolling:false,
   moving:false,
   valid:new Set(),
-  message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
+  message:
+    "Lanza el dado para comenzar. Un seis saca una ficha de casa.",
   winner:null
 };
-
 
 function logoMarkup() {
 
@@ -2777,14 +2798,19 @@ function start(count) {
   render();
 }
 
-function canMove(token, n) {
-  if (token.progress === 57) return false;
+function canMove(token,n) {
 
-  if (token.progress === -1) {
-    return n === 6;
-  }
+return token.progress===-1
 
-  return token.progress + n <= 57;
+?
+
+n===6
+
+:
+
+token.progress!==57 &&
+token.progress+n<=57;
+
 }
 
 function chooseBotMove(color) {
@@ -2955,58 +2981,193 @@ function move(color, id) {
   const n = state.roll;
   const token = state.tokens[color][id];
 
-  const isLeavingHome = token.progress === -1;
-  const finalProgress = isLeavingHome ? 0 : token.progress + n;
+const startProgress =
+  token.progress === -1
+  ? -1
+  : token.progress;
+  const finalProgress = token.progress === -1 ? 0 : token.progress + n;
 
   state.moving = true;
   state.valid = new Set();
   state.message = "Moviendo ficha…";
   render();
 
-  if (isLeavingHome) {
-    state.tokens[color] = state.tokens[color].map(t =>
-      t.id === id
-        ? { ...t, progress: 0 }
-        : t
-    );
+  let currentProgress = startProgress;
 
-    playSound("move");
-    render();
+  function animateStep() {
 
-    setTimeout(() => {
-      finishMove();
-    }, 170);
+  const nextProgress = currentProgress + 1;
 
+  // Si ya llegamos al destino, terminamos.
+  if (nextProgress > finalProgress) {
+    finishMove();
     return;
   }
 
-  let currentProgress = token.progress;
+  currentProgress = nextProgress;
 
-  function animateStep() {
-    const nextProgress = currentProgress + 1;
+  // Movemos la ficha exactamente una casilla.
+  state.tokens[color] = state.tokens[color].map(t =>
+    t.id === id
+      ? { ...t, progress: currentProgress }
+      : t
+  );
 
-    if (nextProgress > finalProgress) {
-      finishMove();
-      return;
-    }
+  playSound("move");
 
-    currentProgress = nextProgress;
+  render();
 
-    state.tokens[color] = state.tokens[color].map(t =>
+  // Pequeña pausa entre cada casilla.
+  if (currentProgress < finalProgress) {
+    setTimeout(animateStep, 180);
+  } else {
+    setTimeout(finishMove, 120);
+  }
+}
+
+  function finishMove() {
+  let capturedTokens = [];
+
+  const updated = {
+    ...state.tokens,
+    [color]: state.tokens[color].map(t =>
       t.id === id
-        ? { ...t, progress: currentProgress }
+        ? { ...t, progress: finalProgress }
         : t
-    );
+    )
+  };
 
-    playSound("move");
+  const landing = trackIndex(color, finalProgress);
+
+  if (landing !== null && !safe.has(landing)) {
+    state.players
+      .filter(c => c !== color)
+      .forEach(opponent => {
+        updated[opponent] = updated[opponent].map(t => {
+          if (trackIndex(opponent, t.progress) === landing) {
+            capturedTokens.push({
+              color: opponent,
+              id: t.id
+            });
+
+            return {
+              ...t,
+              progress: t.progress,
+              captured: true
+            };
+          }
+
+          return t;
+        });
+      });
+  }
+
+  state.tokens = updated;
+  state.moving = false;
+
+  /*
+    Si hubo captura:
+    primero mostramos la ficha siendo capturada,
+    esperamos a que termine la animación
+    y después la mandamos a casa.
+  */
+  if (capturedTokens.length) {
+    playSound("capture");
     render();
 
-    if (currentProgress < finalProgress) {
-      setTimeout(animateStep, 180);
+    setTimeout(() => {
+      capturedTokens.forEach(({ color: capturedColor, id: capturedId }) => {
+        state.tokens[capturedColor] = state.tokens[capturedColor].map(t =>
+          t.id === capturedId
+            ? { ...t, progress: -1, captured: false }
+            : t
+        );
+      });
+
+      continueAfterMove(finalProgress);
+    }, 1550);
+
+  } else {
+    continueAfterMove();
+  }
+
+  async function continueAfterMove(finalProgress) {
+    if (finalProgress === 57) {
+  state.arrived = {
+    color: color,
+    id: id
+  };
+
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 750));
+
+  state.arrived = null;
+}
+  if (finalProgress === 57) {
+  state.arrived = {
+    color: color,
+    id: id
+  };
+
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 750));
+
+  state.arrived = null;
+}
+    if (state.tokens[color].every(token => token.progress === 57)) {
+  playSound("winner");
+
+  state.winner = color;
+  state.celebrating = true;
+  state.roll = null;
+
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 2200));
+
+  state.celebrating = false;
+  state.phase = "winner";
+
+  render();
+  return;
+}
+
+    if (!capturedTokens.length) {
+      playSound("land");
+    }
+
+    if (n === 6 || capturedTokens.length) {
+      state.roll = null;
+
+      if (n === 6 && !capturedTokens.length) {
+        playSound("six");
+      }
+
+      state.message =
+        capturedTokens.length
+          ? "¡Captura! Tienes otro turno."
+          : "¡Un seis! Tienes otro turno.";
+
+      render();
+      queueBotTurn();
+
     } else {
-      setTimeout(finishMove, 120);
+      state.active =
+        (state.active + 1) % state.players.length;
+
+      state.roll = null;
+
+      state.message = isBotTurn()
+        ? `Turno de ${names[state.players[state.active]]}. El bot está pensando…`
+        : "Tu turno. Lanza el dado.";
+
+      render();
+      queueBotTurn();
     }
   }
+}
 
   animateStep();
 }
