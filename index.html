@@ -851,6 +851,13 @@ p {
   animation: capturedPiece 1.8s ease-in-out forwards;
   z-index:20;
 }
+.token.capture-flying {
+  position:fixed !important;
+  z-index:9999 !important;
+  pointer-events:none !important;
+  margin:0 !important;
+  transition:none !important;
+}
 
 /* Señal de captura */
 .token.captured::after {
@@ -3165,24 +3172,130 @@ const startProgress =
     y después la mandamos a casa.
   */
   if (capturedTokens.length) {
-    playSound("capture");
-    render();
+  playSound("capture");
+  render();
 
-    setTimeout(() => {
-      capturedTokens.forEach(({ color: capturedColor, id: capturedId }) => {
-        state.tokens[capturedColor] = state.tokens[capturedColor].map(t =>
-          t.id === capturedId
-            ? { ...t, progress: -1, captured: false }
-            : t
-        );
-      });
+  // Esperamos un momento para mostrar la captura
+  setTimeout(() => {
 
+    const animations = capturedTokens.map(
+      ({ color: capturedColor, id: capturedId }, index) => {
+
+        return new Promise(resolve => {
+
+          const piece = document.querySelector(
+            `.token.captured[data-color="${capturedColor}"][data-token="${capturedId}"]`
+          );
+
+          const home = document.querySelector(
+            `.home.${capturedColor} .yard`
+          );
+
+          if (!piece || !home) {
+            resolve();
+            return;
+          }
+
+          const pieceRect = piece.getBoundingClientRect();
+          const homeRect = home.getBoundingClientRect();
+
+          const startX =
+            pieceRect.left + pieceRect.width / 2;
+
+          const startY =
+            pieceRect.top + pieceRect.height / 2;
+
+          const endX =
+            homeRect.left + homeRect.width / 2;
+
+          const endY =
+            homeRect.top + homeRect.height / 2;
+
+          // Ocultamos la ficha original
+          piece.style.visibility = "hidden";
+
+          // Creamos una copia que viajará hasta casa
+          const flyingPiece = piece.cloneNode(true);
+
+          flyingPiece.classList.remove("captured");
+          flyingPiece.classList.remove("valid");
+          flyingPiece.classList.add("capture-flying");
+
+          flyingPiece.style.position = "fixed";
+          flyingPiece.style.left = `${startX}px`;
+          flyingPiece.style.top = `${startY}px`;
+          flyingPiece.style.width = `${pieceRect.width}px`;
+          flyingPiece.style.height = `${pieceRect.height}px`;
+          flyingPiece.style.margin = "0";
+          flyingPiece.style.zIndex = "9999";
+          flyingPiece.style.pointerEvents = "none";
+          flyingPiece.style.transform =
+            "translate(-50%, -50%) scale(1)";
+
+          document.body.appendChild(flyingPiece);
+
+          // Pequeño retraso para que la captura se sienta más marcada
+          setTimeout(() => {
+
+            const animation = flyingPiece.animate(
+              [
+                {
+                  left: `${startX}px`,
+                  top: `${startY}px`,
+                  transform:
+                    "translate(-50%, -50%) scale(1)",
+                  opacity: 1
+                },
+                {
+                  left: `${endX}px`,
+                  top: `${endY}px`,
+                  transform:
+                    "translate(-50%, -50%) scale(.55)",
+                  opacity: .65
+                }
+              ],
+              {
+                duration: 1000,
+                easing: "cubic-bezier(.35,.05,.7,1)",
+                fill: "forwards"
+              }
+            );
+
+            animation.finished.then(() => {
+
+              flyingPiece.remove();
+
+              state.tokens[capturedColor] =
+                state.tokens[capturedColor].map(t =>
+                  t.id === capturedId
+                    ? {
+                        ...t,
+                        progress: -1,
+                        captured: false
+                      }
+                    : t
+                );
+
+              resolve();
+
+            });
+
+          }, index * 100);
+
+        });
+
+      }
+    );
+
+    Promise.all(animations).then(() => {
       continueAfterMove(finalProgress);
-    }, 1850);
+    });
 
-  } else {
-    continueAfterMove(finalProgress);
-  }
+  }, 500);
+
+} else {
+  continueAfterMove(finalProgress);
+}
 
   async function continueAfterMove(finalProgress) {
     
