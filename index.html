@@ -2653,21 +2653,45 @@ function bind() {
 
 function setup() {
 
-state.phase="setup";
-state.winner=null;
-state.valid=new Set();
-state.roll=null;
+  state.phase = "setup";
+  state.winner = null;
+  state.valid = new Set();
+  state.roll = null;
 
-render();
+  state.setupStep = 1;
+  state.mode = "local";
+  state.count = 4;
+  state.botCount = 1;
+  state.humanColor = "red";
+
+  render();
 
 }
 
 function start(count) {
 
-  state.players =
-    playersByCount[count];
+  if (state.mode === "solo") {
 
-  state.humanColor = "red";
+    const botColors = colors
+      .filter(color => color !== state.humanColor)
+      .slice(0, state.botCount);
+
+    state.players = [
+      state.humanColor,
+      ...botColors
+    ];
+
+    state.count = state.players.length;
+
+  } else {
+
+    state.count = count;
+
+    state.players = [
+      ...playersByCount[count]
+    ];
+
+  }
 
   state.tokens = freshTokens();
 
@@ -2685,12 +2709,13 @@ function start(count) {
 
   state.message =
     state.mode === "solo"
-    ? "Tu turno. Lanza el dado para comenzar."
-    : "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+      ? "Tu turno. Lanza el dado para comenzar."
+      : "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
 
   state.phase = "playing";
 
   render();
+
 }
 
 function canMove(token,n) {
