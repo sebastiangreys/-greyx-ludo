@@ -3340,7 +3340,7 @@ El tablero se encarga del resto.
 
 ${
   state.mode === "solo" && color !== state.humanColor
-    ? `🤖 TURNO DE ${playerLabel(color).toUpperCase()}
+    ? `🤖 TURNO DE ${playerLabel(color).toUpperCase()}`
     : `${
         color === "red"
           ? "🔴"
@@ -3349,7 +3349,7 @@ ${
           : color === "yellow"
           ? "🟡"
           : "🔵"
-TU TURNO · ${playerLabel(color).toUpperCase()}
+      } TU TURNO · ${playerLabel(color).toUpperCase()}`
 }
 
 </div>
@@ -4076,7 +4076,7 @@ state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
 
     if (isBotTurn()) {
     state.message = `${names[color]} está eligiendo una ficha…`;
-      render();#
+      render();
 
       setTimeout(() => {
         const tokenId = chooseBotMove(color);
