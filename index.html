@@ -1608,39 +1608,41 @@ p {
 
 .arrival-confetti {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   overflow: hidden;
-  z-index: 90;
+  z-index: 99999;
 }
 
 .confetti-piece {
   position: absolute;
-  top: -20px;
-  width: 7px;
-  height: 12px;
+  top: -25px;
+  width: 8px;
+  height: 14px;
+  display: block;
+  opacity: 1;
   border-radius: 2px;
-  opacity: 0;
-  animation: confettiFall 2.8s ease-out forwards;
+  animation: confettiFall 3s linear forwards;
 }
 
 @keyframes confettiFall {
 
   0% {
-    transform:
-      translate3d(0, -20px, 0)
-      rotate(0deg);
-    opacity: 1;
-  }
-
-  20% {
+    transform: translateY(-25px) rotate(0deg);
     opacity: 1;
   }
 
   100% {
     transform:
-      translate3d(var(--confetti-x), 110vh, 0)
+      translate(
+        var(--confetti-x),
+        110vh
+      )
       rotate(var(--confetti-r));
+
     opacity: 0;
   }
 
