@@ -1882,9 +1882,14 @@ const state = {
   sound:true,
   arrived:null,
   celebrating:false,
+
   count:4,
-  mode:"solo",
+  mode:"local",
+
+  setupStep:1,
+  botCount:1,
   humanColor:"red",
+
   players:[],
   tokens:freshTokens(),
   active:0,
@@ -1893,8 +1898,7 @@ const state = {
   rolling:false,
   moving:false,
   valid:new Set(),
-  message:
-    "Lanza el dado para comenzar. Un seis saca una ficha de casa.",
+  message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
   winner:null
 };
 
@@ -1963,988 +1967,687 @@ state.phase !== "setup"
 
 function setupMarkup() {
 
-return `
+  // ─────────────────────────────
+  // PASO 1 — MODO DE JUEGO
+  // ─────────────────────────────
 
-<main class="setup">
+  if (state.setupStep === 1) {
 
-<section class="setup-copy">
+    return `
 
-<div class="eyebrow">
-Pasen el tablero
+    <main class="setup">
+
+      <section class="setup-copy">
+
+        <div class="eyebrow">
+          LUDO GREYX
+        </div>
+
+        <h1>
+          Una partida.<br>
+          Tu estrategia.
+        </h1>
+
+        <p>
+          Elige cómo quieres jugar y prepárate para llevar tus fichas hasta la meta.
+        </p>
+
+      </section>
+
+      <section class="setup-card">
+
+        <h2>
+          ¿Cómo quieren jugar?
+        </h2>
+
+        <p>
+          Elige el modo y cuántos rivales participarán.
+        </p>
+
+        <div class="lobby-menu">
+
+          <div class="lobby-section-title">
+            Jugadores
+          </div>
+
+          ${[2,3,4].map(n => `
+
+            <button
+              class="lobby-option ${
+                state.mode === "local" &&
+                state.count === n
+                  ? "selected"
+                  : ""
+              }"
+              data-action="count"
+              data-count="${n}"
+            >
+
+              <span class="lobby-option-left">
+
+                <span class="lobby-icon">
+                  👥
+                </span>
+
+                <span>
+
+                  <strong>
+                    ${n} jugadores
+                  </strong>
+
+                  <small>
+                    ${playersByCount[n]
+                      .map(c => names[c])
+                      .join(" · ")}
+                  </small>
+
+                </span>
+
+              </span>
+
+              <span class="lobby-check">
+                ✓
+              </span>
+
+            </button>
+
+          `).join("")}
+
+
+          <div class="lobby-section-title">
+            Modo de juego
+          </div>
+
+
+          <button
+            class="lobby-option"
+            data-action="mode"
+            data-mode="solo"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                🤖
+              </span>
+
+              <span>
+
+                <strong>
+                  Contra bot
+                </strong>
+
+                <small>
+                  Tú eliges cuántos rivales automáticos
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="lobby-check">
+              →
+            </span>
+
+          </button>
+
+
+          <button
+            class="lobby-option sound-option"
+            data-action="sound"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                ${state.sound ? "🔊" : "🔇"}
+              </span>
+
+              <span>
+
+                <strong>
+                  Sonido
+                </strong>
+
+                <small>
+                  Efectos y sonidos del juego
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="sound-status">
+              ${state.sound ? "ON" : "OFF"}
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          data-action="start"
+        >
+          Empezar partida <span>→</span>
+        </button>
+
+      </section>
+
+      <div class="mini-board">
 </div>
 
-<h1 class="setup-title">
-Ludo,<br>
-<em>Greyx.</em>
-</h1>
+    </main>
 
-<p class="setup-lead">
+    `;
 
-Una carrera colorida alrededor del tablero.
-Elijan su grupo, compartan la pantalla y dejen que empiecen los seises.
-
-</p>
-
-<div class="setup-note">
-♙ Una pantalla · sin cuentas · todo local
-</div>
-
-</section>
-
-<section class="setup-card">
-
-<h2>
-¿Cómo quieren jugar?
-</h2>
-
-<p>
-Elige el modo y cuántos rivales participarán.
-</p>
-
-<div class="lobby-menu">
-
-<div class="lobby-section-title">
-Jugadores
-</div>
-
-${[2,3,4].map(n => `
-
-<button
-class="lobby-option ${state.mode==="local" && state.count===n ? "selected" : ""}"
-data-action="count"
-data-count="${n}"
-data-mode-choice="local"
->
-
-<span class="lobby-option-left">
-
-<span class="lobby-icon">
-👥
-</span>
-
-<span>
-
-<strong>
-${n} jugadores
-</strong>
-
-<small>
-${playersByCount[n].map(c => names[c]).join(" · ")}
-</small>
-
-</span>
-
-</span>
-
-<span class="lobby-check">
-✓
-</span>
-
-</button>
-
-`).join("")}
-
-<div class="lobby-section-title">
-Modo de juego
-</div>
-
-<button
-class="lobby-option ${state.mode==="solo" ? "selected" : ""}"
-data-action="mode"
-data-mode="solo"
->
-
-<span class="lobby-option-left">
-
-<span class="lobby-icon">
-🤖
-</span>
-
-<span>
-
-<strong>
-Contra bot
-</strong>
-
-<small>
-Tú eres Coral · rivales automáticos
-</small>
-
-</span>
-
-</span>
-
-<span class="lobby-check">
-✓
-</span>
-
-</button>
-
-<button
-class="lobby-option sound-option"
-data-action="sound"
->
-
-<span class="lobby-option-left">
-
-<span class="lobby-icon">
-${state.sound ? "🔊" : "🔇"}
-</span>
-
-<span>
-
-<strong>
-Sonido
-</strong>
-
-<small>
-Efectos y sonidos del juego</small>
-
-</span>
-
-</span>
-
-<span class="sound-status">
-${state.sound ? "ON" : "OFF"}
-</span>
-
-</button>
-
-</div>
-
-<button
-class="primary-button"
-data-action="start"
->
-Empezar partida <span>→</span>
-</button>
-
-</section>
-
-<div class="mini-board">
-
-${Array.from(
-  {length:9},
-  () => "<i></i>"
-).join("")}
-
-</div>
-
-</main>`;
-
-}
-
-function coord(color, progress) {
-  if (progress < 0 || progress > 57) {
-    return null;
   }
 
-  // Meta central
-  if (progress === 57) {
-    return [7,7];
+
+  // ─────────────────────────────
+  // PASO 2 — CANTIDAD DE BOTS
+  // ─────────────────────────────
+
+  if (state.setupStep === 2) {
+
+    return `
+
+    <main class="setup">
+
+      <section class="setup-copy">
+
+        <div class="eyebrow">
+          CONTRA BOT
+        </div>
+
+        <h1>
+          Tú contra<br>
+          la máquina.
+        </h1>
+
+        <p>
+          Elige cuántos rivales automáticos quieres enfrentar.
+        </p>
+
+      </section>
+
+
+      <section class="setup-card">
+
+        <h2>
+          🤖 ¿Contra cuántos bots?
+        </h2>
+
+        <p>
+          Elige cuántos rivales automáticos quieres.
+        </p>
+
+
+        <div class="lobby-menu">
+
+          <div class="lobby-section-title">
+            Rivales automáticos
+          </div>
+
+
+          ${[1,2,3].map(n => `
+
+            <button
+              class="lobby-option ${
+                state.botCount === n
+                  ? "selected"
+                  : ""
+              }"
+              data-action="bot-count"
+              data-bots="${n}"
+            >
+
+              <span class="lobby-option-left">
+
+                <span class="lobby-icon">
+                  🤖
+                </span>
+
+                <span>
+
+                  <strong>
+                    ${n} ${n === 1 ? "bot" : "bots"}
+                  </strong>
+
+                  <small>
+                    Tú + ${n} ${n === 1 ? "rival" : "rivales"}
+                  </small>
+
+                </span>
+
+              </span>
+
+              <span class="lobby-check">
+                ✓
+              </span>
+
+            </button>
+
+          `).join("")}
+
+
+          <button
+            class="lobby-option sound-option"
+            data-action="sound"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                ${state.sound ? "🔊" : "🔇"}
+              </span>
+
+              <span>
+
+                <strong>
+                  Sonido
+                </strong>
+
+                <small>
+                  Efectos y sonidos del juego
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="sound-status">
+              ${state.sound ? "ON" : "OFF"}
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div class="setup-actions">
+
+          <button
+            class="outline"
+            data-action="back-setup"
+          >
+            ← Volver
+          </button>
+
+          <button
+            class="primary-button"
+            data-action="bot-continue"
+          >
+            Continuar <span>→</span>
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <div class="mini-board">
+</div>
+
+    </main>
+
+    `;
+
   }
 
-  let cell;
 
-  if (progress <= 51) {
-    cell = track[
-      (startIndex[color] + progress) % track.length
-    ];
-  } else {
-    cell = lanes[color][progress - 52] || null;
+  // ─────────────────────────────
+  // PASO 3 — COLOR DEL JUGADOR
+  // ─────────────────────────────
+
+  if (state.setupStep === 3) {
+
+    return `
+
+    <main class="setup">
+
+      <section class="setup-copy">
+
+        <div class="eyebrow">
+          PERSONALIZA TU PARTIDA
+        </div>
+
+        <h1>
+          Elige tu<br>
+          color.
+        </h1>
+
+        <p>
+          Los bots recibirán automáticamente los colores restantes.
+        </p>
+
+      </section>
+
+
+      <section class="setup-card">
+
+        <h2>
+          🎨 ¿Con qué color quieres jugar?
+        </h2>
+
+        <p>
+          Elige tu color
+        </p>
+
+
+        <div class="lobby-menu">
+
+          <div class="lobby-section-title">
+            Tu color
+          </div>
+
+
+          ${colors.map(color => `
+
+            <button
+              class="lobby-option ${
+                state.humanColor === color
+                  ? "selected"
+                  : ""
+              }"
+              data-action="human-color"
+              data-color="${color}"
+            >
+
+              <span class="lobby-option-left">
+
+                <span class="lobby-icon">
+                  ${
+                    color === "red"
+                      ? "🔴"
+                      : color === "green"
+                      ? "🟢"
+                      : color === "yellow"
+                      ? "🟡"
+                      : "🔵"
+                  }
+                </span>
+
+                <span>
+
+                  <strong>
+                    ${names[color]}
+                  </strong>
+
+                  <small>
+                    ${
+                      state.humanColor === color
+                        ? "Tu color"
+                        : "Seleccionar este color"
+                    }
+                  </small>
+
+                </span>
+
+              </span>
+
+              <span class="lobby-check">
+                ${
+                  state.humanColor === color
+                    ? "✓"
+                    : ""
+                }
+              </span>
+
+            </button>
+
+          `).join("")}
+
+
+          <button
+            class="lobby-option sound-option"
+            data-action="sound"
+          >
+
+            <span class="lobby-option-left">
+
+              <span class="lobby-icon">
+                ${state.sound ? "🔊" : "🔇"}
+              </span>
+
+              <span>
+
+                <strong>
+                  Sonido
+                </strong>
+
+                <small>
+                  Efectos y sonidos del juego
+                </small>
+
+              </span>
+
+            </span>
+
+            <span class="sound-status">
+              ${state.sound ? "ON" : "OFF"}
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div class="setup-actions">
+
+          <button
+            class="outline"
+            data-action="back-setup"
+          >
+            ← Volver
+          </button>
+
+          <button
+            class="primary-button"
+            data-action="start"
+          >
+            Empezar partida <span>→</span>
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <div class="mini-board">
+</div>
+
+    </main>
+
+    `;
+
   }
-
-  if (!cell) {
-    return null;
-  }
-
-  return cell;
-}
-
-function trackIndex(color, progress) {
-  if (progress >= 0 && progress <= 51) {
-    return (
-      startIndex[color] + progress
-    ) % track.length;
-  }
-
-  return null;
-}
-
-function die(n,rolling) {
-
-const positions = {
-
-1:[4],
-
-2:[0,8],
-
-3:[0,4,8],
-
-4:[0,2,6,8],
-
-5:[0,2,4,6,8],
-
-6:[0,2,3,5,6,8]
-
-};
-
-return `
-
-<div class="die ${rolling ? "rolling" : n ? "result" : ""}">
-
-${Array.from(
-  {length:9},
-  (_,i)=>`
-
-<i
-class="pip ${
-  n && positions[n].includes(i)
-  ?"on"
-  :""
-}">
-</i>
-
-`
-).join("")}
-
-</div>
-
-`;
-
-}
-
-function boardMarkup() {
-
-const at = new Map();
-
-state.players.forEach(color => {
-
-state.tokens[color].forEach(token => {
-
-const c = coord(
-  color,
-  token.progress
-);
-
-if(c) {
-
-const key = c.join("-");
-
-at.set(
-key,
-[
-...(at.get(key)||[]),
-{color,token}
-]
-);
-
-}
-
-});
-
-});
-
-const laneAt = (r,c) =>
-
-colors.find(color =>
-
-lanes[color].some(
-([rr,cc]) =>
-rr===r && cc===c
-)
-
-);
-
-const trackAt = (r,c) =>
-
-track.findIndex(
-([rr,cc]) =>
-rr===r && cc===c
-);
-
-let cells="";
-
-for(let i=0;i<225;i++) {
-
-const r=Math.floor(i/15);
-const c=i%15;
-
-const ti=trackAt(r,c);
-
-const lane=laneAt(r,c);
-
-const key=`${r}-${c}`;
-
-const stack=at.get(key)||[];
-
-const start =
-ti>=0
-?
-colors.find(
-color =>
-startIndex[color]===ti
-)
-:
-"";
-
-const tokenHtml=stack.map(
-({color,token},slot)=>`
-
-<button
-
-class="token ${color}
-${
-state.valid.has(
-`${color}-${token.id}`
-)
-?
-"valid"
-:
-""
-}
-${
-token.progress===57
-?
-"finished"
-:
-""
-}
-${
-state.arrived &&
-state.arrived.color === color &&
-state.arrived.id === token.id
-?
-"arrived"
-:
-""
-}
-${
-token.captured
-?
-"captured"
-:
-""
-}
-${
-slot
-?
-`stack-${Math.min(slot,3)}`
-:
-""
-}"
-
-data-action="token"
-
-data-color="${color}"
-
-data-token="${token.id}"
-
-${
-state.valid.has(
-`${color}-${token.id}`
-)
-?
-""
-:
-"disabled"
-}
-
->
-
-${token.id+1}
-
-</button>
-
-`
-).join("");
-
-cells+=`
-
-<div
-
-class="cell
-
-${ti>=0?"track":""}
-
-${lane?`lane-${lane}`:""}
-
-${
-ti>=0 && safe.has(ti)
-?
-"safe"
-:
-""
-}
-
-${start?`start-${start}`:""}"
-
-style="
-grid-row:${r+1};
-grid-column:${c+1}
-"
-
->
-
-${tokenHtml}
-
-</div>
-
-`;
-
-}
-
-const homes=state.players.map(
-color=>`
-
-<div class="home ${color}">
-
-<div class="yard">
-
-${state.tokens[color]
-
-.filter(
-t=>t.progress===-1
-)
-
-.map(t=>`
-
-<button
-
-class="token ${color}
-${
-state.valid.has(
-`${color}-${t.id}`
-)
-?
-"valid"
-:
-""
-}"
-
-data-action="token"
-
-data-color="${color}"
-
-data-token="${t.id}"
-
-${
-state.valid.has(
-`${color}-${t.id}`
-)
-?
-""
-:
-"disabled"
-}
-
->
-
-${t.id+1}
-
-</button>
-
-`)
-.join("")}
-
-</div>
-
-</div>
-
-`
-).join("");
-
-return `
-
-<div class="board-frame">
-
-<div class="board">
-
-${cells}
-
-<div class="finish"></div>
-
-${homes}
-
-</div>
-
-</div>
-
-<div class="legend">
-
-<span>
-<b></b>
-Estrella segura
-</span>
-
-<span>
-
-<b style="background:#e5b33b"></b>
-
-Seis para salir de casa
-
-</span>
-
-<span>
-
-<b style="background:#49668f"></b>
-
-Número exacto para llegar
-
-</span>
-
-</div>
-
-`;
-
-}
-
-function scores() {
-
-return `
-
-<section class="panel">
-
-<h3>
-Marcador de la mesa
-</h3>
-
-<div class="score-grid">
-
-<span></span>
-
-<span class="score-head">
-CASA
-</span>
-
-<span class="score-head">
-TABLERO
-</span>
-
-<span class="score-head">
-META
-</span>
-
-${state.players.map(color=>{
-
-const home =
-state.tokens[color]
-.filter(
-t=>t.progress===-1
-).length;
-
-const done =
-state.tokens[color]
-.filter(
-t=>t.progress===57
-).length;
-
-return `
-
-<span class="score-name">
-
-<i class="score-dot ${color}"></i>
-
-${names[color]}
-
-</span>
-
-<span class="score-value">
-${home}
-</span>
-
-<span class="score-value">
-${4-home-done}
-</span>
-
-<span class="score-value">
-${done}
-</span>
-
-`;
-
-}).join("")}
-
-</div>
-
-</section>
-
-`;
-
-}
-
-function gameMarkup() {
-
-const color =
-state.players[state.active];
-
-const shown =
-state.roll ||
-state.lastRoll;
-
-const pass =
-state.message.startsWith("No hay");
-
-return `
-
-<main>
-
-<div class="game-intro">
-
-<div>
-
-<h1>
-${
-  state.mode === "solo" && color !== state.humanColor
-  ? "Turno del bot."
-  : "Tu turno."
-}
-</h1>
-
-<p>
-Pasen el dispositivo después de cada jugada.
-El tablero se encarga del resto.
-</p>
-
-</div>
-
-<div class="turn-chip ${
-  color === "red"
-    ? "red-turn"
-    : color === "green"
-    ? "green-turn"
-    : color === "yellow"
-    ? "yellow-turn"
-    : "blue-turn"
-}">
-
-${
-  state.mode === "solo" && color !== state.humanColor
-    ? `🤖 TURNO DE ${names[color].toUpperCase()}`
-    : `${
-        color === "red"
-          ? "🔴"
-          : color === "green"
-          ? "🟢"
-          : color === "yellow"
-          ? "🟡"
-          : "🔵"
-      } TU TURNO · ${names[color].toUpperCase()}`
-}
-
-</div>
-
-<div class="game-layout">
-
-<section class="board-wrap">
-
-${boardMarkup()}
-
-<p class="legend">
-
-Si caes sobre un rival, vuelve a casa.
-Las estrellas son seguras.
-
-</p>
-
-</section>
-
-<aside class="sidebar">
-
-<section class="panel status-panel">
-
-<span class="status-label">
-Turno actual
-</span>
-
-<div class="status-player">
-
-<i class="orb ${color}"></i>
-
-<div>
-
-<strong>
-${names[color]}
-</strong>
-
-<small>
-${
-  state.mode === "solo" && color !== state.humanColor
-  ? "Bot automático"
-  : `Jugador ${state.active + 1} · tu turno`
-}
-</small>
-
-</div>
-
-</div>
-
-<div class="dice-row">
-
-${die(
-  shown,
-  state.rolling
-)}
-
-<button
-
-class="roll-button"
-
-data-action="roll"
-
-${
-state.rolling ||
-state.moving ||
-state.roll!==null
-?
-"disabled"
-:
-""
-}
-
->
-
-${
-state.rolling
-?
-"Lanzando…"
-:
-state.roll
-?
-"Elige una ficha"
-:
-"Lanzar dado"
-}
-
-</button>
-
-</div>
-
-<p class="hint ${pass?"pass":""}">
-
-${state.message}
-
-</p>
-
-</section>
-
-${scores()}
-
-<section class="panel rules">
-
-<h3>
-Reglas de la mesa
-</h3>
-
-<div class="rule">
-
-<b>★</b>
-
-<span>
-Las estrellas protegen a todos los colores.
-</span>
-
-</div>
-
-<div class="rule">
-
-<b>6</b>
-
-<span>
-Los seises y las capturas dan otro turno.
-</span>
-
-</div>
-
-<div class="rule">
-
-<b>!</b>
-
-<span>
-Necesitas el número exacto para llegar al centro.
-</span>
-
-</div>
-
-</section>
-
-<button
-class="outline"
-data-action="setup"
->
-Nueva partida
-</button>
-
-</aside>
-
-</div>
-
-</main>
-
-`;
-
-}
-function celebrationMarkup() {
-  return `
-    <div class="celebration">
-      <div class="celebration-card">
-        <div class="celebration-trophy">🏆</div>
-        <h2>¡Las 4 fichas llegaron!</h2>
-        <p>¡Increíble partida, ${names[state.winner || state.players[state.active]]}!</p>
-      </div>
-    </div>
-  `;
-}
-function winnerMarkup() {
-
-return `
-
-<div class="winner">
-
-<div class="winner-card">
-
-<div class="winner-seal">
-★
-</div>
-
-<h2>
-¡Gana ${names[state.winner]}!
-</h2>
-
-<p>
-Todas sus fichas llegaron a la meta.
-Una gran vuelta alrededor del tablero.
-</p>
-
-<div class="winner-actions">
-
-<button
-class="secondary"
-data-action="setup"
->
-Configurar
-</button>
-
-<button
-class="primary-button"
-data-action="again"
->
-Jugar otra vez
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-function render() {
-
-app.innerHTML=`
-
-<div class="shell">
-
-${logoHeader()}
-
-${
-state.phase==="setup"
-?
-setupMarkup()
-:
-gameMarkup()
-}
-
-</div>
-
-${
-state.celebrating
-?
-celebrationMarkup()
-:
-state.phase==="winner"
-?
-winnerMarkup()
-:
-""
-}
-
-`;
-
-bind();
 
 }
 
 function bind() {
 
-app.querySelectorAll(
-"[data-action]"
-)
-.forEach(button=>{
+  app.querySelectorAll(
+    "[data-action]"
+  )
+  .forEach(button => {
 
-button.addEventListener(
-"click",
-()=>{
+    button.addEventListener(
+      "click",
+      () => {
 
-const action =
-button.dataset.action;
+        const action =
+          button.dataset.action;
 
-if(action==="count") {
 
-  state.count =
-    Number(button.dataset.count);
+        // ─────────────────────
+        // JUGADORES LOCALES
+        // ─────────────────────
 
-  state.mode = "local";
+        if(action === "count") {
 
-  render();
+          state.count =
+            Number(button.dataset.count);
 
-}
+          state.mode = "local";
 
-if(action==="mode") {
+          state.setupStep = 1;
 
-  state.mode =
-    button.dataset.mode;
+          render();
 
-  render();
+        }
 
-}
 
-if(action==="sound") {
+        // ─────────────────────
+        // CONTRA BOT
+        // ─────────────────────
 
-  state.sound = !state.sound;
+        if(action === "mode") {
 
-  render();
+          state.mode = "solo";
 
-}
+          state.setupStep = 2;
 
-if(action==="start")
-  start(state.count);
+          render();
 
-if(action==="setup")
-  setup();
+        }
 
-if(action==="again")
-  start(state.players.length);
 
-if(action==="roll")
-  rollDice();
+        // ─────────────────────
+        // CANTIDAD DE BOTS
+        // ─────────────────────
 
-if(action==="token") {
+        if(action === "bot-count") {
 
-move(
-button.dataset.color,
-Number(button.dataset.token)
-);
+          state.botCount =
+            Number(button.dataset.bots);
 
-}
+          render();
 
-}
-);
+        }
 
-});
+
+        // ─────────────────────
+        // CONTINUAR A ELECCIÓN
+        // DE COLOR
+        // ─────────────────────
+
+        if(action === "bot-continue") {
+
+          state.setupStep = 3;
+
+          render();
+
+        }
+
+
+        // ─────────────────────
+        // COLOR DEL JUGADOR
+        // ─────────────────────
+
+        if(action === "human-color") {
+
+          state.humanColor =
+            button.dataset.color;
+
+          render();
+
+        }
+
+
+        // ─────────────────────
+        // VOLVER EN EL LOBBY
+        // ─────────────────────
+
+        if(action === "back-setup") {
+
+          state.setupStep =
+            Math.max(
+              1,
+              state.setupStep - 1
+            );
+
+          render();
+
+        }
+
+
+        // ─────────────────────
+        // SONIDO
+        // ─────────────────────
+
+        if(action === "sound") {
+
+          state.sound =
+            !state.sound;
+
+          render();
+
+        }
+
+
+        // ─────────────────────
+        // EMPEZAR PARTIDA
+        // ─────────────────────
+
+        if(action === "start") {
+
+          start(state.count);
+
+        }
+
+
+        // ─────────────────────
+        // VOLVER AL SETUP
+        // ─────────────────────
+
+        if(action === "setup") {
+
+          setup();
+
+        }
+
+
+        // ─────────────────────
+        // JUGAR OTRA VEZ
+        // ─────────────────────
+
+        if(action === "again") {
+
+          start(state.players.length);
+
+        }
+
+
+        // ─────────────────────
+        // LANZAR DADO
+        // ─────────────────────
+
+        if(action === "roll") {
+
+          rollDice();
+
+        }
+
+
+        // ─────────────────────
+        // MOVER FICHA
+        // ─────────────────────
+
+        if(action === "token") {
+
+          move(
+            button.dataset.color,
+            Number(button.dataset.token)
+          );
+
+        }
+
+      }
+    );
+
+  });
 
 }
 
