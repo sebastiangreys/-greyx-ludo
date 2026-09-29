@@ -2017,19 +2017,24 @@ function setupMarkup() {
             Jugadores
           </div>
 
-          <button
-  class="lobby-option ${state.mode === "local" ? "selected" : ""}"
-  data-action="local"
->
-  <span class="lobby-option-left">
-    <span class="lobby-icon">👥</span>
-    <span>
-      <strong>Local</strong>
-      <small>Juega con otras personas en la misma pantalla</small>
+         ${[2,3,4].map(n => `
+  <button
+    class="lobby-option ${
+      state.mode === "local" && state.count === n ? "selected" : ""
+    }"
+    data-action="count"
+    data-count="${n}"
+  >
+    <span class="lobby-option-left">
+      <span class="lobby-icon">👥</span>
+      <span>
+        <strong>${n} jugadores</strong>
+        <small>${playersByCount[n].map(c => names[c]).join(" · ")}</small>
+      </span>
     </span>
-  </span>
-  <span class="lobby-check">✓</span>
-</button>
+    <span class="lobby-check">✓</span>
+  </button>
+`).join("")}
 
           <div class="lobby-section-title">
             Modo de juego
