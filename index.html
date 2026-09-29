@@ -3093,7 +3093,7 @@ const startProgress =
 
   async function continueAfterMove(finalProgress) {
     
-  if (finalProgress === 57) {
+    if (finalProgress === 57) {
   state.arrived = {
     color: color,
     id: id
@@ -3101,7 +3101,20 @@ const startProgress =
 
   render();
 
-  await new Promise(resolve => setTimeout(resolve, 750));
+  // Forzar la animación de llegada
+  requestAnimationFrame(() => {
+    const piece = document.querySelector(
+      `.token[data-color="${color}"][data-id="${id}"]`
+    );
+
+    if (piece) {
+      piece.classList.remove("arrived");
+      void piece.offsetWidth;
+      piece.classList.add("arrived");
+    }
+  });
+
+  await new Promise(resolve => setTimeout(resolve, 900));
 
   state.arrived = null;
 }
