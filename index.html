@@ -2154,6 +2154,7 @@ function playerLabel(color) {
 const state = {
   phase:"setup",
   sound:true,
+  animations:true,
   settingsOpen:false,
   arrived:null,
   celebrating:false,
@@ -3752,27 +3753,27 @@ function settingsMarkup() {
 
 
           <button
-            class="settings-option"
-            data-action="settings-animation"
-          >
+  class="settings-option"
+  data-action="settings-animation"
+>
 
-            <span class="settings-option-icon">
-              ✨
-            </span>
+  <span class="settings-option-icon">
+    ${state.animations ? "✨" : "⏹️"}
+  </span>
 
-            <span class="settings-option-text">
+  <span class="settings-option-text">
 
-              <strong>
-                Animaciones
-              </strong>
+    <strong>
+      Animaciones
+    </strong>
 
-              <small>
-                Efectos y movimientos del juego
-              </small>
+    <small>
+      ${state.animations ? "Activadas" : "Desactivadas"}
+    </small>
 
-            </span>
+  </span>
 
-          </button>
+</button>
 
 
           <button
@@ -4034,6 +4035,13 @@ if (action === "close-settings") {
 if (action === "settings-sound") {
 
   state.sound = !state.sound;
+
+  render();
+
+}
+if (action === "settings-animation") {
+
+  state.animations = !state.animations;
 
   render();
 
