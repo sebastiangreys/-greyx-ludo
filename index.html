@@ -2228,6 +2228,86 @@ p {
     transform: translateY(0) scale(1);
   }
 }
+@media (max-width:920px) {
+
+  .setup-modern {
+    grid-template-columns:1fr;
+    min-height:auto;
+    gap:35px;
+    padding:35px 0 50px;
+  }
+
+  .setup-copy {
+    text-align:center;
+  }
+
+  .setup-modern .eyebrow {
+    justify-content:center;
+  }
+
+  .setup-lead {
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .setup-status {
+    margin-top:25px;
+  }
+}
+
+@media (max-width:560px) {
+
+  .setup-modern {
+    padding:20px 0 35px;
+    gap:25px;
+  }
+
+  .setup-card-modern {
+    padding:21px 18px;
+    border-radius:24px;
+  }
+
+  .setup-title-small {
+    font-size:clamp(2.8rem,13vw,4.2rem);
+  }
+
+  .player-count-card {
+    min-height:100px;
+  }
+
+  .setup-actions {
+    grid-template-columns:1fr;
+  }
+
+  .secondary-button {
+    order:2;
+  }
+
+  .name-field-content {
+    display:block;
+  }
+
+  .name-field input {
+    width:100%;
+    margin-top:4px;
+    text-align:left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-copy,
+  .setup-card-modern {
+    animation:none;
+  }
+
+  .mode-card,
+  .player-count-card,
+  .color-card,
+  .sound-mini,
+  .secondary-button {
+    transition:none;
+  }
+}
 </style>
 </head>
 
