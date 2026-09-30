@@ -3319,11 +3319,8 @@ class="pip ${
 `;
 
 }
-
 function boardMarkup() {
-
 const at = new Map();
-
 state.players.forEach(color => {
 
 state.tokens[color].forEach(token => {
@@ -3577,9 +3574,7 @@ ${homes}
 </div>
 
 `;
-
 }
-
 function scores() {
 
 return `
@@ -3724,21 +3719,39 @@ ${boardMarkup()}
 Turno actual
 </span>
 <div class="status-player">
-<i class="orb ${color}"></i>
+
+<div class="players-list">
+
+${state.players.map((playerColor, index) => `
+
+<div class="player-row">
+
+<i class="orb ${playerColor}"></i>
 
 <div>
 
 <strong>
-${playerLabel(color)}
+${playerLabel(playerColor)}
 </strong>
 
 <small>
 ${
-  state.mode === "solo" && color !== state.humanColor
-  ? "Bot automático"
-  : `Jugador ${state.active + 1} · tu turno`
+  state.mode === "solo" && playerColor !== state.humanColor
+    ? "Bot"
+    : `Jugador ${index + 1}`
+}
+${
+  index === state.active
+    ? " · Turno actual"
+    : ""
 }
 </small>
+
+</div>
+
+</div>
+
+`).join("")}
 
 </div>
 
