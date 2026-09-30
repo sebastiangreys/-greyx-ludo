@@ -3980,6 +3980,14 @@ setupMarkup()
 gameMarkup()
 }
 
+${
+state.phase !== "setup"
+?
+settingsMarkup()
+:
+""
+}
+
 </div>
 
 ${
@@ -3994,20 +4002,11 @@ winnerMarkup()
 ""
 }
 
-${
-state.phase !== "setup"
-?
-settingsMarkup()
-:
-""
-}
-
 `;
 
 bind();
 
 }
-
 function bind() {
 
   app.querySelectorAll("[data-action]")
