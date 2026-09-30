@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#f7f1e6" />
 <title>Ludo Greyx</title>
-
 <style>
 :root {
   --paper:#f7f1e6;
@@ -18,11 +17,9 @@
   --blue:#426ba8;
   --safe:#b6914e;
 }
-
 * {
   box-sizing:border-box;
 }
-
 body {
   margin:0;
   min-width:320px;
@@ -43,7 +40,6 @@ body {
     "Segoe UI",
     sans-serif;
 }
-
 button {
   font:inherit;
 }
@@ -51,27 +47,23 @@ button {
 .app {
   min-height:100vh;
 }
-
 .shell {
   position: relative;
   width:min(1320px,calc(100% - 32px));
   margin:auto;
   padding:18px 0 44px;
 }
-
 .topbar {
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:56px;
 }
-
 .brand {
   display:flex;
   align-items:center;
   gap:12px;
 }
-
 .brand-logo {
   display:grid;
   place-items:center;
@@ -82,12 +74,10 @@ button {
   color:#fff;
   overflow:hidden;
 }
-
 .brand-logo svg {
   width:31px;
   height:31px;
 }
-
 .brand-name {
   display:block;
   font-size:1.12rem;
@@ -95,7 +85,6 @@ button {
   letter-spacing:-.05em;
   line-height:1;
 }
-
 .brand-caption {
   display:block;
   margin-top:5px;
@@ -104,7 +93,6 @@ button {
   letter-spacing:.11em;
   text-transform:uppercase;
 }
-
 .setup {
   display:grid;
   grid-template-columns:1fr minmax(360px,530px);
@@ -112,7 +100,6 @@ button {
   gap:clamp(46px,8vw,130px);
   min-height:650px;
 }
-
 .eyebrow {
   display:flex;
   align-items:center;
@@ -122,21 +109,18 @@ button {
   letter-spacing:.18em;
   text-transform:uppercase;
 }
-
 .eyebrow::before {
   content:"";
   width:24px;
   height:2px;
   background:#e4ac42;
 }
-
 h1,
 h2,
 h3,
 p {
   margin-top:0;
 }
-
 .setup-title {
   margin:20px 0 23px;
   max-width:650px;
@@ -144,19 +128,16 @@ p {
   line-height:.82;
   letter-spacing:-.1em;
 }
-
 .setup-title em {
   color:var(--coral);
   font-style:normal;
 }
-
 .setup-lead {
   max-width:500px;
   color:#687384;
   font-size:clamp(1rem,1.35vw,1.2rem);
   line-height:1.55;
 }
-
 .setup-note {
   display:flex;
   align-items:center;
@@ -165,7 +146,6 @@ p {
   color:#67717c;
   font-size:.82rem;
 }
-
 .setup-card,
 .panel {
   border:1px solid #e5dfd3;
@@ -173,13 +153,11 @@ p {
   box-shadow:0 22px 50px #6c58301c;
   border-radius:26px;
 }
-
 .setup-card {
   position:relative;
   overflow:hidden;
   padding:38px;
 }
-
 .setup-card::after {
   content:"";
   position:absolute;
@@ -190,29 +168,24 @@ p {
   border-radius:50%;
   background:#fff2c7;
 }
-
 .setup-card>* {
   position:relative;
   z-index:1;
 }
-
 .setup-card h2 {
   margin-bottom:8px;
   font-size:1.7rem;
   letter-spacing:-.05em;
 }
-
 .setup-card p {
   color:var(--muted);
   font-size:.9rem;
 }
-
 .player-options {
   display:grid;
   gap:10px;
   margin:27px 0 20px;
 }
-
 .player-option {
   display:flex;
   align-items:center;
@@ -227,59 +200,48 @@ p {
   cursor:pointer;
   transition:.2s;
 }
-
 .player-option:hover {
   transform:translateY(-2px);
   border-color:#cda83c;
 }
-
 .player-option.selected {
   border:2px solid #d5aa3d;
   padding:14px 16px;
   box-shadow:0 7px 18px #b1872020;
 }
-
 .player-option strong,
 .player-option small {
   display:block;
 }
-
 .player-option strong {
   font-size:.98rem;
 }
-
 .player-option small {
   margin-top:4px;
   color:var(--muted);
   font-size:.72rem;
 }
-
 .dots {
   display:flex;
   gap:5px;
 }
-
 .dot,
 .score-dot {
   display:inline-block;
   border-radius:50%;
 }
-
 .dot {
   width:12px;
   height:12px;
   border:1px solid #fff;
   box-shadow:0 1px 2px #0003;
 }
-
 .red {
   background:var(--coral);
 }
-
 .green {
   background:var(--green);
 }
-
 .yellow {
   background:var(--yellow);
 }
@@ -287,7 +249,6 @@ p {
 .blue {
   background:var(--blue);
 }
-
 .primary-button,
 .roll-button {
   display:flex;
@@ -305,13 +266,11 @@ p {
   box-shadow:0 4px 0 #304868;
   transition:.15s;
 }
-
 .primary-button:hover,
 .roll-button:hover {
   filter:brightness(1.08);
   transform:translateY(-1px);
 }
-
 .mini-board {
   position:fixed;
   bottom:26px;
@@ -325,7 +284,6 @@ p {
   transform:rotate(3deg);
   opacity:.78;
 }
-
 .mini-board i {
   display:block;
   width:29px;
@@ -333,43 +291,33 @@ p {
   border-radius:10px;
   background:#f7edca;
 }
-
 .mini-board i:nth-child(1) {
   background:#f5bdca;
 }
-
 .mini-board i:nth-child(2) {
   background:#b6e3df;
 }
-
 .mini-board i:nth-child(3) {
   background:#c8d7ed;
 }
-
 .mini-board i:nth-child(4) {
   background:#c9d7ee;
 }
-
 .mini-board i:nth-child(5) {
   background:#fff3cf;
 }
-
 .mini-board i:nth-child(6) {
   background:#efd8a0;
 }
-
 .mini-board i:nth-child(7) {
   background:#f7edca;
 }
-
 .mini-board i:nth-child(8) {
   background:#d6ae44;
 }
-
 .mini-board i:nth-child(9) {
   background:#f7edca;
 }
-
 .game-intro {
   display:flex;
   justify-content:space-between;
@@ -377,38 +325,28 @@ p {
   gap:20px;
   margin-bottom:18px;
 }
-
 .game-intro h1 {
   margin:0;
   font-size:clamp(2rem,4vw,3.1rem);
   letter-spacing:-.08em;
 }
-
 .game-intro p {
   margin:8px 0 0;
   color:var(--muted);
   font-size:.9rem;
 }
-
 .turn-chip {
   display:flex;
   align-items:center;
   gap:9px;
-
   padding:11px 16px;
-
   border:1px solid #e1d9cb;
   border-radius:999px;
-
   color:var(--ink);
   background:#fffaf0;
-
   font:800 .72rem monospace;
-
   white-space:nowrap;
-
   box-shadow:0 4px 12px #6c583018;
-
   transition:
     background .25s ease,
     border-color .25s ease,
@@ -418,37 +356,28 @@ p {
   content:"";
   width:10px;
   height:10px;
-
   border-radius:50%;
-
   background:var(--coral);
-
   box-shadow:
   0 0 0 4px #e5393520;
-
   animation:turnPulse 1.5s ease-in-out infinite;
 }
-
 .turn-chip.red-turn::before {
   background:var(--coral);
   box-shadow:0 0 0 4px #e5393520;
 }
-
 .turn-chip.green-turn::before {
   background:var(--green);
   box-shadow:0 0 0 4px #368f6020;
 }
-
 .turn-chip.yellow-turn::before {
   background:var(--yellow);
   box-shadow:0 0 0 4px #d9a92820;
 }
-
 .turn-chip.blue-turn::before {
   background:var(--blue);
   box-shadow:0 0 0 4px #426ba820;
 }
-
 @keyframes turnPulse {
   50% {
     transform:scale(1.18);
