@@ -4371,15 +4371,10 @@ if (action === "settings-theme") {
            ========================= */
 
         if (action === "bot-count") {
-
-          state.botCount =
-            Number(button.dataset.bots);
-
-          render();
-
-        }
-
-
+  state.botCount =
+    Number(button.dataset.count);
+  render();
+}
         /* =========================
            CONTINUAR BOT
            ========================= */
