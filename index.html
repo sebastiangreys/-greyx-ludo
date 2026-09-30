@@ -3728,27 +3728,27 @@ function settingsMarkup() {
 
 
           <button
-            class="settings-option"
-            data-action="settings-sound"
-          >
+  class="settings-option"
+  data-action="settings-sound"
+>
 
-            <span class="settings-option-icon">
-              🔊
-            </span>
+  <span class="settings-option-icon">
+    ${state.sound ? "🔊" : "🔇"}
+  </span>
 
-            <span class="settings-option-text">
+  <span class="settings-option-text">
 
-              <strong>
-                Sonido
-              </strong>
+    <strong>
+      Sonido
+    </strong>
 
-              <small>
-                Activar o desactivar sonidos
-              </small>
+    <small>
+      ${state.sound ? "Activado" : "Desactivado"}
+    </small>
 
-            </span>
+  </span>
 
-          </button>
+</button>
 
 
           <button
@@ -4031,8 +4031,13 @@ if (action === "close-settings") {
   render();
 
 }
+if (action === "settings-sound") {
 
+  state.sound = !state.sound;
 
+  render();
+
+}
         /* =========================
            LOCAL
            ========================= */
