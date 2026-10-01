@@ -4667,6 +4667,35 @@ function settingsMarkup() {
             </button>
 
           </div>
+          <button
+  class="settings-option"
+  data-action="settings-sound"
+>
+
+  <span class="settings-option-icon sound-setting-icon">
+    ${state.sound ? "🔊" : "🔇"}
+  </span>
+
+  <span class="settings-option-text">
+
+    <strong>
+      Sonido
+    </strong>
+
+    <small>
+      ${state.sound
+        ? "Efectos de sonido activados"
+        : "Efectos de sonido desactivados"
+      }
+    </small>
+
+  </span>
+
+  <span class="settings-toggle ${state.sound ? "active" : ""}">
+    <span></span>
+  </span>
+
+</button>
 <button
   class="settings-option"
   data-action="how-to-play"
