@@ -40,11 +40,11 @@ button {
   min-height:100vh;
 }
 .shell {
-  position:relative;
   width:min(1180px,calc(100% - 36px));
   min-height:100vh;
   margin:auto;
   padding:24px 0 50px;
+  position:relative;
 }
 .topbar {
   display:flex;
@@ -100,6 +100,8 @@ button {
   min-height:680px;
   grid-template-columns:minmax(0,1fr) minmax(390px,500px);
   gap:clamp(50px,8vw,120px);
+
+  padding-top:70px;
 }
 
 .setup-modern::before {
@@ -2246,6 +2248,32 @@ p {
   position: absolute;
   top: 18px;
   right: 18px;
+
+  width: 46px;
+  height: 46px;
+
+  border: 1px solid #202b3e22;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #202b3e;
+
+  font-size: 21px;
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px #202b3e18;
+
+  z-index: 80;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+}
 
   width: 46px;
   height: 46px;
@@ -4513,45 +4541,39 @@ Jugar otra vez
 
 function render() {
 
-app.innerHTML=`
+  app.innerHTML=`
 
-<div class="shell">
+  <div class="shell">
 
-${logoHeader()}
+    ${logoHeader()}
 
-${
-state.phase==="setup"
-?
-setupMarkup()
-:
-gameMarkup()
-}
+    ${
+      state.phase==="setup"
+      ?
+      setupMarkup()
+      :
+      gameMarkup()
+    }
 
-${
-state.phase !== "setup"
-?
-settingsMarkup()
-:
-""
-}
+    ${settingsMarkup()}
 
-</div>
+  </div>
 
-${
-state.celebrating
-?
-celebrationMarkup()
-:
-state.phase==="winner"
-?
-winnerMarkup()
-:
-""
-}
+  ${
+    state.celebrating
+    ?
+    celebrationMarkup()
+    :
+    state.phase==="winner"
+    ?
+    winnerMarkup()
+    :
+    ""
+  }
 
-`;
+  `;
 
-bind();
+  bind();
 
 }
 function bind() {
