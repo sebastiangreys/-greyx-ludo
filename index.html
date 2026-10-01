@@ -2704,6 +2704,261 @@ p {
   background: #ffffff;
   transform: translateY(-1px);
 }
+/* =========================================
+   ACERCA DE GREYX LUDO
+   ========================================= */
+
+.about-greyx-panel {
+  margin-top: 10px;
+
+  padding: 17px;
+
+  border-radius: 18px;
+
+  background: #ffffff70;
+
+  border: 1px solid #202b3e12;
+
+  animation: settingsOpen .22s ease-out;
+}
+
+.about-greyx-header {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.about-greyx-logo {
+  width: 45px;
+  height: 45px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 14px;
+
+  background: #202b3e0b;
+
+  font-size: 23px;
+}
+
+.about-greyx-title {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.about-greyx-title span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .15em;
+}
+
+.about-greyx-title h3 {
+  margin: 0;
+
+  color: var(--ink);
+
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.about-greyx-close {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #202b3e0d;
+  color: var(--ink);
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.about-greyx-description {
+  padding: 12px;
+
+  border-radius: 13px;
+
+  background: #ffffff80;
+
+  margin-bottom: 10px;
+}
+
+.about-greyx-description p {
+  margin: 0;
+
+  color: #4f5b6d;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.about-greyx-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.about-greyx-info-row {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px;
+
+  border-radius: 12px;
+
+  background: #ffffff80;
+}
+
+.about-greyx-info-row > span {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #202b3e08;
+
+  font-size: 15px;
+}
+
+.about-greyx-info-row div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+.about-greyx-info-row strong {
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.about-greyx-info-row small {
+  color: #4f5b6d;
+
+  font-size: 9px;
+}
+
+.about-greyx-divider {
+  height: 1px;
+
+  margin: 13px 0;
+
+  background: #202b3e12;
+}
+
+.about-greyx-creator {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.about-greyx-creator-icon {
+  width: 35px;
+  height: 35px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #202b3e0b;
+
+  font-size: 16px;
+}
+
+.about-greyx-creator div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+.about-greyx-creator div span {
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .12em;
+}
+
+.about-greyx-creator div strong {
+  color: var(--ink);
+
+  font-size: 12px;
+}
+
+.about-greyx-version {
+  margin-top: 12px;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: .08em;
+
+  text-align: center;
+}
+
+.about-greyx-back {
+  width: 100%;
+
+  margin-top: 13px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #202b3e16;
+  border-radius: 12px;
+
+  background: #ffffff80;
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.about-greyx-back:hover {
+  background: #ffffff;
+
+  transform: translateY(-1px);
+}
 </style>
 </head>
 
@@ -5018,6 +5273,22 @@ if (action === "how-to-play") {
 if (action === "close-how-to-play") {
 
   state.howToPlayOpen = false;
+
+  render();
+
+}
+if (action === "about-greyx") {
+
+  state.aboutGreyxOpen = true;
+
+  render();
+
+}
+
+
+if (action === "close-about-greyx") {
+
+  state.aboutGreyxOpen = false;
 
   render();
 
