@@ -3720,38 +3720,21 @@ Turno actual
 </span>
 <div class="status-player">
 
-<div class="players-list">
-
-${state.players.map((playerColor, index) => `
-
-<div class="player-row">
-
-<i class="orb ${playerColor}"></i>
+<i class="orb ${color}"></i>
 
 <div>
 
 <strong>
-${playerLabel(playerColor)}
+${playerLabel(color)}
 </strong>
 
 <small>
 ${
-  state.mode === "solo" && playerColor !== state.humanColor
-    ? "Bot"
-    : `Jugador ${index + 1}`
-}
-${
-  index === state.active
-    ? " · Turno actual"
-    : ""
+  state.mode === "solo" && color !== state.humanColor
+  ? "Bot automático"
+  : `Jugador ${state.active + 1} · tu turno`
 }
 </small>
-
-</div>
-
-</div>
-
-`).join("")}
 
 </div>
 
