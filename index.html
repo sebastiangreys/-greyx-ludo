@@ -4324,17 +4324,13 @@ if (action === "settings-theme") {
            ========================= */
 
         if (action === "local-count") {
+  state.count = Number(button.dataset.count);
+  state.mode = "local";
 
-          state.count =
-            Number(button.dataset.count);
-
-          state.mode = "local";
-
-          render();
-
-        }
-
-
+  // Cargar los colores/jugadores elegidos
+  state.players = [...playersByCount[state.count]];
+  render();
+}
         /* =========================
            CONTINUAR LOCAL
            ========================= */
