@@ -3026,6 +3026,7 @@ const state = {
   settingsOpen:false,
   settingsThemeOpen:false,
   howToPlayOpen:false,
+  aboutGreyxOpen:false,
   arrived:null,
   celebrating:false,
   count:4,
@@ -4654,29 +4655,157 @@ ${
 
 
           <button
-            class="settings-option"
-            data-action="about-greyx"
-          >
+  class="settings-option"
+  data-action="about-greyx"
+>
 
-            <span class="settings-option-icon">
-              👤
-            </span>
+  <span class="settings-option-icon">
+    👤
+  </span>
 
-            <span class="settings-option-text">
+  <span class="settings-option-text">
 
-              <strong>
-                Acerca de Greyx Ludo
-              </strong>
+    <strong>
+      Acerca de Greyx Ludo
+    </strong>
 
-              <small>
-                Conoce el proyecto y su creador
-              </small>
+    <small>
+      Conoce el proyecto y su creador
+    </small>
 
-            </span>
+  </span>
 
-          </button>
+</button>
+
+${
+  state.aboutGreyxOpen
+  ?
+  `
+
+  <div class="about-greyx-panel">
+
+    <div class="about-greyx-header">
+
+      <div class="about-greyx-logo">
+        🎲
+      </div>
+
+      <div class="about-greyx-title">
+
+        <span>
+          GREYX STUDIOS
+        </span>
+
+        <h3>
+          LUDO GREYX
+        </h3>
+
+      </div>
+
+      <button
+        class="about-greyx-close"
+        data-action="close-about-greyx"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+
+    </div>
 
 
+    <div class="about-greyx-description">
+
+      <p>
+        Un clásico juego de mesa reinventado
+        como una experiencia digital moderna,
+        sencilla y divertida.
+      </p>
+
+    </div>
+
+
+    <div class="about-greyx-info">
+
+      <div class="about-greyx-info-row">
+
+        <span>🎮</span>
+
+        <div>
+          <strong>Proyecto</strong>
+          <small>Greyx Ludo</small>
+        </div>
+
+      </div>
+
+
+      <div class="about-greyx-info-row">
+
+        <span>🧠</span>
+
+        <div>
+          <strong>Creado con</strong>
+          <small>HTML · CSS · JavaScript</small>
+        </div>
+
+      </div>
+
+
+      <div class="about-greyx-info-row">
+
+        <span>✨</span>
+
+        <div>
+          <strong>Concepto</strong>
+          <small>Un Ludo hecho para jugar y compartir</small>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="about-greyx-divider"></div>
+
+
+    <div class="about-greyx-creator">
+
+      <span class="about-greyx-creator-icon">
+        👤
+      </span>
+
+      <div>
+
+        <span>
+          CREADOR
+        </span>
+
+        <strong>
+          Sebastián Greys
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="about-greyx-version">
+      GREYX LUDO · PROYECTO INDEPENDIENTE
+    </div>
+
+
+    <button
+      class="about-greyx-back"
+      data-action="close-about-greyx"
+    >
+      ← Volver a configuración
+    </button>
+
+  </div>
+
+  `
+  :
+  ""
+}
           <button
             class="settings-option"
             data-action="settings-new-game"
