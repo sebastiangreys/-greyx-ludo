@@ -2852,7 +2852,6 @@ const state = {
   count:4,
   mode:"local",
   setupStep:1,
-  mainPlayOpen: false,
   botCount:1,
   humanColor:"red",
 playerNames:{
@@ -2930,11 +2929,131 @@ La mesa para compartir
 }
 
 function setupMarkup() {
+  
+  if (state.mainPlayOpen) {
+
+  return `
+    <section class="setup setup-modern setup-step">
+
+      <div class="setup-copy">
+
+        <div class="eyebrow">
+          NUEVA PARTIDA
+        </div>
+
+        <h1 class="setup-title">
+          ELIGE TU
+          <span>MODO.</span>
+        </h1>
+
+        <p class="setup-lead">
+          Decide cómo quieres jugar
+          esta partida.
+        </p>
+
+      </div>
+
+
+      <div class="setup-card setup-card-modern">
+
+        <div class="setup-card-header">
+
+          <span class="setup-card-kicker">
+            MODO DE JUEGO
+          </span>
+
+          <h2>
+            ¿Cómo quieres jugar?
+          </h2>
+
+          <p>
+            Elige una modalidad para comenzar.
+          </p>
+
+        </div>
+
+
+        <div class="mode-grid">
+
+          <button
+            class="mode-card"
+            data-action="local"
+          >
+
+            <span class="mode-icon">
+              👥
+            </span>
+
+            <span class="mode-info">
+
+              <strong>
+                Jugar local
+              </strong>
+
+              <small>
+                Comparte el dispositivo con tus amigos.
+              </small>
+
+            </span>
+
+            <span class="mode-arrow">
+              ›
+            </span>
+
+          </button>
+
+
+          <button
+            class="mode-card"
+            data-action="mode"
+          >
+
+            <span class="mode-icon">
+              🤖
+            </span>
+
+            <span class="mode-info">
+
+              <strong>
+                Contra bot
+              </strong>
+
+              <small>
+                Juega contra rivales automáticos.
+              </small>
+
+            </span>
+
+            <span class="mode-arrow">
+              ›
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div class="setup-actions">
+
+          <button
+            class="secondary-button"
+            data-action="main-back"
+          >
+            ← Volver
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+  `;
+}
 
   if (state.setupStep === 1) {
 
   return `
-    <section class="setup setup-modern main-menu">
+    <section class="setup setup-modern">
 
       <div class="setup-copy">
 
@@ -2955,7 +3074,7 @@ function setupMarkup() {
 
         <div class="setup-status">
           <span class="status-dot"></span>
-          LISTO PARA JUGAR
+          SIN CUENTAS · JUEGO LOCAL
         </div>
 
       </div>
@@ -2966,188 +3085,58 @@ function setupMarkup() {
         <div class="setup-card-glow"></div>
 
         <div class="setup-card-header">
-
           <span class="setup-card-kicker">
-            MENÚ PRINCIPAL
+            NUEVA PARTIDA
           </span>
 
           <h2>
-            Bienvenido a Greyx Ludo
+            ¿Cómo quieres jugar?
           </h2>
 
           <p>
-            Elige qué quieres hacer.
+            Elige una modalidad para comenzar.
           </p>
-
         </div>
 
 
-        <div class="main-menu-grid">
+        <div class="mode-grid">
 
           <button
-            class="main-menu-option main-menu-play"
-            data-action="main-play"
+            class="mode-card ${state.mode === "local" ? "selected" : ""}"
+            data-action="local"
           >
 
-            <span class="main-menu-icon">
-              🎮
-            </span>
+            <span class="mode-icon">👥</span>
 
-            <span class="main-menu-info">
-
-              <strong>
-                Jugar
-              </strong>
+            <span class="mode-info">
+              <strong>Jugar local</strong>
 
               <small>
-                Comienza una nueva partida
+                Comparte el dispositivo con tus amigos.
               </small>
-
             </span>
 
-            <span class="mode-arrow">
-              ›
-            </span>
+            <span class="mode-arrow">›</span>
 
           </button>
 
 
           <button
-            class="main-menu-option"
-            data-action="how-to-play"
+            class="mode-card ${state.mode === "solo" ? "selected" : ""}"
+            data-action="mode"
           >
 
-            <span class="main-menu-icon">
-              📖
-            </span>
+            <span class="mode-icon">🤖</span>
 
-            <span class="main-menu-info">
-
-              <strong>
-                Cómo jugar
-              </strong>
+            <span class="mode-info">
+              <strong>Contra bot</strong>
 
               <small>
-                Aprende las reglas de Greyx Ludo
+                Juega contra rivales automáticos.
               </small>
-
             </span>
 
-            <span class="mode-arrow">
-              ›
-            </span>
-
-          </button>
-
-
-          <button
-            class="main-menu-option"
-            data-action="menu-sound"
-          >
-
-            <span class="main-menu-icon">
-              ${state.sound ? "🔊" : "🔇"}
-            </span>
-
-            <span class="main-menu-info">
-
-              <strong>
-                Sonido
-              </strong>
-
-              <small>
-                ${state.sound ? "Activado" : "Desactivado"}
-              </small>
-
-            </span>
-
-            <span class="mode-arrow">
-              ›
-            </span>
-
-          </button>
-
-
-          <button
-            class="main-menu-option"
-            data-action="menu-animation"
-          >
-
-            <span class="main-menu-icon">
-              ${state.animations ? "✨" : "⏹️"}
-            </span>
-
-            <span class="main-menu-info">
-
-              <strong>
-                Animaciones
-              </strong>
-
-              <small>
-                ${state.animations ? "Activadas" : "Desactivadas"}
-              </small>
-
-            </span>
-
-            <span class="mode-arrow">
-              ›
-            </span>
-
-          </button>
-
-
-          <button
-            class="main-menu-option"
-            data-action="menu-theme"
-          >
-
-            <span class="main-menu-icon">
-              🎨
-            </span>
-
-            <span class="main-menu-info">
-
-              <strong>
-                Temas
-              </strong>
-
-              <small>
-                Personaliza el aspecto del juego
-              </small>
-
-            </span>
-
-            <span class="mode-arrow">
-              ›
-            </span>
-
-          </button>
-
-
-          <button
-            class="main-menu-option"
-            data-action="about-greyx"
-          >
-
-            <span class="main-menu-icon">
-              👤
-            </span>
-
-            <span class="main-menu-info">
-
-              <strong>
-                Acerca de Greyx Ludo
-              </strong>
-
-              <small>
-                Conoce el proyecto
-              </small>
-
-            </span>
-
-            <span class="mode-arrow">
-              ›
-            </span>
+            <span class="mode-arrow">›</span>
 
           </button>
 
@@ -3161,12 +3150,16 @@ function setupMarkup() {
 
           <span>
             🎲
-            GREYX LUDO
+            Una partida rápida
           </span>
 
-          <span>
-            v1.0
-          </span>
+          <button
+            class="sound-mini"
+            data-action="sound"
+            aria-label="Activar o desactivar sonido"
+          >
+            ${state.sound ? "🔊" : "🔇"}
+          </button>
 
         </div>
 
@@ -4570,9 +4563,12 @@ function bind() {
 
         const action = button.dataset.action;
         if (action === "main-play") {
+  state.mainPlayOpen = true;
+  render();
+}
+        if (action === "main-back") {
 
-  state.setupStep = 1;
-  state.mode = null;
+  state.mainPlayOpen = false;
 
   render();
 
