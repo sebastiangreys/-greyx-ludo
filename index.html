@@ -3323,7 +3323,6 @@ function playerLabel(color) {
 const state = {
   phase:"setup",
   sound:true,
-  animations:true,
   theme:"classic",
   settingsOpen:false,
   settingsThemeOpen:false,
@@ -4873,30 +4872,6 @@ ${
   :
   ""
 }
-          <button
-  class="settings-option"
-  data-action="settings-animation"
->
-
-  <span class="settings-option-icon">
-    ${state.animations ? "✨" : "⏹️"}
-  </span>
-
-  <span class="settings-option-text">
-
-    <strong>
-      Animaciones
-    </strong>
-
-    <small>
-      ${state.animations ? "Activadas" : "Desactivadas"}
-    </small>
-
-  </span>
-
-</button>
-
-
           <button
   class="settings-option"
   data-action="settings-theme"
