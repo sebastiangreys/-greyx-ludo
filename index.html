@@ -4314,27 +4314,31 @@ if (action === "settings-theme") {
         /* =========================
            LOCAL
            ========================= */
-
         if (action === "local") {
+  state.mode = "local";
+  state.setupStep = 2;
 
-          state.mode = "local";
-          state.setupStep = 2;
+  // Preparar inmediatamente los jugadores
+  state.players = [
+    ...playersByCount[state.count]
+  ];
 
-          render();
+  render();
 
-        }
-
-
+}
         /* =========================
            CANTIDAD LOCAL
            ========================= */
-
         if (action === "local-count") {
+
   state.count = Number(button.dataset.count);
+
   state.mode = "local";
 
-  // Cargar los colores/jugadores elegidos
-  state.players = [...playersByCount[state.count]];
+  // Actualizar los jugadores según la cantidad elegida
+  state.players = [
+    ...playersByCount[state.count]
+  ];
   render();
 }
         /* =========================
@@ -4342,28 +4346,21 @@ if (action === "settings-theme") {
            ========================= */
 
         if (action === "local-continue") {
-
-          state.setupStep = 3;
-
-          render();
-
-        }
-
-
+  // Asegurar que los jugadores estén definidos
+  state.players = [
+    ...playersByCount[state.count]
+  ];
+  state.setupStep = 3;
+  render();
+}
         /* =========================
            CONTRA BOT
            ========================= */
-
         if (action === "mode") {
-
           state.mode = "solo";
           state.setupStep = 2;
-
           render();
-
         }
-
-
         /* =========================
            CANTIDAD DE BOTS
            ========================= */
@@ -4767,19 +4764,14 @@ state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
 
       return;
     }
-
     if (isBotTurn()) {
-    state.message = `${names[color]} está eligiendo una ficha…`;
-      render();
-
+  state.message = `${playerLabel(color)} está eligiendo una ficha…`;
       setTimeout(() => {
         const tokenId = chooseBotMove(color);
         if (tokenId !== null) move(color, tokenId);
       }, 700);
-
       return;
     }
-
     state.message =
       state.valid.size === 1
         ? "Una ficha puede moverse. Tócala para jugar."
@@ -5152,8 +5144,8 @@ if (capturedTokens.length) {
       state.roll = null;
 
       state.message = isBotTurn()
-        ? `Turno de ${names[state.players[state.active]]}. El bot está pensando…`
-        : "Tu turno. Lanza el dado.";
+  ? `Turno de ${playerLabel(state.players[state.active])}. El bot está pensando…`
+  : "Tu turno. Lanza el dado.";
 
       render();
       queueBotTurn();
