@@ -1545,13 +1545,23 @@ p {
 
 .panel {
   padding:18px;
+  border:1px solid #ffffff12;
+  border-radius:20px;
+  background:
+    linear-gradient(145deg,#202535e8,#121621e8);
+  box-shadow:
+    0 16px 35px #00000035,
+    inset 0 1px 0 #ffffff0b;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
 }
 
 .status-label {
-  color:#9b7438;
-  font:700 .65rem monospace;
-  letter-spacing:.11em;
+  color:#9b8cff;
+  font:800 .63rem monospace;
+  letter-spacing:.13em;
   text-transform:uppercase;
+  text-shadow:0 0 12px #8c7cff35;
 }
 
 .status-player {
@@ -1710,12 +1720,15 @@ p {
 }
 
 .hint.pass {
-  color:#a36938;
+  color:#ff9a9a;
 }
 
 .panel h3 {
   margin:0 0 15px;
   font-size:.93rem;
+  color:#ffffff;
+  font-weight:850;
+  letter-spacing:-.02em;
 }
 
 .score-grid {
