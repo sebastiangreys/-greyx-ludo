@@ -1531,29 +1531,54 @@ p {
 
 .dice-row {
   display:grid;
-  grid-template-columns:62px 1fr;
-  gap:12px;
+  grid-template-columns:68px 1fr;
+  gap:14px;
   align-items:center;
+  padding:14px;
+  border:1px solid #ffffff12;
+  border-radius:18px;
+  background:linear-gradient(145deg,#1d2230,#151925);
+  box-shadow:
+    0 12px 28px #00000030,
+    inset 0 1px 0 #ffffff0a;
 }
 
 .die {
   display:grid;
   grid-template:repeat(3,1fr)/repeat(3,1fr);
   gap:4px;
-  width:62px;
-  height:62px;
-  padding:9px;
-  border:1px solid #dac49a;
-  border-radius:15px;
-  background:#fff5cf;
+  width:68px;
+  height:68px;
+  padding:10px;
+  border:1px solid #ffffff22;
+  border-radius:18px;
+  background:
+    linear-gradient(145deg,#f8f9ff,#dfe3f0);
+  box-shadow:
+    0 10px 22px #00000045,
+    inset 0 1px 2px #ffffff,
+    inset 0 -3px 5px #00000018,
+    0 0 0 3px #8c7cff12;
 }
 
 .pip {
   width:100%;
   height:100%;
   border-radius:50%;
-  background:#455f89;
+  background:#20263a;
   opacity:0;
+  box-shadow:
+    inset 0 2px 2px #ffffff20,
+    0 1px 2px #00000055;
+  transform:scale(.92);
+  transition:
+    opacity .15s ease,
+    transform .15s ease;
+}
+
+.pip.on {
+  opacity:1;
+  transform:scale(1);
 }
 
 .pip.on {
