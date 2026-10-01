@@ -713,20 +713,76 @@ p {
 }
 .primary-button,
 .roll-button {
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
   gap:9px;
   width:100%;
-  min-height:52px;
-  border:0;
-  border-radius:15px;
-  background:var(--navy);
-  color:#fff;
-  font-weight:800;
+  min-height:54px;
+  border:1px solid #ffffff20;
+  border-radius:16px;
+  background:
+    linear-gradient(135deg,#8c7cff,#6355c7);
+  color:#ffffff;
+  font-weight:900;
+  letter-spacing:.01em;
   cursor:pointer;
-  box-shadow:0 4px 0 #304868;
-  transition:.15s;
+
+  box-shadow:
+    0 8px 0 #3d357d,
+    0 14px 28px #00000040,
+    inset 0 1px 0 #ffffff35;
+
+  transition:
+    transform .15s ease,
+    filter .15s ease,
+    box-shadow .15s ease;
+}
+
+.primary-button::before,
+.roll-button::before {
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:15px;
+  background:linear-gradient(
+    180deg,
+    #ffffff18,
+    transparent 45%
+  );
+  pointer-events:none;
+}
+
+.primary-button:hover,
+.roll-button:hover {
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+  box-shadow:
+    0 10px 0 #3d357d,
+    0 18px 32px #0000004d,
+    0 0 22px #8c7cff35,
+    inset 0 1px 0 #ffffff40;
+}
+
+.primary-button:active,
+.roll-button:active {
+  transform:translateY(5px);
+  box-shadow:
+    0 3px 0 #3d357d,
+    0 7px 15px #00000035,
+    inset 0 2px 5px #00000025;
+}
+
+.primary-button:disabled,
+.roll-button:disabled {
+  cursor:not-allowed;
+  filter:grayscale(.35);
+  opacity:.55;
+  transform:none;
+  box-shadow:
+    0 4px 0 #30354a,
+    0 8px 16px #00000025;
 }
 .primary-button:hover,
 .roll-button:hover {
