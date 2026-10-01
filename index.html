@@ -2554,6 +2554,150 @@ p {
   }
 
 }
+/* =========================================
+   CÓMO JUGAR
+   ========================================= */
+
+.how-to-play-panel {
+  margin-top: 10px;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  background: #ffffff70;
+
+  border: 1px solid #202b3e12;
+
+  animation: settingsOpen .22s ease-out;
+}
+
+.how-to-play-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 15px;
+}
+
+.how-to-play-kicker {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .14em;
+}
+
+.how-to-play-header h3 {
+  margin: 0;
+
+  font-size: 20px;
+}
+
+.how-to-play-close {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #202b3e0d;
+  color: var(--ink);
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.how-to-play-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.how-to-play-rule {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding: 10px;
+
+  border-radius: 13px;
+
+  background: #ffffff80;
+}
+
+.how-to-play-rule > span {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #202b3e08;
+
+  font-size: 16px;
+}
+
+.how-to-play-rule strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 12px;
+}
+
+.how-to-play-rule p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.how-to-play-back {
+  width: 100%;
+
+  margin-top: 13px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #202b3e16;
+  border-radius: 12px;
+
+  background: #ffffff80;
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.how-to-play-back:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
 </style>
 </head>
 
@@ -2875,6 +3019,7 @@ const state = {
   theme:"classic",
   settingsOpen:false,
   settingsThemeOpen:false,
+  howToPlayOpen:false,
   arrived:null,
   celebrating:false,
   count:4,
@@ -4260,32 +4405,136 @@ function settingsMarkup() {
             </button>
 
           </div>
-
-
-          <button
+<button
   class="settings-option"
-  data-action="settings-sound"
+  data-action="how-to-play"
 >
 
   <span class="settings-option-icon">
-    ${state.sound ? "🔊" : "🔇"}
+    📖
   </span>
 
   <span class="settings-option-text">
 
     <strong>
-      Sonido
+      Cómo jugar
     </strong>
 
     <small>
-      ${state.sound ? "Activado" : "Desactivado"}
+      Reglas y funcionamiento
     </small>
 
   </span>
 
 </button>
 
+${
+  state.howToPlayOpen
+  ?
+  `
 
+  <div class="how-to-play-panel">
+
+    <div class="how-to-play-header">
+
+      <div>
+        <span class="how-to-play-kicker">
+          GREYX LUDO
+        </span>
+
+        <h3>
+          📖 Cómo jugar
+        </h3>
+      </div>
+
+      <button
+        class="how-to-play-close"
+        data-action="close-how-to-play"
+        aria-label="Cerrar cómo jugar"
+      >
+        ✕
+      </button>
+
+    </div>
+
+
+    <div class="how-to-play-content">
+
+      <div class="how-to-play-rule">
+        <span>🎲</span>
+        <div>
+          <strong>Lanza el dado</strong>
+          <p>
+            Tira el dado cuando sea tu turno y mueve una ficha
+            según el número obtenido.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="how-to-play-rule">
+        <span>🏠</span>
+        <div>
+          <strong>Saca una ficha</strong>
+          <p>
+            Necesitas sacar un 6 para sacar una ficha de casa
+            y colocarla en la casilla inicial.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="how-to-play-rule">
+        <span>💥</span>
+        <div>
+          <strong>Captura fichas</strong>
+          <p>
+            Si caes sobre una ficha rival en una casilla válida,
+            la capturas y vuelve a su casa.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="how-to-play-rule">
+        <span>🛡️</span>
+        <div>
+          <strong>Casillas seguras</strong>
+          <p>
+            Algunas casillas protegen las fichas y evitan
+            que puedan ser capturadas.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="how-to-play-rule">
+        <span>🏆</span>
+        <div>
+          <strong>Llega a la meta</strong>
+          <p>
+            Lleva tus fichas hasta el centro del tablero
+            para completar el recorrido.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+
+    <button
+      class="how-to-play-back"
+      data-action="close-how-to-play"
+    >
+      ← Volver a configuración
+    </button>
+
+  </div>
+
+  `
+  :
+  ""
+}
           <button
   class="settings-option"
   data-action="settings-animation"
@@ -4618,6 +4867,22 @@ if (action === "settings-theme") {
 
   state.settingsThemeOpen =
     !state.settingsThemeOpen;
+
+  render();
+
+}
+if (action === "how-to-play") {
+
+  state.howToPlayOpen = true;
+
+  render();
+
+}
+
+
+if (action === "close-how-to-play") {
+
+  state.howToPlayOpen = false;
 
   render();
 
