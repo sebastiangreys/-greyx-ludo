@@ -4562,17 +4562,6 @@ function bind() {
       button.addEventListener("click", () => {
 
         const action = button.dataset.action;
-        if (action === "main-play") {
-  state.mainPlayOpen = true;
-  render();
-}
-        if (action === "main-back") {
-
-  state.mainPlayOpen = false;
-
-  render();
-
-}
         if (action === "settings") {
 
   state.settingsOpen = true;
