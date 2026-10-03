@@ -3522,7 +3522,7 @@ function getMaster() {
   const ctx = getAudioContext();
   if (!masterGain) {
     masterGain = ctx.createGain();
-    masterGain.gain.value = 3;
+    masterGain.gain.value = 5;
 
     const limiter = ctx.createDynamicsCompressor();
     masterGain.connect(limiter);
