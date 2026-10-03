@@ -3198,6 +3198,166 @@ p {
   25%{opacity:.13}
   100%{opacity:0}
 }
+/* ================================
+   INTRO GREYX
+================================ */
+
+.intro-screen{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 50% 45%, #6d21ff20 0, transparent 28%),
+    #080a12;
+  overflow:hidden;
+  opacity:1;
+  transition:opacity .8s ease;
+}
+
+.intro-screen.hide{
+  opacity:0;
+  pointer-events:none;
+}
+
+.intro-scene{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+
+.intro-company{
+  animation:introCompanyIn 1s ease-out both;
+}
+
+.intro-logo{
+  width:clamp(120px,24vw,190px);
+  height:auto;
+  filter:
+    drop-shadow(0 0 8px #6d21ff)
+    drop-shadow(0 0 28px #6d21ff88);
+  animation:introLogoPulse 1.8s ease-in-out infinite;
+}
+
+.intro-name{
+  margin-top:20px;
+  font-size:clamp(2.4rem,8vw,4.8rem);
+  font-weight:950;
+  letter-spacing:-.08em;
+  line-height:1;
+  color:#fff;
+  text-shadow:0 0 20px #ffffff22;
+}
+
+.intro-name span{
+  color:#6d21ff;
+  text-shadow:
+    0 0 10px #6d21ff,
+    0 0 30px #6d21ff88;
+}
+
+.intro-ludo{
+  opacity:0;
+  transform:scale(.92);
+  animation:introLudoIn .8s ease-out 2s forwards;
+}
+
+.intro-ludo-title{
+  margin:0;
+  font-size:clamp(3rem,10vw,6rem);
+  font-weight:950;
+  letter-spacing:-.07em;
+  color:#fff;
+}
+
+.intro-ludo-title span{
+  color:#6d21ff;
+}
+
+.intro-ludo-subtitle{
+  margin:12px 0 28px;
+  color:#9da4b5;
+  font-size:.85rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+
+.intro-loader{
+  width:min(260px,65vw);
+  height:3px;
+  margin:auto;
+  overflow:hidden;
+  border-radius:999px;
+  background:#ffffff12;
+}
+
+.intro-loader::before{
+  content:"";
+  display:block;
+  width:35%;
+  height:100%;
+  border-radius:inherit;
+  background:#6d21ff;
+  box-shadow:0 0 14px #6d21ff;
+  animation:introLoading 2.2s ease-in-out infinite;
+}
+
+@keyframes introCompanyIn{
+  0%{
+    opacity:0;
+    transform:scale(.75);
+  }
+  60%{
+    opacity:1;
+    transform:scale(1.06);
+  }
+  100%{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@keyframes introLogoPulse{
+  0%,100%{
+    filter:
+      drop-shadow(0 0 8px #6d21ff)
+      drop-shadow(0 0 22px #6d21ff66);
+  }
+  50%{
+    filter:
+      drop-shadow(0 0 16px #6d21ff)
+      drop-shadow(0 0 42px #6d21ffaa);
+  }
+}
+
+@keyframes introLudoIn{
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@keyframes introLoading{
+  0%{transform:translateX(-140%)}
+  100%{transform:translateX(390%)}
+}
+
+.intro-flash{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:#6d21ff;
+  opacity:0;
+  animation:introFlash .7s ease-out .15s;
+}
+
+@keyframes introFlash{
+  0%{opacity:.65}
+  100%{opacity:0}
+}
 </style>
 </head>
 
@@ -5386,7 +5546,78 @@ Jugar otra vez
 `;
 
 }
+function greyxLogoMarkup(){
+  return `
+    <svg viewBox="0 0 80 80" class="intro-logo">
+      <path fill="#fff"
+        d="M18 18h42L51 27H31c-8 0-14 6-14 14s6 14 14 14h8l-9 9h-1C15 64 7 54 7 41S15 18 18 18Z"/>
+      <path fill="#fff"
+        d="M37 37h27l-9 9H43l-6 7-7-8 7-8Z"/>
+      <path fill="#6d21ff"
+        d="M44 48h15l-7 7h-15l7-7Z"/>
+    </svg>
+  `;
+}
+function showIntro(){
 
+  app.innerHTML = `
+    <div class="intro-screen" id="introScreen">
+
+      <div class="intro-flash"></div>
+
+      <div class="intro-scene intro-company" id="introCompany">
+
+        ${greyxLogoMarkup()}
+
+        <div class="intro-name">
+          GRE<span>X</span>
+        </div>
+
+      </div>
+
+      <div class="intro-scene intro-ludo">
+
+        <div>
+
+          <h1 class="intro-ludo-title">
+            GREY<span>X</span> LUDO
+          </h1>
+
+          <div class="intro-ludo-subtitle">
+            La mesa para compartir
+          </div>
+
+          <div class="intro-loader"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+    const company = document.getElementById("introCompany");
+
+    if(company){
+      company.style.transition = "opacity .7s ease, transform .7s ease";
+      company.style.opacity = "0";
+      company.style.transform = "scale(1.08)";
+    }
+  }, 1700);
+
+  setTimeout(() => {
+    const intro = document.getElementById("introScreen");
+
+    if(intro){
+      intro.classList.add("hide");
+
+      setTimeout(() => {
+        render();
+      }, 800);
+    }
+  }, 5000);
+}
 function render() {
 
   app.innerHTML=`
