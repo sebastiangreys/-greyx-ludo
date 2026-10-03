@@ -5284,52 +5284,35 @@ ${
   :
   ""
 }
-          <button
-            class="settings-option"
-            data-action="settings-new-game"
-          >
+${
+  state.phase === "playing"
+  ?
+  `
+  <button
+    class="settings-option"
+    data-action="settings-new-game"
+  >
+    <span class="settings-option-icon">🔄</span>
+    <span class="settings-option-text">
+      <strong>Nueva partida</strong>
+      <small>Reiniciar con los mismos jugadores</small>
+    </span>
+  </button>
 
-            <span class="settings-option-icon">
-              🔄
-            </span>
-
-            <span class="settings-option-text">
-
-              <strong>
-                Nueva partida
-              </strong>
-
-              <small>
-                Comenzar una nueva partida
-              </small>
-
-            </span>
-
-          </button>
-
-
-          <button
-            class="settings-option"
-            data-action="settings-menu"
-          >
-
-            <span class="settings-option-icon">
-              🏠
-            </span>
-
-            <span class="settings-option-text">
-
-              <strong>
-                Salir al menú
-              </strong>
-
-              <small>
-                Volver a la configuración inicial
-              </small>
-
-            </span>
-
-          </button>
+  <button
+    class="settings-option"
+    data-action="settings-menu"
+  >
+    <span class="settings-option-icon">🏠</span>
+    <span class="settings-option-text">
+      <strong>Salir al menú</strong>
+      <small>Volver a la pantalla inicial</small>
+    </span>
+  </button>
+  `
+  :
+  ""
+}
 
         </section>
 
@@ -5554,6 +5537,27 @@ if (action === "about-greyx") {
 
 
 if (action === "close-about-greyx") {
+  if (action === "settings-new-game") {
+
+  if (!confirm("¿Empezar una nueva partida?")) return;
+
+  state.settingsOpen = false;
+  state.howToPlayOpen = false;
+  state.aboutGreyxOpen = false;
+
+  start(state.players.length);
+}
+
+if (action === "settings-menu") {
+
+  if (!confirm("¿Salir al menú? Se perderá la partida actual.")) return;
+
+  state.settingsOpen = false;
+  state.howToPlayOpen = false;
+  state.aboutGreyxOpen = false;
+
+  setup();
+}
 
   state.aboutGreyxOpen = false;
 
