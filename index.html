@@ -3006,6 +3006,198 @@ p {
 .settings-toggle.active span {
   transform: translateX(16px);
 }
+/* =========================================================
+   INTRO GREYX STUDIOS
+   ========================================================= */
+
+.intro-screen{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 45%, #6d21ff22 0, transparent 30%),
+    radial-gradient(circle at 20% 80%, #5141a822 0, transparent 35%),
+    linear-gradient(145deg,#070811,#0d1020 55%,#070910);
+  opacity:1;
+  transition:opacity .7s ease, visibility .7s ease;
+}
+
+.intro-screen.hide{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.intro-content{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  text-align:center;
+}
+
+/* Destello detrás del logo */
+
+.intro-glow{
+  position:absolute;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  background:#6d21ff;
+  filter:blur(80px);
+  opacity:0;
+  animation:introGlow 2s ease-out forwards;
+}
+
+@keyframes introGlow{
+  0%{
+    opacity:0;
+    transform:scale(.35);
+  }
+
+  35%{
+    opacity:.28;
+    transform:scale(1);
+  }
+
+  65%{
+    opacity:.16;
+    transform:scale(1.2);
+  }
+
+  100%{
+    opacity:0;
+    transform:scale(1.5);
+  }
+}
+
+/* GREYX */
+
+.intro-studios{
+  position:relative;
+  z-index:2;
+  font-size:clamp(3.2rem,11vw,7rem);
+  font-weight:950;
+  letter-spacing:.18em;
+  color:#fff;
+  line-height:.9;
+  opacity:0;
+  transform:translateY(18px) scale(.96);
+  animation:introGreyxIn .9s cubic-bezier(.16,1,.3,1) .15s forwards;
+}
+
+.intro-studios span{
+  display:block;
+  margin-top:15px;
+  font-size:.18em;
+  letter-spacing:.55em;
+  font-weight:700;
+  color:#b995ff;
+}
+
+@keyframes introGreyxIn{
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+/* Segunda pantalla */
+
+.intro-ludo{
+  position:absolute;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+  opacity:0;
+  transform:scale(.94);
+  animation:introLudoIn 1s ease-out 2s forwards;
+}
+
+.intro-ludo-title{
+  font-size:clamp(2.7rem,9vw,6rem);
+  font-weight:950;
+  letter-spacing:-.06em;
+  color:#fff;
+}
+
+.intro-ludo-title span{
+  color:#8b5cf6;
+}
+
+.intro-subtitle{
+  color:#8e96a8;
+  font-size:.75rem;
+  font-weight:700;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+}
+
+/* Cargando */
+
+.intro-loader{
+  width:150px;
+  height:3px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#ffffff12;
+}
+
+.intro-loader-bar{
+  width:0%;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#6d21ff,#b995ff);
+  animation:introLoading 2.4s cubic-bezier(.25,.8,.25,1) 2.15s forwards;
+}
+
+@keyframes introLudoIn{
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@keyframes introLoading{
+  0%{width:0%}
+  100%{width:100%}
+}
+
+/* Pequeño texto inferior */
+
+.intro-status{
+  margin-top:2px;
+  color:#596174;
+  font:600 .65rem monospace;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+/* Flash final */
+
+.intro-flash{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  background:#fff;
+  opacity:0;
+  pointer-events:none;
+  animation:introFlash .5s ease 4.65s forwards;
+}
+
+@keyframes introFlash{
+  0%{opacity:0}
+  25%{opacity:.13}
+  100%{opacity:0}
+}
 </style>
 </head>
 
@@ -3203,7 +3395,62 @@ const safe = new Set([
 ]);
 
 const app = document.getElementById("app");
+function showIntro(){
 
+  app.innerHTML = `
+    <div class="intro-screen" id="introScreen">
+
+      <div class="intro-content">
+
+        <div class="intro-glow"></div>
+
+        <div class="intro-studios">
+          GREYX
+          <span>STUDIOS</span>
+        </div>
+
+        <div class="intro-ludo">
+
+          <div class="intro-ludo-title">
+            GREYX <span>LUDO</span>
+          </div>
+
+          <div class="intro-subtitle">
+            La mesa para compartir
+          </div>
+
+          <div class="intro-loader">
+            <div class="intro-loader-bar"></div>
+          </div>
+
+          <div class="intro-status">
+            Preparando partida...
+          </div>
+
+        </div>
+
+        <div class="intro-flash"></div>
+
+      </div>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+
+    const intro = document.getElementById("introScreen");
+
+    if(!intro) return;
+
+    intro.classList.add("hide");
+
+    setTimeout(() => {
+      render();
+    }, 700);
+
+  }, 5000);
+
+}
 // ===============================
 // SISTEMA DE SONIDOS
 // ===============================
@@ -6084,10 +6331,8 @@ if (capturedTokens.length) {
   animateStep();
 }
 
-render();
-
+showIntro();
 })();
-
 </script>
 
 </body>
