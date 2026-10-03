@@ -3764,6 +3764,18 @@ function syncMusic() {
 
   startMusic(state.phase === "playing" ? "game" : "menu");
 }
+const blankTokens = () =>
+  [0,1,2,3].map(id => ({
+    id,
+    progress:-1
+  }));
+
+const freshTokens = () => ({
+  red:blankTokens(),
+  green:blankTokens(),
+  yellow:blankTokens(),
+  blue:blankTokens()
+});
 
 function playerLabel(color) {
   return state.playerNames[color].trim() || names[color];
@@ -6439,10 +6451,6 @@ function showTapGate() {
 }
 
 showTapGate();
-
- else {
-  showIntro();
-}
 
 })();
 </script>
