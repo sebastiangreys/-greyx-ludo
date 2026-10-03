@@ -3610,6 +3610,7 @@ const state = {
   settingsThemeOpen:false,
   howToPlayOpen:false,
   aboutGreyxOpen:false,
+  confirmAction:null,
   arrived:null,
   celebrating:false,
   count:4,
@@ -4954,359 +4955,223 @@ function settingsMarkup() {
         <section class="settings-panel">
 
           <div class="settings-header">
-
             <div class="settings-title">
-
               <span>⚙️</span>
-
-              <strong>
-                Configuración
-              </strong>
-
+              <strong>Configuración</strong>
             </div>
 
-            <button
-              class="settings-close"
-              data-action="close-settings"
-            >
+            <button class="settings-close" data-action="close-settings">
               ✕
             </button>
-
           </div>
-          <button
-  class="settings-option"
-  data-action="settings-sound"
->
-
-  <span class="settings-option-icon sound-setting-icon">
-    ${state.sound ? "🔊" : "🔇"}
-  </span>
 
-  <span class="settings-option-text">
-
-    <strong>
-      Sonido
-    </strong>
-
-    <small>
-      ${state.sound
-        ? "Efectos de sonido activados"
-        : "Efectos de sonido desactivados"
-      }
-    </small>
-
-  </span>
-
-  <span class="settings-toggle ${state.sound ? "active" : ""}">
-    <span></span>
-  </span>
-
-</button>
-<button
-  class="settings-option"
-  data-action="how-to-play"
->
-
-  <span class="settings-option-icon">
-    📖
-  </span>
-
-  <span class="settings-option-text">
-
-    <strong>
-      Cómo jugar
-    </strong>
-
-    <small>
-      Reglas y funcionamiento
-    </small>
-
-  </span>
-
-</button>
-
-${
-  state.howToPlayOpen
-  ?
-  `
-
-  <div class="how-to-play-panel">
-
-    <div class="how-to-play-header">
-
-      <div>
-        <span class="how-to-play-kicker">
-          GREYX LUDO
-        </span>
-
-        <h3>
-          📖 Cómo jugar
-        </h3>
-      </div>
-
-      <button
-        class="how-to-play-close"
-        data-action="close-how-to-play"
-        aria-label="Cerrar cómo jugar"
-      >
-        ✕
-      </button>
-
-    </div>
-
-
-    <div class="how-to-play-content">
-
-      <div class="how-to-play-rule">
-        <span>🎲</span>
-        <div>
-          <strong>Lanza el dado</strong>
-          <p>
-            Tira el dado cuando sea tu turno y mueve una ficha
-            según el número obtenido.
-          </p>
-        </div>
-      </div>
-
-
-      <div class="how-to-play-rule">
-        <span>🏠</span>
-        <div>
-          <strong>Saca una ficha</strong>
-          <p>
-            Necesitas sacar un 6 para sacar una ficha de casa
-            y colocarla en la casilla inicial.
-          </p>
-        </div>
-      </div>
-
-
-      <div class="how-to-play-rule">
-        <span>💥</span>
-        <div>
-          <strong>Captura fichas</strong>
-          <p>
-            Si caes sobre una ficha rival en una casilla válida,
-            la capturas y vuelve a su casa.
-          </p>
-        </div>
-      </div>
-
-
-      <div class="how-to-play-rule">
-        <span>🛡️</span>
-        <div>
-          <strong>Casillas seguras</strong>
-          <p>
-            Algunas casillas protegen las fichas y evitan
-            que puedan ser capturadas.
-          </p>
-        </div>
-      </div>
+          <button class="settings-option" data-action="settings-sound">
+            <span class="settings-option-icon sound-setting-icon">
+              ${state.sound ? "🔊" : "🔇"}
+            </span>
+            <span class="settings-option-text">
+              <strong>Sonido</strong>
+              <small>
+                ${state.sound
+                  ? "Efectos de sonido activados"
+                  : "Efectos de sonido desactivados"}
+              </small>
+            </span>
+            <span class="settings-toggle ${state.sound ? "active" : ""}">
+              <span></span>
+            </span>
+          </button>
+
+          ${
+            state.phase === "playing"
+            ?
+            `
+            <button class="settings-option" data-action="settings-new-game">
+              <span class="settings-option-icon">🔄</span>
+              <span class="settings-option-text">
+                <strong>${state.confirmAction === "settings-new-game" ? "¿Seguro? Toca otra vez" : "Nueva partida"}</strong>
+                <small>${state.confirmAction === "settings-new-game" ? "Se reiniciará la partida" : "Reiniciar con los mismos jugadores"}</small>
+              </span>
+            </button>
+
+            <button class="settings-option" data-action="settings-menu">
+              <span class="settings-option-icon">🏠</span>
+              <span class="settings-option-text">
+                <strong>${state.confirmAction === "settings-menu" ? "¿Seguro? Toca otra vez" : "Salir al menú"}</strong>
+                <small>${state.confirmAction === "settings-menu" ? "Se perderá la partida actual" : "Volver a la pantalla inicial"}</small>
+              </span>
+            </button>
+            `
+            :
+            ""
+          }
+
+          <button class="settings-option" data-action="how-to-play">
+            <span class="settings-option-icon">📖</span>
+            <span class="settings-option-text">
+              <strong>Cómo jugar</strong>
+              <small>Reglas y funcionamiento</small>
+            </span>
+          </button>
+
+          ${
+            state.howToPlayOpen
+            ?
+            `
+            <div class="how-to-play-panel">
+
+              <div class="how-to-play-header">
+                <div>
+                  <span class="how-to-play-kicker">GREYX LUDO</span>
+                  <h3>📖 Cómo jugar</h3>
+                </div>
+                <button
+                  class="how-to-play-close"
+                  data-action="close-how-to-play"
+                  aria-label="Cerrar cómo jugar"
+                >✕</button>
+              </div>
+
+              <div class="how-to-play-content">
+
+                <div class="how-to-play-rule">
+                  <span>🎲</span>
+                  <div>
+                    <strong>Lanza el dado</strong>
+                    <p>Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🏠</span>
+                  <div>
+                    <strong>Saca una ficha</strong>
+                    <p>Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>💥</span>
+                  <div>
+                    <strong>Captura fichas</strong>
+                    <p>Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🛡️</span>
+                  <div>
+                    <strong>Casillas seguras</strong>
+                    <p>Algunas casillas protegen las fichas y evitan que puedan ser capturadas.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🏆</span>
+                  <div>
+                    <strong>Llega a la meta</strong>
+                    <p>Lleva tus fichas hasta el centro del tablero para completar el recorrido.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <button class="how-to-play-back" data-action="close-how-to-play">
+                ← Volver a configuración
+              </button>
+
+            </div>
+            `
+            :
+            ""
+          }
+
+          <button class="settings-option" data-action="about-greyx">
+            <span class="settings-option-icon">👤</span>
+            <span class="settings-option-text">
+              <strong>Acerca de Greyx Ludo</strong>
+              <small>Conoce el proyecto y su creador</small>
+            </span>
+          </button>
+
+          ${
+            state.aboutGreyxOpen
+            ?
+            `
+            <div class="about-greyx-panel">
+
+              <div class="about-greyx-header">
+                <div class="about-greyx-logo">🎲</div>
+                <div class="about-greyx-title">
+                  <span>GREYX STUDIOS</span>
+                  <h3>LUDO GREYX</h3>
+                </div>
+                <button
+                  class="about-greyx-close"
+                  data-action="close-about-greyx"
+                  aria-label="Cerrar"
+                >✕</button>
+              </div>
+
+              <div class="about-greyx-description">
+                <p>
+                  Un clásico juego de mesa reinventado como una
+                  experiencia digital moderna, sencilla y divertida.
+                </p>
+              </div>
+
+              <div class="about-greyx-info">
+
+                <div class="about-greyx-info-row">
+                  <span>🎮</span>
+                  <div>
+                    <strong>Proyecto</strong>
+                    <small>Greyx Ludo</small>
+                  </div>
+                </div>
+
+                <div class="about-greyx-info-row">
+                  <span>🧠</span>
+                  <div>
+                    <strong>Creado con</strong>
+                    <small>HTML · CSS · JavaScript</small>
+                  </div>
+                </div>
+
+                <div class="about-greyx-info-row">
+                  <span>✨</span>
+                  <div>
+                    <strong>Concepto</strong>
+                    <small>Un Ludo hecho para jugar y compartir</small>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="about-greyx-divider"></div>
+
+              <div class="about-greyx-creator">
+                <span class="about-greyx-creator-icon">👤</span>
+                <div>
+                  <span>CREADOR</span>
+                  <strong>Sebastián Greys</strong>
+                </div>
+              </div>
+
+              <div class="about-greyx-version">
+                GREYX LUDO · PROYECTO INDEPENDIENTE
+              </div>
+
+              <button class="about-greyx-back" data-action="close-about-greyx">
+                ← Volver a configuración
+              </button>
+
+            </div>
+            `
+            :
+            ""
+          }
 
-
-      <div class="how-to-play-rule">
-        <span>🏆</span>
-        <div>
-          <strong>Llega a la meta</strong>
-          <p>
-            Lleva tus fichas hasta el centro del tablero
-            para completar el recorrido.
-          </p>
-        </div>
-      </div>
-
-    </div>
-
-
-    <button
-      class="how-to-play-back"
-      data-action="close-how-to-play"
-    >
-      ← Volver a configuración
-    </button>
-
-  </div>
-
-  `
-  :
-  ""
-}
-          <button
-  class="settings-option"
-  data-action="about-greyx"
->
-
-  <span class="settings-option-icon">
-    👤
-  </span>
-
-  <span class="settings-option-text">
-
-    <strong>
-      Acerca de Greyx Ludo
-    </strong>
-
-    <small>
-      Conoce el proyecto y su creador
-    </small>
-
-  </span>
-
-</button>
-
-${
-  state.aboutGreyxOpen
-  ?
-  `
-
-  <div class="about-greyx-panel">
-
-    <div class="about-greyx-header">
-
-      <div class="about-greyx-logo">
-        🎲
-      </div>
-
-      <div class="about-greyx-title">
-
-        <span>
-          GREYX STUDIOS
-        </span>
-
-        <h3>
-          LUDO GREYX
-        </h3>
-
-      </div>
-
-      <button
-        class="about-greyx-close"
-        data-action="close-about-greyx"
-        aria-label="Cerrar"
-      >
-        ✕
-      </button>
-
-    </div>
-
-
-    <div class="about-greyx-description">
-
-      <p>
-        Un clásico juego de mesa reinventado
-        como una experiencia digital moderna,
-        sencilla y divertida.
-      </p>
-
-    </div>
-
-
-    <div class="about-greyx-info">
-
-      <div class="about-greyx-info-row">
-
-        <span>🎮</span>
-
-        <div>
-          <strong>Proyecto</strong>
-          <small>Greyx Ludo</small>
-        </div>
-
-      </div>
-
-
-      <div class="about-greyx-info-row">
-
-        <span>🧠</span>
-
-        <div>
-          <strong>Creado con</strong>
-          <small>HTML · CSS · JavaScript</small>
-        </div>
-
-      </div>
-
-
-      <div class="about-greyx-info-row">
-
-        <span>✨</span>
-
-        <div>
-          <strong>Concepto</strong>
-          <small>Un Ludo hecho para jugar y compartir</small>
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="about-greyx-divider"></div>
-
-
-    <div class="about-greyx-creator">
-
-      <span class="about-greyx-creator-icon">
-        👤
-      </span>
-
-      <div>
-
-        <span>
-          CREADOR
-        </span>
-
-        <strong>
-          Sebastián Greys
-        </strong>
-
-      </div>
-
-    </div>
-
-
-    <div class="about-greyx-version">
-      GREYX LUDO · PROYECTO INDEPENDIENTE
-    </div>
-
-
-    <button
-      class="about-greyx-back"
-      data-action="close-about-greyx"
-    >
-      ← Volver a configuración
-    </button>
-
-  </div>
-
-  `
-  :
-  ""
-}
-if (action === "settings-new-game" || action === "settings-menu") {
-
-  // Primer toque: pedir confirmación
-  if (state.confirmAction !== action) {
-    state.confirmAction = action;
-    render();
-    return;
-  }
-
-  // Segundo toque: ejecutar
-  state.confirmAction = null;
-  state.settingsOpen = false;
-  state.howToPlayOpen = false;
-  state.aboutGreyxOpen = false;
-
-  if (action === "settings-new-game") {
-    start(state.players.length);
-  } else {
-    setup();
-  }
-
-  return;
-}
         </section>
 
       </div>
@@ -5319,6 +5184,7 @@ if (action === "settings-new-game" || action === "settings-menu") {
   `;
 
 }
+
 function celebrationMarkup() {
   return `
     <div class="celebration">
@@ -5482,20 +5348,17 @@ function bind() {
       button.addEventListener("click", () => {
 
         const action = button.dataset.action;
-        if (action === "settings") {
-
+if (action === "settings") {
   state.settingsOpen = true;
-
+  state.confirmAction = null;
   render();
-
 }
 
-
 if (action === "close-settings") {
-
   state.settingsOpen = false;
-
+  state.confirmAction = null;
   render();
+}
 
 }
 if (action === "settings-sound") {
