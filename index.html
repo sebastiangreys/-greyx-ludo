@@ -3513,10 +3513,19 @@ const app = document.getElementById("app");
 // ===============================
 
 let audioContext;
-let audioUnlocked = false;
+let 
 
 function getAudioContext() {
-  let masterGain = null;
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+  return audioContext;
+}
+
+let masterGain = null;
 
 function getMaster() {
   const ctx = getAudioContext();
@@ -3529,15 +3538,6 @@ function getMaster() {
     limiter.connect(ctx.destination);
   }
   return masterGain;
-}
-
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-  return audioContext;
 }
 
 document.addEventListener("visibilitychange", () => {
