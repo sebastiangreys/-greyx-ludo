@@ -3489,6 +3489,48 @@ p {
   }
 
 }
+/* INTRO NUEVA */
+.gx-intro{
+  position:fixed;inset:0;z-index:999999;
+  background:radial-gradient(circle at 50% 45%,#6d21ff28 0,transparent 40%),#070911;
+  overflow:hidden;opacity:1;transition:opacity .8s ease;
+}
+.gx-intro.hide{opacity:0;pointer-events:none}
+
+.gx-scene{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;transition:opacity 1.6s ease;
+}
+.gx-scene.gx-off{opacity:0}
+
+.gx-pop{animation:gxIn 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gxIn{
+  from{opacity:0;transform:scale(.8)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.gx-intro svg{width:min(92vw,560px);height:auto}
+
+.gx-name{
+  margin-top:18px;color:#fff;
+  font-size:clamp(3.2rem,15vw,6.5rem);
+  font-weight:950;line-height:1;letter-spacing:-.09em;
+}
+.gx-name span{color:#6d21ff;text-shadow:0 0 12px #6d21ff,0 0 35px #6d21ff}
+
+.gx-loading-box{width:min(220px,60vw);text-align:center}
+.gx-loading-text{
+  color:#8e96a8;font:700 .7rem monospace;
+  letter-spacing:.3em;margin-bottom:14px;
+}
+.gx-bar{height:3px;border-radius:99px;background:#ffffff14;overflow:hidden}
+.gx-bar i{
+  display:block;width:0;height:100%;border-radius:inherit;
+  background:#6d21ff;box-shadow:0 0 10px #6d21ff;
+}
+.gx-bar.run i{width:100%;transition:width 1.9s ease-in-out}
+
 </style>
 <div id="app" class="app"></div>
 
@@ -5615,90 +5657,51 @@ function greyxLogoMarkup(){
 
 function showIntro(){
 
-  // Crear la intro directamente sobre toda la página
-  const oldIntro = document.getElementById("introScreen");
-  if(oldIntro) oldIntro.remove();
+  const old = document.getElementById("introScreen");
+  if(old) old.remove();
 
   document.body.insertAdjacentHTML("beforeend", `
-    <div class="intro-screen" id="introScreen">
+    <div class="gx-intro" id="introScreen">
 
-      <div class="intro-flash"></div>
-
-      <!-- ESCENA GREYX -->
-      <div class="intro-scene intro-company" id="introCompany">
-
-        <div class="intro-logo-wrap">
+      <div class="gx-scene" id="gxLogo">
+        <div class="gx-pop">
           ${greyxLogoMarkup()}
+          <div class="gx-name">GREY<span>X</span></div>
         </div>
-
-        <div class="intro-name">
-          GREY<span>X</span>
-        </div>
-
       </div>
 
-      <!-- ESCENA LUDO -->
-      <div class="intro-scene intro-ludo" id="introLudo">
-
-        <div class="intro-ludo-content">
-
-          <h1 class="intro-ludo-title">
-            GREY<span>X</span> LUDO
-          </h1>
-
-          <div class="intro-ludo-subtitle">
-            La mesa para compartir
-          </div>
-
-          <div class="intro-loader">
-            <div class="intro-loader-bar"></div>
-          </div>
-
+      <div class="gx-scene gx-off" id="gxLoading">
+        <div class="gx-loading-box">
+          <div class="gx-loading-text">CARGANDO</div>
+          <div class="gx-bar" id="gxBar"><i></i></div>
         </div>
-
       </div>
 
     </div>
   `);
 
-  // A los 2 segundos desaparece GREYX
+  const intro = document.getElementById("introScreen");
+
+  // 5s mostrando el logo, luego se desvanece (1.6s)
   setTimeout(() => {
-
-    const company = document.getElementById("introCompany");
-
-    if(company){
-      company.classList.add("intro-company-out");
-    }
-
-    const ludo = document.getElementById("introLudo");
-
-    if(ludo){
-      ludo.classList.add("intro-ludo-show");
-    }
-
-  }, 2000);
-
-
-  // A los 5 segundos termina la intro
-  setTimeout(() => {
-
-    const intro = document.getElementById("introScreen");
-
-    if(!intro) return;
-
-    intro.classList.add("hide");
-
-    setTimeout(() => {
-
-      intro.remove();
-
-      // Ahora sí aparece el lobby
-      render();
-
-    }, 800);
-
+    document.getElementById("gxLogo").classList.add("gx-off");
   }, 5000);
+
+  // aparece la pantalla de carga
+  setTimeout(() => {
+    document.getElementById("gxLoading").classList.remove("gx-off");
+    document.getElementById("gxBar").classList.add("run");
+  }, 6700);
+
+  // termina y entra al juego
+  setTimeout(() => intro.classList.add("hide"), 8900);
+
+  setTimeout(() => {
+    intro.remove();
+    render();
+  }, 9700);
 }
+
 function render() {
 
   app.innerHTML=`
