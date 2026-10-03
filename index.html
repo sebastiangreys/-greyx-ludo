@@ -3620,6 +3620,27 @@ text-rendering:geometricPrecision;
 
 /* Que el contenido no quede debajo de la hora/batería */
 .shell{padding-top:calc(24px + env(safe-area-inset-top, 0px))}
+/* LOGO DE LA ESQUINA */
+.brand{gap:10px}
+
+.brand-mark{
+  width:44px;
+  height:auto;
+  flex:0 0 auto;
+}
+
+.brand-word{
+  color:#fff;
+  font-family:"Syncopate","Arial Black",sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:.14em;
+  line-height:1;
+}
+.brand-word span{
+  color:#6d21ff;
+  text-shadow:0 0 10px #6d21ff88;
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -3977,31 +3998,23 @@ return `
 
 
 function logoHeader() {
+  return `
+  <header class="topbar">
+    <div class="brand">
 
-return `
-<header class="topbar">
+      <svg class="brand-mark" viewBox="40 90 630 460"
+        xmlns="http://www.w3.org/2000/svg" aria-label="GREYX">
+        <path fill="#f0f0f2" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
+        <path fill="#f0f0f2" d="M255 295H440L385 365H275L237 318Z"/>
+        <path fill="#5b35f0" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
+      </svg>
 
-<div class="brand">
+      <span class="brand-word">GREY<span>X</span></span>
 
-${logoMarkup()}
-
-<span>
-
-<span class="brand-name">
-Ludo Greyx
-</span>
-
-<span class="brand-caption">
-La mesa para compartir
-</span>
-
-</span>
-
-</div>
-
-</header>`;
-
+    </div>
+  </header>`;
 }
+
 
 function setupMarkup() {
   
