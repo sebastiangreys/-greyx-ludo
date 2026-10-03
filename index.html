@@ -3520,7 +3520,8 @@ function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (audioContext.state === "suspended") {
+  if (audioContext.state !== "running") {
+
     audioContext.resume();
   }
   return audioContext;
@@ -3539,38 +3540,57 @@ function getMaster() {
   return masterGain;
 }
 
-async function recoverAudio() {
-  if (!audioUnlocked || !audioContext) return;
-  if (audioContext.state === "running") return;
+let audioNeedsReset = false;
 
-  try { await audioContext.resume(); } catch (e) {}
+function markAudioForReset() {
+  if (!audioUnlocked) return;
+  audioNeedsReset = true;
+}
 
-  if (audioContext.state === "running") {
-    if (musicMode) nextNoteTime = audioContext.currentTime + 0.1;
-    return;
-  }
+function resetAudio() {
+  if (!audioUnlocked || !audioNeedsReset) return;
+  audioNeedsReset = false;
 
-  // Si no revivió, creamos el audio de nuevo
-  try { audioContext.close(); } catch (e) {}
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicMode = null;
+
+  const old = audioContext;
   audioContext = null;
   masterGain = null;
   musicGain = null;
 
-  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
-  musicMode = null;
+  if (old) { try { old.close(); } catch (e) {} }
 
   getAudioContext();
   syncMusic();
 }
 
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) recoverAudio();
-});
-window.addEventListener("pageshow", recoverAudio);
-window.addEventListener("focus", recoverAudio);
+function wakeAudio() {
+  if (!audioUnlocked || !audioContext) return;
 
-["touchend", "pointerdown", "click"].forEach(ev =>
-  document.addEventListener(ev, recoverAudio, { passive: true })
+  if (audioContext.state !== "running") {
+    audioContext.resume().catch(() => {});
+  }
+
+  try {
+    const b = audioContext.createBuffer(1, 1, 22050);
+    const s = audioContext.createBufferSource();
+    s.buffer = b;
+    s.connect(audioContext.destination);
+    s.start(0);
+  } catch (e) {}
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) markAudioForReset();
+  else resetAudio();
+});
+
+window.addEventListener("pagehide", markAudioForReset);
+window.addEventListener("pageshow", resetAudio);
+
+["touchstart", "touchend", "pointerdown", "click"].forEach(ev =>
+  document.addEventListener(ev, wakeAudio, { passive: true })
 );
 
 function tone(frequency, duration = 0.12, type = "sine", volume = 0.045, delay = 0) {
