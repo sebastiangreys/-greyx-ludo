@@ -3539,11 +3539,39 @@ function getMaster() {
   return masterGain;
 }
 
+async function recoverAudio() {
+  if (!audioUnlocked || !audioContext) return;
+  if (audioContext.state === "running") return;
+
+  try { await audioContext.resume(); } catch (e) {}
+
+  if (audioContext.state === "running") {
+    if (musicMode) nextNoteTime = audioContext.currentTime + 0.1;
+    return;
+  }
+
+  // Si no revivió, creamos el audio de nuevo
+  try { audioContext.close(); } catch (e) {}
+  audioContext = null;
+  masterGain = null;
+  musicGain = null;
+
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicMode = null;
+
+  getAudioContext();
+  syncMusic();
+}
+
 document.addEventListener("visibilitychange", () => {
-  if (!audioContext) return;
-  if (document.hidden) audioContext.suspend();
-  else audioContext.resume();
+  if (!document.hidden) recoverAudio();
 });
+window.addEventListener("pageshow", recoverAudio);
+window.addEventListener("focus", recoverAudio);
+
+["touchend", "pointerdown", "click"].forEach(ev =>
+  document.addEventListener(ev, recoverAudio, { passive: true })
+);
 
 function tone(frequency, duration = 0.12, type = "sine", volume = 0.045, delay = 0) {
   const ctx = getAudioContext();
