@@ -3336,18 +3336,8 @@ text-rendering:geometricPrecision;
   );
 }
 /* DADO */
-.rolling{
-  animation:diceTumble .7s cubic-bezier(.3,.6,.4,1) infinite;
-}
-@keyframes diceTumble{
-  0%{transform:translateY(0) rotate(0) scale(1)}
-  25%{transform:translateY(-14px) rotate(120deg) scale(1.12)}
-  50%{transform:translateY(0) rotate(240deg) scale(.94)}
-  75%{transform:translateY(-8px) rotate(330deg) scale(1.08)}
-  100%{transform:translateY(0) rotate(360deg) scale(1)}
-}
 .die.six{
-  box-shadow:0 0 0 3px #ffd54f,0 0 26px #ffd54f99,0 10px 22px #00000045;
+  box-shadow:0 0 0 2px #ffd54f88,0 0 16px #ffd54f66,0 10px 22px #00000045;
 }
 
 /* SALTO DE FICHA */
@@ -4946,7 +4936,6 @@ const DIE_POS = {
 let dieFlicker = null;
 
 function startDieFlicker() {
-  stopDieFlicker();
   dieFlicker = setInterval(() => {
     const n = Math.floor(Math.random() * 6) + 1;
     document.querySelectorAll(".die .pip").forEach((p, i) => {
@@ -6495,7 +6484,6 @@ function rollDice(fromBot = false) {
 
   playSound("dice");
   render();
-  startDieFlicker();
   setTimeout(() => {
     const n = Math.floor(Math.random() * 6) + 1;
     const color = state.players[state.active];
@@ -6547,7 +6535,7 @@ state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
         : "Elige una ficha iluminada.";
 
     render();
-}, 750);
+}, 550);
 }
 
 function move(color, id) {
