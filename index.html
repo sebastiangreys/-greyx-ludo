@@ -3198,19 +3198,25 @@ p {
   25%{opacity:.13}
   100%{opacity:0}
 }
-/* ================================
+/* =========================================
    INTRO GREYX
-================================ */
+========================================= */
 
 .intro-screen{
   position:fixed;
   inset:0;
-  z-index:99999;
+  z-index:999999;
+  width:100vw;
+  height:100vh;
   display:grid;
   place-items:center;
   background:
-    radial-gradient(circle at 50% 45%, #6d21ff20 0, transparent 28%),
-    #080a12;
+    radial-gradient(
+      circle at 50% 45%,
+      #6d21ff28 0,
+      transparent 30%
+    ),
+    #070911;
   overflow:hidden;
   opacity:1;
   transition:opacity .8s ease;
@@ -3221,147 +3227,268 @@ p {
   pointer-events:none;
 }
 
+
+/* ESCENAS */
+
 .intro-scene{
   position:absolute;
   inset:0;
+  width:100%;
+  height:100%;
   display:grid;
   place-items:center;
   text-align:center;
 }
 
+
+/* =========================================
+   LOGO GREYX
+========================================= */
+
 .intro-company{
-  animation:introCompanyIn 1s ease-out both;
+  opacity:1;
+  transform:scale(.82);
+  z-index:3;
+  animation:introCompanyIn 1s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.intro-company-out{
+  opacity:0;
+  transform:scale(1.12);
+  transition:
+    opacity .7s ease,
+    transform .7s ease;
+}
+
+.intro-logo-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .intro-logo{
-  width:clamp(120px,24vw,190px);
+  display:block;
+  width:clamp(150px,28vw,230px);
   height:auto;
+
   filter:
     drop-shadow(0 0 8px #6d21ff)
-    drop-shadow(0 0 28px #6d21ff88);
-  animation:introLogoPulse 1.8s ease-in-out infinite;
+    drop-shadow(0 0 25px #6d21ff)
+    drop-shadow(0 0 55px #6d21ff55);
+
+  animation:introLogoGlow 1.8s ease-in-out infinite;
 }
 
+
+/* GREY X */
+
 .intro-name{
-  margin-top:20px;
-  font-size:clamp(2.4rem,8vw,4.8rem);
-  font-weight:950;
-  letter-spacing:-.08em;
-  line-height:1;
+  margin-top:22px;
+
   color:#fff;
-  text-shadow:0 0 20px #ffffff22;
+
+  font-size:
+    clamp(2.8rem,8vw,5rem);
+
+  font-weight:950;
+  line-height:1;
+
+  letter-spacing:-.09em;
+
+  text-shadow:
+    0 0 15px #ffffff18,
+    0 0 35px #ffffff0d;
 }
 
 .intro-name span{
   color:#6d21ff;
+
   text-shadow:
     0 0 10px #6d21ff,
-    0 0 30px #6d21ff88;
+    0 0 30px #6d21ff,
+    0 0 60px #6d21ff66;
 }
+
+
+/* =========================================
+   GREYX LUDO
+========================================= */
 
 .intro-ludo{
   opacity:0;
   transform:scale(.92);
-  animation:introLudoIn .8s ease-out 2s forwards;
+  z-index:2;
+  pointer-events:none;
+}
+
+.intro-ludo-show{
+  opacity:1;
+  transform:scale(1);
+
+  transition:
+    opacity .7s ease,
+    transform .7s cubic-bezier(.2,.8,.2,1);
+}
+
+.intro-ludo-content{
+  width:min(90vw,700px);
 }
 
 .intro-ludo-title{
   margin:0;
-  font-size:clamp(3rem,10vw,6rem);
-  font-weight:950;
-  letter-spacing:-.07em;
+
   color:#fff;
+
+  font-size:
+    clamp(3rem,10vw,6.5rem);
+
+  font-weight:950;
+  line-height:.9;
+
+  letter-spacing:-.08em;
+
+  text-shadow:
+    0 0 25px #ffffff12;
 }
 
 .intro-ludo-title span{
   color:#6d21ff;
+
+  text-shadow:
+    0 0 15px #6d21ff,
+    0 0 40px #6d21ff66;
 }
 
 .intro-ludo-subtitle{
-  margin:12px 0 28px;
-  color:#9da4b5;
-  font-size:.85rem;
-  letter-spacing:.22em;
+  margin-top:18px;
+
+  color:#9299aa;
+
+  font-size:.78rem;
+  font-weight:700;
+
+  letter-spacing:.25em;
   text-transform:uppercase;
 }
 
+
+/* =========================================
+   LOADING
+========================================= */
+
 .intro-loader{
-  width:min(260px,65vw);
+  width:min(280px,65vw);
   height:3px;
-  margin:auto;
+
+  margin:30px auto 0;
+
   overflow:hidden;
+
   border-radius:999px;
+
   background:#ffffff12;
 }
 
-.intro-loader::before{
-  content:"";
-  display:block;
+.intro-loader-bar{
   width:35%;
   height:100%;
-  border-radius:inherit;
+
+  border-radius:999px;
+
   background:#6d21ff;
-  box-shadow:0 0 14px #6d21ff;
-  animation:introLoading 2.2s ease-in-out infinite;
+
+  box-shadow:
+    0 0 8px #6d21ff,
+    0 0 20px #6d21ff;
+
+  animation:introLoading 1.8s ease-in-out infinite;
 }
 
-@keyframes introCompanyIn{
-  0%{
-    opacity:0;
-    transform:scale(.75);
-  }
-  60%{
-    opacity:1;
-    transform:scale(1.06);
-  }
-  100%{
-    opacity:1;
-    transform:scale(1);
-  }
-}
 
-@keyframes introLogoPulse{
-  0%,100%{
-    filter:
-      drop-shadow(0 0 8px #6d21ff)
-      drop-shadow(0 0 22px #6d21ff66);
-  }
-  50%{
-    filter:
-      drop-shadow(0 0 16px #6d21ff)
-      drop-shadow(0 0 42px #6d21ffaa);
-  }
-}
-
-@keyframes introLudoIn{
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
-}
-
-@keyframes introLoading{
-  0%{transform:translateX(-140%)}
-  100%{transform:translateX(390%)}
-}
+/* =========================================
+   FLASH
+========================================= */
 
 .intro-flash{
   position:absolute;
   inset:0;
+
+  z-index:10;
+
   pointer-events:none;
+
   background:#6d21ff;
+
   opacity:0;
-  animation:introFlash .7s ease-out .15s;
+
+  animation:introFlash .7s ease-out .1s;
+}
+
+
+/* =========================================
+   ANIMACIONES
+========================================= */
+
+@keyframes introCompanyIn{
+
+  0%{
+    opacity:0;
+    transform:scale(.72);
+  }
+
+  60%{
+    opacity:1;
+    transform:scale(1.05);
+  }
+
+  100%{
+    opacity:1;
+    transform:scale(1);
+  }
+
+}
+
+@keyframes introLogoGlow{
+
+  0%,100%{
+    filter:
+      drop-shadow(0 0 8px #6d21ff)
+      drop-shadow(0 0 25px #6d21ff)
+      drop-shadow(0 0 45px #6d21ff44);
+  }
+
+  50%{
+    filter:
+      drop-shadow(0 0 16px #6d21ff)
+      drop-shadow(0 0 40px #6d21ff)
+      drop-shadow(0 0 70px #6d21ff77);
+  }
+
+}
+
+@keyframes introLoading{
+
+  0%{
+    transform:translateX(-150%);
+  }
+
+  100%{
+    transform:translateX(400%);
+  }
+
 }
 
 @keyframes introFlash{
-  0%{opacity:.65}
-  100%{opacity:0}
-}
-</style>
-</head>
 
-<body>
+  0%{
+    opacity:.55;
+  }
+
+  100%{
+    opacity:0;
+  }
+
+}
 
 <div id="app" class="app"></div>
 
@@ -5548,26 +5675,46 @@ Jugar otra vez
 }
 function greyxLogoMarkup(){
   return `
-    <svg viewBox="0 0 80 80" class="intro-logo">
-      <path fill="#fff"
-        d="M18 18h42L51 27H31c-8 0-14 6-14 14s6 14 14 14h8l-9 9h-1C15 64 7 54 7 41S15 18 18 18Z"/>
-      <path fill="#fff"
-        d="M37 37h27l-9 9H43l-6 7-7-8 7-8Z"/>
-      <path fill="#6d21ff"
-        d="M44 48h15l-7 7h-15l7-7Z"/>
+    <svg
+      viewBox="0 0 80 80"
+      class="intro-logo"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="GREYX"
+    >
+      <path
+        fill="#fff"
+        d="M18 18h42L51 27H31c-8 0-14 6-14 14s6 14 14 14h8l-9 9h-1C15 64 7 54 7 41S15 18 18 18Z"
+      />
+
+      <path
+        fill="#fff"
+        d="M37 37h27l-9 9H43l-6 7-7-8 7-8Z"
+      />
+
+      <path
+        fill="#6d21ff"
+        d="M44 48h15l-7 7h-15l7-7Z"
+      />
     </svg>
   `;
 }
 function showIntro(){
 
-  app.innerHTML = `
+  // Crear la intro directamente sobre toda la página
+  const oldIntro = document.getElementById("introScreen");
+  if(oldIntro) oldIntro.remove();
+
+  document.body.insertAdjacentHTML("beforeend", `
     <div class="intro-screen" id="introScreen">
 
       <div class="intro-flash"></div>
 
+      <!-- ESCENA GREYX -->
       <div class="intro-scene intro-company" id="introCompany">
 
-        ${greyxLogoMarkup()}
+        <div class="intro-logo-wrap">
+          ${greyxLogoMarkup()}
+        </div>
 
         <div class="intro-name">
           GRE<span>X</span>
@@ -5575,9 +5722,10 @@ function showIntro(){
 
       </div>
 
-      <div class="intro-scene intro-ludo">
+      <!-- ESCENA LUDO -->
+      <div class="intro-scene intro-ludo" id="introLudo">
 
-        <div>
+        <div class="intro-ludo-content">
 
           <h1 class="intro-ludo-title">
             GREY<span>X</span> LUDO
@@ -5587,35 +5735,53 @@ function showIntro(){
             La mesa para compartir
           </div>
 
-          <div class="intro-loader"></div>
+          <div class="intro-loader">
+            <div class="intro-loader-bar"></div>
+          </div>
 
         </div>
 
       </div>
 
     </div>
-  `;
+  `);
 
+  // A los 2 segundos desaparece GREYX
   setTimeout(() => {
+
     const company = document.getElementById("introCompany");
 
     if(company){
-      company.style.transition = "opacity .7s ease, transform .7s ease";
-      company.style.opacity = "0";
-      company.style.transform = "scale(1.08)";
+      company.classList.add("intro-company-out");
     }
-  }, 1700);
 
+    const ludo = document.getElementById("introLudo");
+
+    if(ludo){
+      ludo.classList.add("intro-ludo-show");
+    }
+
+  }, 2000);
+
+
+  // A los 5 segundos termina la intro
   setTimeout(() => {
+
     const intro = document.getElementById("introScreen");
 
-    if(intro){
-      intro.classList.add("hide");
+    if(!intro) return;
 
-      setTimeout(() => {
-        render();
-      }, 800);
-    }
+    intro.classList.add("hide");
+
+    setTimeout(() => {
+
+      intro.remove();
+
+      // Ahora sí aparece el lobby
+      render();
+
+    }, 800);
+
   }, 5000);
 }
 function render() {
