@@ -3335,6 +3335,39 @@ text-rendering:geometricPrecision;
     #426ba8 75% 100%
   );
 }
+/* DADO */
+.rolling{
+  animation:diceTumble .7s cubic-bezier(.3,.6,.4,1) infinite;
+}
+@keyframes diceTumble{
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  25%{transform:translateY(-14px) rotate(120deg) scale(1.12)}
+  50%{transform:translateY(0) rotate(240deg) scale(.94)}
+  75%{transform:translateY(-8px) rotate(330deg) scale(1.08)}
+  100%{transform:translateY(0) rotate(360deg) scale(1)}
+}
+.die.six{
+  box-shadow:0 0 0 3px #ffd54f,0 0 26px #ffd54f99,0 10px 22px #00000045;
+}
+
+/* SALTO DE FICHA */
+.token.hop{animation:tokenHop .18s ease-out}
+@keyframes tokenHop{
+  0%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-28%) scale(1.18)}
+  100%{transform:translateY(0) scale(1)}
+}
+
+/* CONTADOR */
+.score-value.full{color:#ffd54f}
+
+/* META */
+.finish.pulse{animation:finishPulse .9s ease-out}
+@keyframes finishPulse{
+  0%{box-shadow:0 0 0 0 #ffffff88,0 0 25px #8c7cff25}
+  60%{box-shadow:0 0 0 22px #ffffff00,0 0 50px #ffe27a99}
+  100%{box-shadow:0 0 0 0 #ffffff00,0 0 25px #8c7cff25}
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -3899,6 +3932,7 @@ const state = {
   languageOpen:false,
   lang:loadLang(),
   confirmAction:null,
+  hop:null,
   arrived:null,
   celebrating:false,
   count:4,
@@ -4897,6 +4931,26 @@ function trackIndex(color, progress) {
 
   return null;
 }
+const DIE_POS = {
+  1:[4], 2:[0,8], 3:[0,4,8],
+  4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]
+};
+
+let dieFlicker = null;
+
+function startDieFlicker() {
+  stopDieFlicker();
+  dieFlicker = setInterval(() => {
+    const n = Math.floor(Math.random() * 6) + 1;
+    document.querySelectorAll(".die .pip").forEach((p, i) => {
+      p.classList.toggle("on", DIE_POS[n].includes(i));
+    });
+  }, 80);
+}
+
+function stopDieFlicker() {
+  if (dieFlicker) { clearInterval(dieFlicker); dieFlicker = null; }
+}
 
 function die(n,rolling) {
 
@@ -4918,7 +4972,7 @@ const positions = {
 
 return `
 
-<div class="die ${rolling ? "rolling" : n ? "result" : ""}">
+<div class="die ${rolling ? "rolling" : n ? "result" : ""} ${!rolling && n === 6 ? "six" : ""}">
 
 ${Array.from(
   {length:9},
@@ -6452,7 +6506,7 @@ function rollDice(fromBot = false) {
 
   playSound("dice");
   render();
-
+  startDieFlicker();
   setTimeout(() => {
     const n = Math.floor(Math.random() * 6) + 1;
     const color = state.players[state.active];
@@ -6503,7 +6557,7 @@ state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
         : "Elige una ficha iluminada.";
 
     render();
-  }, 550);
+}, 750);
 }
 
 function move(color, id) {
@@ -6617,7 +6671,7 @@ if (capturedTokens.length) {
 
   // Primero mostramos claramente la captura
   setTimeout(() => {
-
+    stopDieFlicker();
     const animations = capturedTokens.map(
       ({ color: capturedColor, id: capturedId }, index) => {
 
