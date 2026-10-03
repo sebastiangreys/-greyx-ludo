@@ -3293,6 +3293,13 @@ text-rendering:geometricPrecision;
   .dice-row{grid-template-columns:62px 1fr;padding:12px}
   .die{width:62px;height:62px;padding:9px}
 }
+/* Centrar encabezado de las tarjetas */
+.setup-card-header{
+  text-align:center;
+}
+.setup-card-kicker{
+  text-align:center;
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -3866,27 +3873,6 @@ function setupMarkup() {
 
             <span class="mode-arrow">›</span>
 
-          </button>
-
-        </div>
-
-
-        <div class="setup-divider"></div>
-
-
-        <div class="setup-footer">
-
-          <span>
-            🎲
-            Una partida rápida
-          </span>
-
-          <button
-            class="sound-mini"
-            data-action="sound"
-            aria-label="Activar o desactivar sonido"
-          >
-            ${state.sound ? "🔊" : "🔇"}
           </button>
 
         </div>
