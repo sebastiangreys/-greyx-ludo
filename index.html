@@ -3516,6 +3516,21 @@ let audioContext;
 let audioUnlocked = false;
 
 function getAudioContext() {
+  let masterGain = null;
+
+function getMaster() {
+  const ctx = getAudioContext();
+  if (!masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 3;
+
+    const limiter = ctx.createDynamicsCompressor();
+    masterGain.connect(limiter);
+    limiter.connect(ctx.destination);
+  }
+  return masterGain;
+}
+
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
@@ -3544,7 +3559,8 @@ function tone(frequency, duration = 0.12, type = "sine", volume = 0.045, delay =
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
 
   oscillator.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(getMaster());
+
 
   oscillator.start(ctx.currentTime + delay);
   oscillator.stop(ctx.currentTime + delay + duration + 0.03);
@@ -3564,7 +3580,7 @@ function sweep(from, to, duration, type = "sine", volume = 0.04) {
   g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
 
   o.connect(g);
-  g.connect(ctx.destination);
+  g.connect(getMaster());
   o.start();
   o.stop(ctx.currentTime + duration + 0.03);
 }
@@ -3671,7 +3687,7 @@ function getMusicGain() {
   if (!musicGain) {
     musicGain = ctx.createGain();
     musicGain.gain.value = 1;
-    musicGain.connect(ctx.destination);
+    musicGain.connect(getMaster());
   }
   return musicGain;
 }
