@@ -3513,7 +3513,8 @@ const app = document.getElementById("app");
 // ===============================
 
 let audioContext;
-let 
+let audioUnlocked = false;
+let masterGain = null;
 
 function getAudioContext() {
   if (!audioContext) {
@@ -3525,13 +3526,11 @@ function getAudioContext() {
   return audioContext;
 }
 
-let masterGain = null;
-
 function getMaster() {
   const ctx = getAudioContext();
   if (!masterGain) {
     masterGain = ctx.createGain();
-    masterGain.gain.value = 5;
+    masterGain.gain.value = 3;
 
     const limiter = ctx.createDynamicsCompressor();
     masterGain.connect(limiter);
