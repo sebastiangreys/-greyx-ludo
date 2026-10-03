@@ -5284,36 +5284,29 @@ ${
   :
   ""
 }
-${
-  state.phase === "playing"
-  ?
-  `
-  <button
-    class="settings-option"
-    data-action="settings-new-game"
-  >
-    <span class="settings-option-icon">🔄</span>
-    <span class="settings-option-text">
-      <strong>Nueva partida</strong>
-      <small>Reiniciar con los mismos jugadores</small>
-    </span>
-  </button>
+if (action === "settings-new-game" || action === "settings-menu") {
 
-  <button
-    class="settings-option"
-    data-action="settings-menu"
-  >
-    <span class="settings-option-icon">🏠</span>
-    <span class="settings-option-text">
-      <strong>Salir al menú</strong>
-      <small>Volver a la pantalla inicial</small>
-    </span>
-  </button>
-  `
-  :
-  ""
+  // Primer toque: pedir confirmación
+  if (state.confirmAction !== action) {
+    state.confirmAction = action;
+    render();
+    return;
+  }
+
+  // Segundo toque: ejecutar
+  state.confirmAction = null;
+  state.settingsOpen = false;
+  state.howToPlayOpen = false;
+  state.aboutGreyxOpen = false;
+
+  if (action === "settings-new-game") {
+    start(state.players.length);
+  } else {
+    setup();
+  }
+
+  return;
 }
-
         </section>
 
       </div>
