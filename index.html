@@ -3515,14 +3515,21 @@ const app = document.getElementById("app");
 let audioContext;
 let audioUnlocked = false;
 let masterGain = null;
+let audioNeedsWake = false;
+let audioBroken = false;
+
+function createAudioContext() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  audioContext = new AC();
+  masterGain = null;
+  musicGain = null;
+  return audioContext;
+}
 
 function getAudioContext() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!audioContext) createAudioContext();
   if (audioContext.state !== "running") {
-
-    audioContext.resume();
+    audioContext.resume().catch(() => {});
   }
   return audioContext;
 }
@@ -3540,38 +3547,7 @@ function getMaster() {
   return masterGain;
 }
 
-let audioNeedsReset = false;
-
-function markAudioForReset() {
-  if (!audioUnlocked) return;
-  audioNeedsReset = true;
-}
-
-function resetAudio() {
-  if (!audioUnlocked || !audioNeedsReset) return;
-  audioNeedsReset = false;
-
-  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
-  musicMode = null;
-
-  const old = audioContext;
-  audioContext = null;
-  masterGain = null;
-  musicGain = null;
-
-  if (old) { try { old.close(); } catch (e) {} }
-
-  getAudioContext();
-  syncMusic();
-}
-
-function wakeAudio() {
-  if (!audioUnlocked || !audioContext) return;
-
-  if (audioContext.state !== "running") {
-    audioContext.resume().catch(() => {});
-  }
-
+function playSilentBlip() {
   try {
     const b = audioContext.createBuffer(1, 1, 22050);
     const s = audioContext.createBufferSource();
@@ -3581,15 +3557,61 @@ function wakeAudio() {
   } catch (e) {}
 }
 
+function rebuildAudio() {
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicMode = null;
+
+  const old = audioContext;
+  audioContext = null;
+  masterGain = null;
+  musicGain = null;
+
+  if (old) {
+    try { old.close().catch(() => {}); } catch (e) {}
+  }
+
+  createAudioContext();
+  audioContext.resume().catch(() => {});
+  playSilentBlip();
+
+  audioBroken = false;
+  audioNeedsWake = false;
+  syncMusic();
+}
+
+function wakeAudio() {
+  if (!audioUnlocked) return;
+
+  if (audioBroken) {
+    rebuildAudio();
+    return;
+  }
+
+  if (!audioContext) return;
+  if (audioContext.state === "running" && !audioNeedsWake) return;
+
+  audioContext.resume().catch(() => {});
+  playSilentBlip();
+
+  const ctx = audioContext;
+  setTimeout(() => {
+    if (ctx !== audioContext) return;
+    if (ctx.state === "running") {
+      audioNeedsWake = false;
+      audioBroken = false;
+    } else {
+      audioBroken = true;
+    }
+  }, 400);
+}
+
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) markAudioForReset();
-  else resetAudio();
+  if (document.hidden) audioNeedsWake = true;
 });
+window.addEventListener("pagehide", () => { audioNeedsWake = true; });
+window.addEventListener("pageshow", () => { audioNeedsWake = true; });
 
-window.addEventListener("pagehide", markAudioForReset);
-window.addEventListener("pageshow", resetAudio);
-
-["touchstart", "touchend", "pointerdown", "click"].forEach(ev =>
+["touchend", "pointerup", "click"].forEach(ev =>
   document.addEventListener(ev, wakeAudio, { passive: true })
 );
 
@@ -3763,6 +3785,7 @@ function scheduleMusic() {
 
   const ctx = getAudioContext();
   const stepDur = 60 / set.bpm / 2;
+  if (nextNoteTime < ctx.currentTime) nextNoteTime = ctx.currentTime + 0.05;
 
   while (nextNoteTime < ctx.currentTime + 0.3) {
     const bar = Math.floor(musicStep / 8) % set.chords.length;
