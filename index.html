@@ -3742,6 +3742,13 @@ function playSound(type) {
   }
 
   /* ---- NUEVOS ---- */
+if (type === "goal") {
+  tone(784, 0.1, "sine", 0.05);
+  tone(988, 0.1, "sine", 0.05, 0.1);
+  tone(1319, 0.3, "sine", 0.055, 0.2);
+  return;
+}
+
   if (type === "click") { tone(720, 0.05, "triangle", 0.03); return; }
   if (type === "back") { tone(460, 0.06, "triangle", 0.028); return; }
   if (type === "start") {
@@ -5111,6 +5118,15 @@ slot
 :
 ""
 }"
+${
+state.hop &&
+state.hop.color === color &&
+state.hop.id === token.id
+?
+"hop"
+:
+""
+}
 
 data-action="token"
 
@@ -5240,7 +5256,8 @@ return `
 
 ${cells}
 
-<div class="finish"></div>
+<div class="finish ${state.arrived ? "pulse" : ""}"></div>
+
 
 ${homes}
 
@@ -5308,8 +5325,8 @@ ${home}
 ${4-home-done}
 </span>
 
-<span class="score-value">
-${done}
+<span class="score-value ${done === 4 ? "full" : ""}">
+${done}/4
 </span>
 
 `;
@@ -5471,64 +5488,36 @@ ${scores()}
 `;
 
 }
-function showArrivalConfetti() {
+function showArrivalConfetti(color, pieces = 90) {
 
-  const container =
-    document.createElement("div");
+  const palettes = {
+    red:["#e53935","#ff8a80","#ffd54f","#ffffff"],
+    green:["#368f60","#69f0ae","#ffd54f","#ffffff"],
+    yellow:["#d9a928","#ffe27a","#ff9800","#ffffff"],
+    blue:["#426ba8","#82b1ff","#b39ddb","#ffffff"]
+  };
+  const palette = palettes[color] || ["#e53935","#d9a928","#368f60","#426ba8"];
 
-  container.className =
-    "arrival-confetti";
-
+  const container = document.createElement("div");
+  container.className = "arrival-confetti";
   document.body.appendChild(container);
 
-  const pieces = 90;
-
   for (let i = 0; i < pieces; i++) {
-
-    const piece =
-      document.createElement("span");
-
-    piece.className =
-      "confetti-piece";
-
-    piece.style.left =
-      `${Math.random() * 100}vw`;
-
-    piece.style.background =
-      [
-        "#e53935",
-        "#d9a928",
-        "#368f60",
-        "#426ba8",
-        "#f39c12",
-        "#9b59b6"
-      ][Math.floor(Math.random() * 6)];
-
-    piece.style.setProperty(
-      "--confetti-x",
-      `${(Math.random() - 0.5) * 300}px`
-    );
-
-    piece.style.setProperty(
-      "--confetti-r",
-      `${Math.random() * 720 - 360}deg`
-    );
-
-    piece.style.animationDelay =
-      `${Math.random() * 0.6}s`;
-
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}vw`;
+    piece.style.background = palette[Math.floor(Math.random() * palette.length)];
+    piece.style.setProperty("--confetti-x", `${(Math.random() - 0.5) * 300}px`);
+    piece.style.setProperty("--confetti-r", `${Math.random() * 720 - 360}deg`);
+    piece.style.animationDelay = `${Math.random() * 0.6}s`;
     container.appendChild(piece);
   }
 
   setTimeout(() => {
-
-    if (container.parentNode) {
-      container.remove();
-    }
-
+    if (container.parentNode) container.remove();
   }, 4000);
-
 }
+
 function settingsMarkup() {
 
   return `
@@ -6524,6 +6513,7 @@ function rollDice(fromBot = false) {
     if (state.valid.size === 1) {
        const onlyToken = [...state.valid][0];
        const id = Number(onlyToken.split("-")[1]);
+     render();
 
     setTimeout(() => {
       move(color, id);
@@ -6605,7 +6595,7 @@ const startProgress =
       ? { ...t, progress: currentProgress }
       : t
   );
-
+state.hop = { color, id };
   playSound("move");
 
   render();
@@ -6619,6 +6609,7 @@ const startProgress =
 }
 
   function finishMove() {
+    state.hop = null;
   let capturedTokens = [];
 
   const updated = {
@@ -6862,7 +6853,8 @@ if (capturedTokens.length) {
   });
 
   // Confeti al llegar al centro
-  showArrivalConfetti();
+showArrivalConfetti(color);
+playSound("goal");
 
   // Esperamos a que terminen los dos saltitos
   await new Promise(resolve =>
@@ -6873,6 +6865,7 @@ if (capturedTokens.length) {
 }
     if (state.tokens[color].every(token => token.progress === 57)) {
   playSound("winner");
+  showArrivalConfetti(color, 180);
 
   state.winner = color;
   state.celebrating = true;
