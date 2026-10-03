@@ -3528,14 +3528,19 @@ p {
   letter-spacing:.22em;
   margin-right:-.22em;
   transform:scaleX(1.25);
+will-change:transform;
+-webkit-font-smoothing:antialiased;
+text-rendering:geometricPrecision;
 
 }
-
 
 .gx-letter{
   display:inline-block;
   opacity:0;
-  transform:translateX(-18px);
+  transform:translate3d(-18px,0,0);
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
   animation:gxLetter .6s cubic-bezier(.2,.8,.2,1) forwards;
 }
 .gx-letter.gx-x{
@@ -3543,9 +3548,8 @@ p {
   text-shadow:0 0 12px #6d21ff,0 0 35px #6d21ff;
 }
 @keyframes gxLetter{
-  to{opacity:1;transform:translateX(0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
 }
-
 
 .gx-loading-box{width:min(220px,60vw);text-align:center}
 .gx-loading-text{
@@ -6677,7 +6681,15 @@ if (capturedTokens.length) {
   animateStep();
 }
 console.log("GREYX: JavaScript funcionando");
-showIntro();
+if (document.fonts && document.fonts.ready) {
+  Promise.race([
+    document.fonts.load('700 1em "Syncopate"'),
+    new Promise(r => setTimeout(r, 1500))
+  ]).then(showIntro);
+} else {
+  showIntro();
+}
+
 })();
 </script>
 
