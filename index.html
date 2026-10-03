@@ -3518,7 +3518,20 @@ p {
   font-size:clamp(3.2rem,15vw,6.5rem);
   font-weight:950;line-height:1;letter-spacing:-.09em;
 }
-.gx-name span{color:#6d21ff;text-shadow:0 0 12px #6d21ff,0 0 35px #6d21ff}
+.gx-letter{
+  display:inline-block;
+  opacity:0;
+  transform:translateX(-18px);
+  animation:gxLetter .6s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.gx-letter.gx-x{
+  color:#6d21ff;
+  text-shadow:0 0 12px #6d21ff,0 0 35px #6d21ff;
+}
+@keyframes gxLetter{
+  to{opacity:1;transform:translateX(0)}
+}
+
 
 .gx-loading-box{width:min(220px,60vw);text-align:center}
 .gx-loading-text{
@@ -5667,7 +5680,10 @@ function showIntro(){
       <div class="gx-scene" id="gxLogo">
         <div class="gx-pop">
           ${greyxLogoMarkup()}
-          <div class="gx-name">GREY<span>X</span></div>
+<div class="gx-name">
+  <span class="gx-letter" style="animation-delay:1.2s">G</span><span class="gx-letter" style="animation-delay:1.6s">R</span><span class="gx-letter" style="animation-delay:2.0s">E</span><span class="gx-letter" style="animation-delay:2.4s">Y</span><span class="gx-letter gx-x" style="animation-delay:2.8s">X</span>
+</div>
+
         </div>
       </div>
 
