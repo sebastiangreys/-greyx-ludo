@@ -5348,78 +5348,67 @@ function bind() {
       button.addEventListener("click", () => {
 
         const action = button.dataset.action;
-if (action === "settings") {
-  state.settingsOpen = true;
-  state.confirmAction = null;
-  render();
-}
 
-if (action === "close-settings") {
-  state.settingsOpen = false;
-  state.confirmAction = null;
-  render();
-}
+        if (action === "settings") {
+          state.settingsOpen = true;
+          state.confirmAction = null;
+          render();
+        }
 
-}
-if (action === "settings-sound") {
+        if (action === "close-settings") {
+          state.settingsOpen = false;
+          state.confirmAction = null;
+          render();
+        }
 
-  state.sound = !state.sound;
+        if (action === "settings-sound") {
+          state.sound = !state.sound;
+          render();
+        }
 
-  render();
-}
-if (action === "how-to-play") {
+        if (action === "how-to-play") {
+          state.howToPlayOpen = true;
+          render();
+        }
 
-  state.howToPlayOpen = true;
+        if (action === "close-how-to-play") {
+          state.howToPlayOpen = false;
+          render();
+        }
 
-  render();
+        if (action === "about-greyx") {
+          state.aboutGreyxOpen = true;
+          render();
+        }
 
-}
+        if (action === "close-about-greyx") {
+          state.aboutGreyxOpen = false;
+          render();
+        }
 
+        if (action === "settings-new-game" || action === "settings-menu") {
 
-if (action === "close-how-to-play") {
+          // Primer toque: pedir confirmación
+          if (state.confirmAction !== action) {
+            state.confirmAction = action;
+            render();
+            return;
+          }
 
-  state.howToPlayOpen = false;
+          // Segundo toque: ejecutar
+          state.confirmAction = null;
+          state.settingsOpen = false;
+          state.howToPlayOpen = false;
+          state.aboutGreyxOpen = false;
 
-  render();
+          if (action === "settings-new-game") {
+            start(state.players.length);
+          } else {
+            setup();
+          }
 
-}
-if (action === "about-greyx") {
-
-  state.aboutGreyxOpen = true;
-
-  render();
-
-}
-
-
-if (action === "close-about-greyx") {
-  if (action === "settings-new-game") {
-
-  if (!confirm("¿Empezar una nueva partida?")) return;
-
-  state.settingsOpen = false;
-  state.howToPlayOpen = false;
-  state.aboutGreyxOpen = false;
-
-  start(state.players.length);
-}
-
-if (action === "settings-menu") {
-
-  if (!confirm("¿Salir al menú? Se perderá la partida actual.")) return;
-
-  state.settingsOpen = false;
-  state.howToPlayOpen = false;
-  state.aboutGreyxOpen = false;
-
-  setup();
-}
-
-  state.aboutGreyxOpen = false;
-
-  render();
-
-}
+          return;
+        }
         /* =========================
            LOCAL
            ========================= */
