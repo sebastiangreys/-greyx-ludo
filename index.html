@@ -3641,6 +3641,108 @@ text-rendering:geometricPrecision;
   color:#6d21ff;
   text-shadow:0 0 10px #6d21ff88;
 }
+/* =========================================
+   CONFIGURACIÓN — TEMA OSCURO
+   ========================================= */
+
+/* Fondo que cubre toda la pantalla */
+.settings-overlay{
+  position:fixed;
+  inset:0;
+  padding:calc(70px + env(safe-area-inset-top, 0px)) 14px 14px;
+  background:rgba(5,6,12,.62);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+
+/* Panel */
+.settings-panel{
+  width:min(350px,100%);
+  max-height:calc(100vh - 100px);
+  overflow-y:auto;
+  padding:18px;
+  color:#fff;
+  background:linear-gradient(145deg,#222740,#131725);
+  border:1px solid #ffffff14;
+  border-radius:24px;
+  box-shadow:0 30px 70px #000000aa, inset 0 1px 0 #ffffff12;
+}
+
+.settings-title strong{color:#fff;font-size:1.15rem}
+
+.settings-close,
+.how-to-play-close,
+.about-greyx-close{
+  background:#ffffff12;
+  color:#fff;
+}
+
+/* Opciones */
+.settings-option{
+  color:#fff;
+  margin-bottom:4px;
+  border:1px solid transparent;
+}
+.settings-option:hover{
+  background:#ffffff0c;
+  border-color:#ffffff10;
+}
+.settings-option-icon{
+  background:linear-gradient(145deg,#8c7cff26,#ffffff0a);
+  border:1px solid #ffffff10;
+}
+.settings-option-text strong{color:#fff}
+.settings-option-text small{color:#8e97aa}
+
+/* Interruptor de sonido */
+.settings-toggle{background:#ffffff1c}
+.settings-toggle.active{
+  background:#7b68e8;
+  box-shadow:0 0 12px #7b68e866;
+}
+
+/* Subpaneles: Cómo jugar y Acerca de */
+.how-to-play-panel,
+.about-greyx-panel{
+  background:#ffffff08;
+  border:1px solid #ffffff12;
+}
+.how-to-play-kicker,
+.about-greyx-title span,
+.about-greyx-creator div span{color:#9f91ff}
+
+.how-to-play-header h3,
+.about-greyx-title h3,
+.how-to-play-rule strong,
+.about-greyx-info-row strong,
+.about-greyx-creator div strong{color:#fff}
+
+.how-to-play-rule,
+.about-greyx-description,
+.about-greyx-info-row{
+  background:#ffffff08;
+}
+.how-to-play-rule > span,
+.about-greyx-info-row > span,
+.about-greyx-logo,
+.about-greyx-creator-icon{
+  background:#8c7cff1f;
+}
+.how-to-play-rule p,
+.about-greyx-description p,
+.about-greyx-info-row small{color:#a3abbd}
+
+.about-greyx-divider{background:#ffffff12}
+.about-greyx-version{color:#6f788b}
+
+.how-to-play-back,
+.about-greyx-back{
+  background:#ffffff0d;
+  color:#fff;
+  border-color:#ffffff14;
+}
+.how-to-play-back:hover,
+.about-greyx-back:hover{background:#ffffff18}
 
 </style>
 <div id="app" class="app"></div>
