@@ -3314,6 +3314,15 @@ text-rendering:geometricPrecision;
   animation:gxPulse 1.6s ease-in-out infinite;
 }
 @keyframes gxPulse{0%,100%{opacity:.35}50%{opacity:1}}
+.lang-option{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:13px 14px;
+  border:1px solid #ffffff12;border-radius:13px;
+  background:#ffffff08;color:#fff;
+  font-weight:700;font-size:.9rem;cursor:pointer;
+}
+.lang-option.selected{border-color:#8c7cffaa;background:#8c7cff22}
+.lang-check{color:#b9aeff;font-weight:900}
 
 </style>
 <div id="app" class="app"></div>
@@ -3875,6 +3884,8 @@ const state = {
   settingsThemeOpen:false,
   howToPlayOpen:false,
   aboutGreyxOpen:false,
+  languageOpen:false,
+  lang:loadLang(),
   confirmAction:null,
   arrived:null,
   celebrating:false,
@@ -3901,6 +3912,294 @@ players:[],
   message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
   winner:null
 };
+/* ========== IDIOMAS ========== */
+
+const LANGS = { es:"Español", en:"English", pt:"Português" };
+
+function loadLang() {
+  try {
+    const saved = localStorage.getItem("gx-lang");
+    if (["es","en","pt"].includes(saved)) return saved;
+  } catch (e) {}
+  const nav = (navigator.language || "es").slice(0,2).toLowerCase();
+  return ["en","pt"].includes(nav) ? nav : "es";
+}
+
+const DICT = {
+
+en: {
+"El clásico juego de mesa, llevado a una experiencia moderna para compartir y competir.": "The classic board game, brought to a modern experience to share and compete.",
+"SIN CUENTAS · JUEGO LOCAL": "NO ACCOUNTS · LOCAL PLAY",
+"NUEVA PARTIDA": "NEW GAME",
+"¿Cómo quieres jugar?": "How do you want to play?",
+"Elige una modalidad para comenzar.": "Pick a mode to start.",
+"Jugar local": "Play local",
+"Comparte el dispositivo con tus amigos.": "Share the device with your friends.",
+"Contra bot": "Vs bot",
+"Juega contra rivales automáticos.": "Play against automatic rivals.",
+"PARTIDA LOCAL": "LOCAL GAME",
+"ELIGE TU": "CHOOSE YOUR",
+"MESA.": "TABLE.",
+"Decide cuántas personas participarán en esta partida.": "Decide how many people will play this game.",
+"JUGADORES": "PLAYERS",
+"¿Cuántos juegan?": "How many are playing?",
+"Puedes cambiarlo para cada partida.": "You can change it for every game.",
+"DUELO": "DUEL",
+"TRÍO": "TRIO",
+"MESA COMPLETA": "FULL TABLE",
+"← Volver": "← Back",
+"Continuar →": "Continue →",
+"MODO BOT": "BOT MODE",
+"CONTRA": "VERSUS",
+"IA.": "AI.",
+"Elige cuántos rivales automáticos quieres enfrentar.": "Choose how many automatic rivals you want to face.",
+"RIVALES": "RIVALS",
+"¿Cuántos bots?": "How many bots?",
+"Tú jugarás contra los colores restantes.": "You will play against the remaining colors.",
+"2 RIVALES": "2 RIVALS",
+"3 RIVALES": "3 RIVALS",
+"PERSONALIZAR": "CUSTOMIZE",
+"PONGAN SUS": "ENTER YOUR",
+"NOMBRES.": "NAMES.",
+"Dale una identidad a cada jugador antes de comenzar.": "Give each player an identity before starting.",
+"Nombre de cada ficha": "Name for each piece",
+"Si lo dejas vacío, usaremos el nombre del color.": "If you leave it empty, we'll use the color name.",
+"Nombre": "Name",
+"🎲 Comenzar partida": "🎲 Start game",
+"TU FICHA": "YOUR PIECE",
+"Escoge la ficha que quieres controlar durante la partida.": "Choose the piece you want to control during the game.",
+"JUGADOR": "PLAYER",
+"Tu color": "Your color",
+"Los bots ocuparán los colores restantes.": "The bots will take the remaining colors.",
+"Seleccionado": "Selected",
+"Elegir": "Choose",
+"Tu nombre": "Your name",
+"🤖 Comenzar": "🤖 Start",
+"Turno del bot.": "Bot's turn.",
+"Tu turno.": "Your turn.",
+"Pasen el dispositivo después de cada jugada. El tablero se encarga del resto.": "Pass the device after each move. The board takes care of the rest.",
+"Turno actual": "Current turn",
+"Bot automático": "Automatic bot",
+"Lanzando…": "Rolling…",
+"Elige una ficha": "Choose a piece",
+"Lanzar dado": "Roll die",
+"Marcador de la mesa": "Table scoreboard",
+"CASA": "HOME",
+"TABLERO": "BOARD",
+"META": "GOAL",
+"Lanza el dado para comenzar. Un seis saca una ficha de casa.": "Roll the die to start. A six brings a piece out of home.",
+"Tu turno. Lanza el dado para comenzar.": "Your turn. Roll the die to start.",
+"Tu turno. Lanza el dado.": "Your turn. Roll the die.",
+"El dado está rodando…": "The die is rolling…",
+"Una ficha puede moverse. Tócala para jugar.": "One piece can move. Tap it to play.",
+"Elige una ficha iluminada.": "Choose a highlighted piece.",
+"Moviendo ficha…": "Moving piece…",
+"¡Captura! Tienes otro turno.": "Capture! You get another turn.",
+"🏁 ¡Ficha en la meta! Tienes otro turno.": "🏁 Piece at the goal! You get another turn.",
+"¡Un seis! Tienes otro turno.": "A six! You get another turn.",
+"Configuración": "Settings",
+"Sonido": "Sound",
+"Efectos de sonido activados": "Sound effects on",
+"Efectos de sonido desactivados": "Sound effects off",
+"Música": "Music",
+"Música de fondo activada": "Background music on",
+"Música de fondo desactivada": "Background music off",
+"Idioma": "Language",
+"🌐 Idioma": "🌐 Language",
+"Nueva partida": "New game",
+"¿Seguro? Toca otra vez": "Sure? Tap again",
+"Se reiniciará la partida": "The game will restart",
+"Reiniciar con los mismos jugadores": "Restart with the same players",
+"Salir al menú": "Exit to menu",
+"Se perderá la partida actual": "The current game will be lost",
+"Volver a la pantalla inicial": "Return to the start screen",
+"Cómo jugar": "How to play",
+"📖 Cómo jugar": "📖 How to play",
+"Reglas y funcionamiento": "Rules and how it works",
+"Lanza el dado": "Roll the die",
+"Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.": "Roll the die on your turn and move a piece by the number you get.",
+"Saca una ficha": "Bring out a piece",
+"Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.": "You need a 6 to bring a piece out of home and place it on the starting square.",
+"Captura fichas": "Capture pieces",
+"Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.": "If you land on a rival piece on a valid square, you capture it and it goes back home.",
+"Casillas seguras": "Safe squares",
+"Algunas casillas protegen las fichas y evitan que puedan ser capturadas.": "Some squares protect pieces so they can't be captured.",
+"Llega a la meta": "Reach the goal",
+"Lleva tus fichas hasta el centro del tablero para completar el recorrido.": "Take your pieces to the center of the board to complete the journey.",
+"← Volver a configuración": "← Back to settings",
+"Acerca de Greyx Ludo": "About Greyx Ludo",
+"Conoce el proyecto y su creador": "Learn about the project and its creator",
+"Un clásico juego de mesa reinventado como una experiencia digital moderna, sencilla y divertida.": "A classic board game reinvented as a modern, simple and fun digital experience.",
+"Proyecto": "Project",
+"Creado con": "Built with",
+"Concepto": "Concept",
+"Un Ludo hecho para jugar y compartir": "A Ludo made to play and share",
+"CREADOR": "CREATOR",
+"GREYX LUDO · PROYECTO INDEPENDIENTE": "GREYX LUDO · INDEPENDENT PROJECT",
+"Cerrar": "Close",
+"Cerrar cómo jugar": "Close how to play",
+"¡Las 4 fichas llegaron!": "All 4 pieces made it!",
+"Todas sus fichas llegaron a la meta. Una gran vuelta alrededor del tablero.": "All their pieces reached the goal. A great lap around the board.",
+"Configurar": "Set up",
+"Jugar otra vez": "Play again",
+"CARGANDO": "LOADING",
+"TOCA PARA ENTRAR": "TAP TO ENTER"
+},
+
+pt: {
+"El clásico juego de mesa, llevado a una experiencia moderna para compartir y competir.": "O clássico jogo de tabuleiro, levado a uma experiência moderna para compartilhar e competir.",
+"SIN CUENTAS · JUEGO LOCAL": "SEM CONTAS · JOGO LOCAL",
+"NUEVA PARTIDA": "NOVA PARTIDA",
+"¿Cómo quieres jugar?": "Como você quer jogar?",
+"Elige una modalidad para comenzar.": "Escolha um modo para começar.",
+"Jugar local": "Jogar local",
+"Comparte el dispositivo con tus amigos.": "Compartilhe o dispositivo com seus amigos.",
+"Juega contra rivales automáticos.": "Jogue contra rivais automáticos.",
+"ELIGE TU": "ESCOLHA SUA",
+"Decide cuántas personas participarán en esta partida.": "Decida quantas pessoas vão participar desta partida.",
+"JUGADORES": "JOGADORES",
+"¿Cuántos juegan?": "Quantos jogam?",
+"Puedes cambiarlo para cada partida.": "Você pode mudar a cada partida.",
+"TRÍO": "TRIO",
+"MESA COMPLETA": "MESA CHEIA",
+"← Volver": "← Voltar",
+"CONTRA": "CONTRA A",
+"Elige cuántos rivales automáticos quieres enfrentar.": "Escolha quantos rivais automáticos você quer enfrentar.",
+"RIVALES": "RIVAIS",
+"¿Cuántos bots?": "Quantos bots?",
+"Tú jugarás contra los colores restantes.": "Você jogará contra as cores restantes.",
+"2 RIVALES": "2 RIVAIS",
+"3 RIVALES": "3 RIVAIS",
+"PONGAN SUS": "ESCOLHAM SEUS",
+"NOMBRES.": "NOMES.",
+"Dale una identidad a cada jugador antes de comenzar.": "Dê uma identidade a cada jogador antes de começar.",
+"Nombre de cada ficha": "Nome de cada peça",
+"Si lo dejas vacío, usaremos el nombre del color.": "Se deixar vazio, usaremos o nome da cor.",
+"Nombre": "Nome",
+"🎲 Comenzar partida": "🎲 Começar partida",
+"TU FICHA": "SUA PEÇA",
+"COLOR.": "COR.",
+"Escoge la ficha que quieres controlar durante la partida.": "Escolha a peça que você quer controlar durante a partida.",
+"JUGADOR": "JOGADOR",
+"Tu color": "Sua cor",
+"Los bots ocuparán los colores restantes.": "Os bots ficarão com as cores restantes.",
+"Seleccionado": "Selecionado",
+"Elegir": "Escolher",
+"Tu nombre": "Seu nome",
+"🤖 Comenzar": "🤖 Começar",
+"Turno del bot.": "Vez do bot.",
+"Tu turno.": "Sua vez.",
+"Pasen el dispositivo después de cada jugada. El tablero se encarga del resto.": "Passem o dispositivo depois de cada jogada. O tabuleiro cuida do resto.",
+"Turno actual": "Vez atual",
+"Lanzando…": "Lançando…",
+"Elige una ficha": "Escolha uma peça",
+"Lanzar dado": "Lançar dado",
+"Marcador de la mesa": "Placar da mesa",
+"TABLERO": "TABULEIRO",
+"Lanza el dado para comenzar. Un seis saca una ficha de casa.": "Lance o dado para começar. Um seis tira uma peça de casa.",
+"Tu turno. Lanza el dado para comenzar.": "Sua vez. Lance o dado para começar.",
+"Tu turno. Lanza el dado.": "Sua vez. Lance o dado.",
+"El dado está rodando…": "O dado está rolando…",
+"Una ficha puede moverse. Tócala para jugar.": "Uma peça pode se mover. Toque nela para jogar.",
+"Elige una ficha iluminada.": "Escolha uma peça iluminada.",
+"Moviendo ficha…": "Movendo peça…",
+"¡Captura! Tienes otro turno.": "Captura! Você joga novamente.",
+"🏁 ¡Ficha en la meta! Tienes otro turno.": "🏁 Peça na meta! Você joga novamente.",
+"¡Un seis! Tienes otro turno.": "Um seis! Você joga novamente.",
+"Configuración": "Configurações",
+"Sonido": "Som",
+"Efectos de sonido activados": "Efeitos sonoros ativados",
+"Efectos de sonido desactivados": "Efeitos sonoros desativados",
+"Música de fondo activada": "Música de fundo ativada",
+"Música de fondo desactivada": "Música de fundo desativada",
+"🌐 Idioma": "🌐 Idioma",
+"Nueva partida": "Nova partida",
+"¿Seguro? Toca otra vez": "Tem certeza? Toque novamente",
+"Se reiniciará la partida": "A partida será reiniciada",
+"Reiniciar con los mismos jugadores": "Reiniciar com os mesmos jogadores",
+"Salir al menú": "Sair para o menu",
+"Se perderá la partida actual": "A partida atual será perdida",
+"Volver a la pantalla inicial": "Voltar à tela inicial",
+"Cómo jugar": "Como jogar",
+"📖 Cómo jugar": "📖 Como jogar",
+"Reglas y funcionamiento": "Regras e funcionamento",
+"Lanza el dado": "Lance o dado",
+"Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.": "Lance o dado na sua vez e mova uma peça de acordo com o número obtido.",
+"Saca una ficha": "Tire uma peça",
+"Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.": "Você precisa tirar um 6 para tirar uma peça de casa e colocá-la na casa inicial.",
+"Captura fichas": "Capture peças",
+"Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.": "Se você cair sobre uma peça rival em uma casa válida, você a captura e ela volta para a casa dela.",
+"Casillas seguras": "Casas seguras",
+"Algunas casillas protegen las fichas y evitan que puedan ser capturadas.": "Algumas casas protegem as peças e evitam que sejam capturadas.",
+"Llega a la meta": "Chegue à meta",
+"Lleva tus fichas hasta el centro del tablero para completar el recorrido.": "Leve suas peças até o centro do tabuleiro para completar o percurso.",
+"← Volver a configuración": "← Voltar às configurações",
+"Acerca de Greyx Ludo": "Sobre o Greyx Ludo",
+"Conoce el proyecto y su creador": "Conheça o projeto e seu criador",
+"Un clásico juego de mesa reinventado como una experiencia digital moderna, sencilla y divertida.": "Um clássico jogo de tabuleiro reinventado como uma experiência digital moderna, simples e divertida.",
+"Proyecto": "Projeto",
+"Creado con": "Criado com",
+"Concepto": "Conceito",
+"Un Ludo hecho para jugar y compartir": "Um Ludo feito para jogar e compartilhar",
+"CREADOR": "CRIADOR",
+"GREYX LUDO · PROYECTO INDEPENDIENTE": "GREYX LUDO · PROJETO INDEPENDENTE",
+"Cerrar": "Fechar",
+"Cerrar cómo jugar": "Fechar como jogar",
+"¡Las 4 fichas llegaron!": "As 4 peças chegaram!",
+"Todas sus fichas llegaron a la meta. Una gran vuelta alrededor del tablero.": "Todas as peças chegaram à meta. Uma grande volta ao redor do tabuleiro.",
+"Jugar otra vez": "Jogar novamente",
+"CARGANDO": "CARREGANDO",
+"TOCA PARA ENTRAR": "TOQUE PARA ENTRAR"
+}
+
+};
+
+const PATTERNS = [
+  [/^Jugador (\d+) · tu turno$/, { en:"Player $1 · your turn", pt:"Jogador $1 · sua vez" }],
+  [/^(🔴|🟢|🟡|🔵) TU TURNO · (.+)$/, { en:"$1 YOUR TURN · $2", pt:"$1 SUA VEZ · $2" }],
+  [/^🤖 TURNO DE (.+)$/, { en:"🤖 $1'S TURN", pt:"🤖 VEZ DE $1" }],
+  [/^Turno de (.+)\. El bot está pensando…$/, { en:"$1's turn. The bot is thinking…", pt:"Vez de $1. O bot está pensando…" }],
+  [/^(.+) está lanzando el dado…$/, { en:"$1 is rolling the die…", pt:"$1 está lançando o dado…" }],
+  [/^No hay movimientos válidos para (.+)\.$/, { en:"No valid moves for $1.", pt:"Não há movimentos válidos para $1." }],
+  [/^(.+) está eligiendo una ficha…$/, { en:"$1 is choosing a piece…", pt:"$1 está escolhendo uma peça…" }],
+  [/^¡Increíble partida, (.+)!$/, { en:"Amazing game, $1!", pt:"Que partida incrível, $1!" }],
+  [/^¡Gana (.+)!$/, { en:"$1 wins!", pt:"$1 venceu!" }]
+];
+
+function translateText(str, lang) {
+  const key = str.replace(/\s+/g, " ").trim();
+  if (!key) return null;
+
+  const d = DICT[lang];
+  if (d && d[key]) return d[key];
+
+  for (const [re, out] of PATTERNS) {
+    if (re.test(key)) return key.replace(re, out[lang]);
+  }
+  return null;
+}
+
+function translateDOM(root) {
+  const lang = state.lang;
+  if (!root || lang === "es") return;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(n => {
+    const r = translateText(n.nodeValue, lang);
+    if (r !== null) n.nodeValue = r;
+  });
+
+  root.querySelectorAll("[placeholder],[aria-label]").forEach(el => {
+    ["placeholder", "aria-label"].forEach(a => {
+      if (!el.hasAttribute(a)) return;
+      const r = translateText(el.getAttribute(a), lang);
+      if (r !== null) el.setAttribute(a, r);
+    });
+  });
+}
 
 function logoHeader() {
   return `
@@ -5222,6 +5521,48 @@ function settingsMarkup() {
     <span></span>
   </span>
 </button>
+          <button class="settings-option" data-action="settings-language">
+            <span class="settings-option-icon">🌐</span>
+            <span class="settings-option-text">
+              <strong>Idioma</strong>
+              <small>${LANGS[state.lang]}</small>
+            </span>
+          </button>
+
+          ${
+            state.languageOpen
+            ?
+            `
+            <div class="how-to-play-panel">
+              <div class="how-to-play-header">
+                <div>
+                  <span class="how-to-play-kicker">GREYX LUDO</span>
+                  <h3>🌐 Idioma</h3>
+                </div>
+                <button
+                  class="how-to-play-close"
+                  data-action="close-language"
+                  aria-label="Cerrar"
+                >✕</button>
+              </div>
+
+              <div class="how-to-play-content">
+                ${["es","en","pt"].map(code => `
+                  <button
+                    class="lang-option ${state.lang === code ? "selected" : ""}"
+                    data-action="set-lang"
+                    data-lang="${code}"
+                  >
+                    <span>${LANGS[code]}</span>
+                    <span class="lang-check">${state.lang === code ? "✓" : ""}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            `
+            :
+            ""
+          }
 
           ${
             state.phase === "playing"
@@ -5530,6 +5871,7 @@ setTimeout(() => playSound("whoosh"), 5000);
 setTimeout(() => playSound("ready"), 8500);
 
   const intro = document.getElementById("introScreen");
+translateDOM(intro);
 
   // 5s mostrando el logo, luego se desvanece (1.6s)
   setTimeout(() => {
@@ -5584,6 +5926,8 @@ function render() {
   }
 
   `;
+  document.documentElement.lang = state.lang;
+  translateDOM(app);
 
   bind();
   syncMusic();
@@ -5598,6 +5942,22 @@ function bind() {
 
         const action = button.dataset.action;
 playUiSound(action);
+if (action === "settings-language") {
+  state.languageOpen = true;
+  render();
+}
+
+if (action === "close-language") {
+  state.languageOpen = false;
+  render();
+}
+
+if (action === "set-lang") {
+  state.lang = button.dataset.lang;
+  try { localStorage.setItem("gx-lang", state.lang); } catch (e) {}
+  render();
+}
+
 
 if (action === "settings-music") {
   state.music = !state.music;
@@ -6527,6 +6887,7 @@ function showTapGate() {
       <div class="gx-gate-text">TOCA PARA ENTRAR</div>
     </div>
   `);
+  translateDOM(document.getElementById("gxGate"));
 
   document.getElementById("gxGate").addEventListener("click", () => {
     audioUnlocked = true;
