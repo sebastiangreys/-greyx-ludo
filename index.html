@@ -3358,6 +3358,27 @@ text-rendering:geometricPrecision;
   60%{box-shadow:0 0 0 22px #ffffff00,0 0 50px #ffe27a99}
   100%{box-shadow:0 0 0 0 #ffffff00,0 0 25px #8c7cff25}
 }
+/* RENDIMIENTO ANDROID */
+.panel,.game-intro,.settings-button,.settings-overlay,
+.winner,.yard,.settings-panel,.setup-card-modern{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.settings-overlay{background:rgba(5,6,12,.88)}
+.winner{background:rgba(5,6,12,.92)}
+
+.setup-modern::before,
+.setup-card-modern::before,
+.setup-card-glow,
+.board-frame::before{display:none}
+
+.token.valid{filter:none}
+@keyframes selectablePiece{
+  0%,100%{transform:translateY(-3px) scale(1.05)}
+  50%{transform:translateY(-6px) scale(1.1)}
+}
+
+.gx-name{will-change:auto}
 
 </style>
 <div id="app" class="app"></div>
