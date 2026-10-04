@@ -1,38 +1,57 @@
-name: Android APK
+name: Android App Bundle
 on:
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+      - name: Configurar Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-      - uses: actions/setup-node@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: mkdir -p www && cp index.html www/index.html
-      - run: npx cap sync android
-      - name: Icono de la app
+          cache: npm
+      - name: Instalar dependencias
+        run: npm install
+      - name: Preparar carpeta www
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
+      - name: Sincronizar Capacitor
+        run: npx cap sync android
+      - name: Preparar icono de la aplicación
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick
           R=android/app/src/main/res
-          rm -rf $R/mipmap-anydpi-v26
+          rm -rf "$R/mipmap-anydpi-v26"
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             n=${d%%:*}
             s=${d##*:}
-            mkdir -p $R/mipmap-$n
-            convert assets/IMG_2767.jpeg -resize ${s}x${s}^ -gravity center -extent ${s}x${s} $R/mipmap-$n/ic_launcher.png
-            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
+            mkdir -p "$R/mipmap-$n"
+            convert assets/IMG_2767.jpeg \
+              -resize "${s}x${s}^" \
+              -gravity center \
+              -extent "${s}x${s}" \
+              "$R/mipmap-$n/ic_launcher.png"
+            cp \
+              "$R/mipmap-$n/ic_launcher.png" \
+              "$R/mipmap-$n/ic_launcher_round.png"
           done
-      - run: chmod +x android/gradlew
-      - run: ./gradlew assembleDebug
+      - name: Dar permisos a Gradle
+        run: chmod +x android/gradlew
+      - name: Generar Android App Bundle
+        run: ./gradlew bundleRelease
         working-directory: android
-      - uses: actions/upload-artifact@v4
+      - name: Guardar AAB
+        uses: actions/upload-artifact@v4
         with:
-          name: ludo-greyx-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: ludo-greyx-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
