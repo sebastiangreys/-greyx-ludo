@@ -1,0 +1,6953 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#f7f1e6" />
+<title>Ludo Greyx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --paper:#f7f1e6;
+  --ink:#202b3e;
+  --muted:#748091;
+  --navy:#49668f;
+  --coral:#e53935;
+  --green:#368f60;
+  --yellow:#d9a928;
+  --blue:#426ba8;
+  --safe:#b6914e;
+}
+* {
+  box-sizing:border-box;
+}
+body {
+  margin:0;
+  min-width:320px;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 15% 15%, #5141a833 0, transparent 28%),
+    radial-gradient(circle at 85% 80%, #d64e4330 0, transparent 30%),
+    linear-gradient(145deg,#0b0d17,#141827 55%,#0d101b);
+  color:#f7f1e6;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow-x:hidden;
+}
+button {
+  font:inherit;
+}
+
+.app {
+  min-height:100vh;
+}
+.shell {
+  width:min(1180px,calc(100% - 36px));
+  min-height:100vh;
+  margin:auto;
+  padding:24px 0 50px;
+  position:relative;
+}
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  position:relative;
+  z-index:5;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-logo {
+  display:grid;
+  place-items:center;
+  width:43px;
+  height:43px;
+  border-radius:13px;
+  background:#050505;
+  color:#fff;
+  overflow:hidden;
+}
+.brand-logo svg {
+  width:31px;
+  height:31px;
+}
+.brand-name {
+  display:block;
+  font-size:1.12rem;
+  font-weight:850;
+  letter-spacing:-.05em;
+  line-height:1;
+}
+.brand-caption {
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font:600 .67rem/1 monospace;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.setup {
+  display:grid;
+  grid-template-columns:1fr minmax(360px,530px);
+  align-items:center;
+  gap:clamp(46px,8vw,130px);
+  min-height:650px;
+}
+.setup-modern {
+  position:relative;
+  min-height:680px;
+  grid-template-columns:minmax(0,1fr) minmax(390px,500px);
+  gap:clamp(50px,8vw,120px);
+
+  padding-top:70px;
+}
+
+.setup-modern::before {
+  content:"";
+  position:absolute;
+  width:420px;
+  height:420px;
+  left:-180px;
+  bottom:-180px;
+  border-radius:50%;
+  background:#7b61ff18;
+  filter:blur(10px);
+  pointer-events:none;
+}
+
+.setup-copy {
+  position:relative;
+  z-index:2;
+  animation:menuCopyIn .65s ease-out both;
+}
+
+.setup-modern .eyebrow {
+  color:#9f91ff;
+}
+
+.setup-modern .eyebrow::before {
+  background:#7b61ff;
+}
+
+.setup-title {
+  color:#fff;
+  text-transform:uppercase;
+  text-shadow:0 10px 35px #00000040;
+}
+
+.setup-title span {
+  display:block;
+  color:#8c7cff;
+  letter-spacing:-.11em;
+}
+
+.setup-title-small {
+  font-size:clamp(3.2rem,6vw,5.5rem);
+}
+
+.setup-lead {
+  color:#aeb5c7;
+}
+
+.setup-status {
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  margin-top:34px;
+  padding:9px 13px;
+  border:1px solid #ffffff12;
+  border-radius:999px;
+  background:#ffffff08;
+  color:#8992a7;
+  font:700 .64rem/1 monospace;
+  letter-spacing:.1em;
+}
+
+.status-dot {
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#62d891;
+  box-shadow:0 0 12px #62d891;
+}
+
+.setup-card-modern {
+  position:relative;
+  overflow:hidden;
+  border:1px solid #ffffff12;
+  background:
+    linear-gradient(145deg,#1d2232ee,#121622f2);
+  box-shadow:
+    0 30px 80px #00000055,
+    inset 0 1px 0 #ffffff0b;
+  border-radius:30px;
+  padding:30px;
+  color:#fff;
+  animation:menuCardIn .65s .08s ease-out both;
+}
+
+.setup-card-modern::before {
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-110px;
+  top:-110px;
+  border-radius:50%;
+  background:#7b61ff20;
+  filter:blur(4px);
+}
+
+.setup-card-glow {
+  position:absolute;
+  width:120px;
+  height:120px;
+  left:-70px;
+  bottom:-70px;
+  border-radius:50%;
+  background:#d64e4318;
+  filter:blur(8px);
+}
+
+.setup-card-header {
+  position:relative;
+  z-index:2;
+  margin-bottom:22px;
+}
+
+.setup-card-kicker {
+  display:block;
+  margin-bottom:8px;
+  color:#8f83ef;
+  font:800 .62rem/1 monospace;
+  letter-spacing:.16em;
+}
+
+.setup-card-modern h2 {
+  margin:0;
+  color:#fff;
+  font-size:1.65rem;
+  letter-spacing:-.05em;
+}
+
+.setup-card-modern .setup-card-header p {
+  margin:7px 0 0;
+  color:#8e97aa;
+}
+
+.mode-grid {
+  position:relative;
+  z-index:2;
+  display:grid;
+  gap:11px;
+}
+
+.mode-card {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  width:100%;
+  min-height:76px;
+  padding:13px;
+  border:1px solid #ffffff0e;
+  border-radius:18px;
+  background:#ffffff06;
+  color:#fff;
+  text-align:left;
+  cursor:pointer;
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.mode-card:hover {
+  transform:translateY(-2px);
+  background:#ffffff0c;
+  border-color:#8c7cff55;
+}
+
+.mode-card.selected {
+  border-color:#8c7cff99;
+  background:linear-gradient(100deg,#8c7cff18,#ffffff08);
+  box-shadow:0 8px 25px #00000022;
+}
+
+.mode-icon {
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
+  border-radius:14px;
+  background:#ffffff0a;
+  font-size:22px;
+}
+
+.mode-info {
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  gap:4px;
+}
+
+.mode-info strong {
+  font-size:.94rem;
+}
+
+.mode-info small {
+  color:#858fa4;
+  font-size:.69rem;
+  line-height:1.35;
+}
+
+.mode-arrow {
+  color:#737d92;
+  font-size:25px;
+}
+
+.setup-divider {
+  height:1px;
+  margin:22px 0 15px;
+  background:#ffffff0b;
+}
+
+.setup-footer {
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#727c90;
+  font-size:.7rem;
+}
+
+.sound-mini {
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border:1px solid #ffffff10;
+  border-radius:11px;
+  background:#ffffff07;
+  color:#fff;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.sound-mini:hover {
+  background:#ffffff12;
+  transform:scale(1.05);
+}
+
+.player-count-grid {
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:25px 0;
+}
+
+.player-count-card {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:115px;
+  border:1px solid #ffffff0d;
+  border-radius:18px;
+  background:#ffffff06;
+  color:#fff;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.player-count-card:hover {
+  transform:translateY(-3px);
+  border-color:#8c7cff55;
+}
+
+.player-count-card.selected {
+  border-color:#8c7cff99;
+  background:#8c7cff18;
+  box-shadow:0 8px 25px #00000022;
+}
+
+.player-count-card strong {
+  font-size:2.2rem;
+  line-height:1;
+}
+
+.player-count-card span {
+  margin-top:9px;
+  color:#7e889c;
+  font:700 .58rem/1 monospace;
+  letter-spacing:.08em;
+}
+
+.setup-actions {
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px;
+  margin-top:24px;
+}
+
+.secondary-button {
+  min-height:52px;
+  padding:0 18px;
+  border:1px solid #ffffff14;
+  border-radius:15px;
+  background:#ffffff07;
+  color:#aab1c0;
+  font-weight:750;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.secondary-button:hover {
+  background:#ffffff0d;
+  color:#fff;
+}
+
+.setup-card-modern .primary-button {
+  min-height:52px;
+  background:#7b68e8;
+  box-shadow:0 5px 0 #4d429b;
+}
+
+.setup-card-modern .primary-button:hover {
+  background:#8978f5;
+}
+
+.name-list {
+  position:relative;
+  z-index:2;
+  display:grid;
+  gap:9px;
+}
+
+.name-field {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-height:58px;
+  padding:9px 12px;
+  border:1px solid #ffffff0d;
+  border-radius:15px;
+  background:#ffffff06;
+}
+
+.name-color,
+.color-preview {
+  flex:0 0 auto;
+  border-radius:50%;
+}
+
+.name-color {
+  width:13px;
+  height:13px;
+}
+
+.name-field-content {
+  display:flex;
+  flex:1;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.name-field-content > span {
+  color:#c5cad5;
+  font-size:.78rem;
+  font-weight:750;
+}
+
+.name-field input {
+  width:50%;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#fff;
+  text-align:right;
+  font:600 .78rem inherit;
+}
+
+.name-field input::placeholder {
+  color:#596275;
+}
+
+.color-grid {
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+  margin-bottom:12px;
+}
+
+.color-card {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px;
+  border:1px solid #ffffff0d;
+  border-radius:15px;
+  background:#ffffff06;
+  color:#fff;
+  text-align:left;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.color-card:hover {
+  transform:translateY(-2px);
+  border-color:#ffffff25;
+}
+
+.color-card.selected {
+  border-color:#8c7cff99;
+  background:#8c7cff15;
+}
+
+.color-preview {
+  width:29px;
+  height:29px;
+  box-shadow:inset 0 2px 3px #ffffff66,0 3px 8px #00000035;
+}
+
+.color-card strong,
+.color-card small {
+  display:block;
+}
+
+.color-card strong {
+  font-size:.78rem;
+}
+
+.color-card small {
+  margin-top:3px;
+  color:#737d91;
+  font-size:.6rem;
+}
+
+.solo-name-field {
+  position:relative;
+  z-index:2;
+  margin-top:10px;
+}
+
+@keyframes menuCopyIn {
+  from {
+    opacity:0;
+    transform:translateX(-18px);
+  }
+  to {
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+@keyframes menuCardIn {
+  from {
+    opacity:0;
+    transform:translateY(18px) scale(.98);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+.eyebrow {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:#976d32;
+  font:700 .7rem/1 monospace;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.eyebrow::before {
+  content:"";
+  width:24px;
+  height:2px;
+  background:#e4ac42;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top:0;
+}
+.setup-title {
+  margin:20px 0 23px;
+  max-width:650px;
+  font-size:clamp(4.2rem,8vw,7.4rem);
+  line-height:.82;
+  letter-spacing:-.1em;
+}
+.setup-title em {
+  color:var(--coral);
+  font-style:normal;
+}
+.setup-lead {
+  max-width:500px;
+  color:#687384;
+  font-size:clamp(1rem,1.35vw,1.2rem);
+  line-height:1.55;
+}
+.setup-note {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:36px;
+  color:#67717c;
+  font-size:.82rem;
+}
+.setup-card,
+.panel {
+  border:1px solid #e5dfd3;
+  background:#fffdf9ed;
+  box-shadow:0 22px 50px #6c58301c;
+  border-radius:26px;
+}
+.setup-card {
+  position:relative;
+  overflow:hidden;
+  padding:38px;
+}
+.setup-card::after {
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  right:-57px;
+  top:-83px;
+  border-radius:50%;
+  background:#fff2c7;
+}
+.setup-card>* {
+  position:relative;
+  z-index:1;
+}
+.setup-card h2 {
+  margin-bottom:8px;
+  font-size:1.7rem;
+  letter-spacing:-.05em;
+}
+.setup-card p {
+  color:var(--muted);
+  font-size:.9rem;
+}
+.player-options {
+  display:grid;
+  gap:10px;
+  margin:27px 0 20px;
+}
+.player-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:15px 17px;
+  border:1px solid #e5dfd3;
+  border-radius:16px;
+  background:#fbf7ed;
+  color:var(--ink);
+  text-align:left;
+  cursor:pointer;
+  transition:.2s;
+}
+.player-option:hover {
+  transform:translateY(-2px);
+  border-color:#cda83c;
+}
+.player-option.selected {
+  border:2px solid #d5aa3d;
+  padding:14px 16px;
+  box-shadow:0 7px 18px #b1872020;
+}
+.player-option strong,
+.player-option small {
+  display:block;
+}
+.player-option strong {
+  font-size:.98rem;
+}
+.player-option small {
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.72rem;
+}
+.dots {
+  display:flex;
+  gap:5px;
+}
+.dot,
+.score-dot {
+  display:inline-block;
+  border-radius:50%;
+}
+.dot {
+  width:12px;
+  height:12px;
+  border:1px solid #fff;
+  box-shadow:0 1px 2px #0003;
+}
+.red {
+  background:var(--coral);
+}
+.green {
+  background:var(--green);
+}
+.yellow {
+  background:var(--yellow);
+}
+
+.blue {
+  background:var(--blue);
+}
+.primary-button,
+.roll-button {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  width:100%;
+  min-height:54px;
+  border:1px solid #ffffff20;
+  border-radius:16px;
+  background:
+    linear-gradient(135deg,#8c7cff,#6355c7);
+  color:#ffffff;
+  font-weight:900;
+  letter-spacing:.01em;
+  cursor:pointer;
+
+  box-shadow:
+    0 8px 0 #3d357d,
+    0 14px 28px #00000040,
+    inset 0 1px 0 #ffffff35;
+
+  transition:
+    transform .15s ease,
+    filter .15s ease,
+    box-shadow .15s ease;
+}
+
+.primary-button::before,
+.roll-button::before {
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:15px;
+  background:linear-gradient(
+    180deg,
+    #ffffff18,
+    transparent 45%
+  );
+  pointer-events:none;
+}
+
+.primary-button:hover,
+.roll-button:hover {
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+  box-shadow:
+    0 10px 0 #3d357d,
+    0 18px 32px #0000004d,
+    0 0 22px #8c7cff35,
+    inset 0 1px 0 #ffffff40;
+}
+
+.primary-button:active,
+.roll-button:active {
+  transform:translateY(5px);
+  box-shadow:
+    0 3px 0 #3d357d,
+    0 7px 15px #00000035,
+    inset 0 2px 5px #00000025;
+}
+
+.primary-button:disabled,
+.roll-button:disabled {
+  cursor:not-allowed;
+  filter:grayscale(.35);
+  opacity:.55;
+  transform:none;
+  box-shadow:
+    0 4px 0 #30354a,
+    0 8px 16px #00000025;
+}
+.primary-button:hover,
+.roll-button:hover {
+  filter:brightness(1.08);
+  transform:translateY(-1px);
+}
+.mini-board {
+  position:fixed;
+  bottom:26px;
+  left:25%;
+  display:grid;
+  grid-template-columns:repeat(3,29px);
+  gap:5px;
+  padding:14px;
+  border-radius:22px;
+  background:#e5c87c;
+  transform:rotate(3deg);
+  opacity:.78;
+}
+.mini-board i {
+  display:block;
+  width:29px;
+  height:29px;
+  border-radius:10px;
+  background:#f7edca;
+}
+.mini-board i:nth-child(1) {
+  background:#f5bdca;
+}
+.mini-board i:nth-child(2) {
+  background:#b6e3df;
+}
+.mini-board i:nth-child(3) {
+  background:#c8d7ed;
+}
+.mini-board i:nth-child(4) {
+  background:#c9d7ee;
+}
+.mini-board i:nth-child(5) {
+  background:#fff3cf;
+}
+.mini-board i:nth-child(6) {
+  background:#efd8a0;
+}
+.mini-board i:nth-child(7) {
+  background:#f7edca;
+}
+.mini-board i:nth-child(8) {
+  background:#d6ae44;
+}
+.mini-board i:nth-child(9) {
+  background:#f7edca;
+}
+.game-intro {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  margin-bottom:24px;
+  padding:18px 20px;
+  border:1px solid #ffffff12;
+  border-radius:20px;
+  background:linear-gradient(145deg,#202535e8,#121621e8);
+  box-shadow:
+    0 18px 40px #00000035,
+    inset 0 1px 0 #ffffff0c;
+  backdrop-filter:blur(10px);
+}
+
+.game-intro h1 {
+  margin:0;
+  font-size:clamp(1.8rem,3vw,2.6rem);
+  line-height:1;
+  letter-spacing:-.04em;
+  color:#ffffff;
+  text-shadow:0 0 20px #8c7cff22;
+}
+
+.game-intro p {
+  margin:8px 0 0;
+  color:#9da5b8;
+  font-size:.86rem;
+}
+.game-intro h1 {
+  margin:0;
+  font-size:clamp(2rem,4vw,3.1rem);
+  letter-spacing:-.08em;
+}
+.game-intro p {
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+.turn-chip {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 15px;
+  border:1px solid #ffffff18;
+  border-radius:999px;
+  background:#171b29;
+  color:#ffffff;
+  font-size:.78rem;
+  font-weight:800;
+  white-space:nowrap;
+  box-shadow:
+    0 8px 20px #00000030,
+    inset 0 1px 0 #ffffff0a;
+}
+
+.turn-chip::before {
+  content:"";
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#8c7cff;
+  box-shadow:
+    0 0 8px #8c7cffcc,
+    0 0 16px #8c7cff55;
+}
+.turn-chip.red-turn::before {
+  background:var(--coral);
+  box-shadow:0 0 0 4px #e5393520;
+}
+.turn-chip.green-turn::before {
+  background:var(--green);
+  box-shadow:0 0 0 4px #368f6020;
+}
+.turn-chip.yellow-turn::before {
+  background:var(--yellow);
+  box-shadow:0 0 0 4px #d9a92820;
+}
+.turn-chip.blue-turn::before {
+  background:var(--blue);
+  box-shadow:0 0 0 4px #426ba820;
+}
+@keyframes turnPulse {
+  50% {
+    transform:scale(1.18);
+    box-shadow:
+      0 0 0 7px ##e5393512;
+  }
+}
+.game-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 310px;
+  gap:clamp(18px,3vw,42px);
+  align-items:start;
+}
+
+.board-wrap {
+  min-width:0;
+}
+
+.board-frame {
+  position:relative;
+  padding:10px;
+  border:1px solid #ffffff18;
+  border-radius:28px;
+  background:
+    linear-gradient(145deg,#252a3bee,#111522f5);
+  box-shadow:
+    0 30px 70px #00000055,
+    0 0 0 1px #7b68e822,
+    inset 0 1px 0 #ffffff12;
+}
+
+.board-frame::before {
+  content:"";
+  position:absolute;
+  inset:-2px;
+  z-index:-1;
+  border-radius:30px;
+  background:
+    linear-gradient(
+      135deg,
+      #8c7cff55,
+      transparent 35%,
+      #d64e4330 75%,
+      transparent
+    );
+  filter:blur(14px);
+  opacity:.7;
+}
+
+.board {
+  display:grid;
+  position:relative;
+  overflow:hidden;
+  aspect-ratio:1;
+  grid-template-columns:repeat(15,1fr);
+  grid-template-rows:repeat(15,1fr);
+  border-radius:20px;
+  background:#171b29;
+  box-shadow:
+    inset 0 0 0 1px #ffffff10,
+    inset 0 0 35px #00000035;
+}
+
+.cell {
+  position:relative;
+  display:grid;
+  place-items:center;
+  border:1px solid #ffffff0b;
+  background:#171b29;
+}
+
+.cell.track {
+  background:
+    linear-gradient(145deg,#252a3a,#1d2230);
+  box-shadow:
+    inset 0 0 0 1px #ffffff05;
+}
+
+.cell.lane-red {
+  background:linear-gradient(145deg,#a83d46,#682b38);
+  box-shadow:inset 0 0 12px #e5393520;
+}
+
+.cell.lane-green {
+  background:linear-gradient(145deg,#3b8b63,#23523f);
+  box-shadow:inset 0 0 12px #368f6020;
+}
+
+.cell.lane-yellow {
+  background:linear-gradient(145deg,#b58c2d,#735d24);
+  box-shadow:inset 0 0 12px #d9a92820;
+}
+
+.cell.lane-blue {
+  background:linear-gradient(145deg,#4f6fa9,#2e426c);
+  box-shadow:inset 0 0 12px #426ba820;
+}
+
+.cell.start-red {
+  background:linear-gradient(145deg,#d94b50,#8c303c);
+  box-shadow:inset 0 0 15px #ff6b6b25;
+}
+
+.cell.start-green {
+  background:linear-gradient(145deg,#4ca978,#2d684c);
+  box-shadow:inset 0 0 15px #63d59620;
+}
+
+.cell.start-yellow {
+  background:linear-gradient(145deg,#d8ad3c,#8c6d25);
+  box-shadow:inset 0 0 15px #ffe27a20;
+}
+
+.cell.start-blue {
+  background:linear-gradient(145deg,#6085c2,#3a527f);
+  box-shadow:inset 0 0 15px #7da7ff20;
+}
+
+.cell.safe::before {
+  content:"★";
+  color:#c7a8ff;
+  font-size:clamp(10px,1.4vw,17px);
+  text-shadow:
+    0 0 6px #8c7cff99,
+    0 0 12px #8c7cff55;
+}
+.finish {
+  position:absolute;
+  z-index:2;
+  width:20%;
+  height:20%;
+  left:40%;
+  top:40%;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid #ffffff30;
+  border-radius:10px;
+  background:
+    conic-gradient(
+      from 45deg,
+      #e53935 0 25%,
+      #d9a928 25% 50%,
+      #426ba8 50% 75%,
+      #368f60 75%
+    );
+  box-shadow:
+    0 0 25px #8c7cff25,
+    inset 0 0 20px #ffffff18;
+}
+
+.finish::after {
+  content:"GX";
+  display:grid;
+  place-items:center;
+  width:42%;
+  height:42%;
+  border-radius:50%;
+  background:#151925;
+  color:#ffffff;
+  font:900 clamp(7px,1.2vw,15px)/1 monospace;
+  letter-spacing:-.08em;
+  box-shadow:
+    0 0 0 2px #ffffff55,
+    0 0 18px #8c7cff77,
+    inset 0 0 10px #00000055;
+}
+
+/* =====================================================
+   CASAS
+   ORDEN FINAL:
+   ROJO   = ARRIBA IZQUIERDA
+   AZUL   = ARRIBA DERECHA
+   VERDE  = ABAJO IZQUIERDA
+   AMARILLO = ABAJO DERECHA
+   ===================================================== */
+
+.home {
+  position:absolute;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  padding:7%;
+  border-radius:10%;
+}
+
+/* Arriba izquierda */
+.home.red {
+  inset:0 60% 60% 0;
+  background:
+    linear-gradient(145deg,#d94b50,#7d2938);
+  box-shadow:inset 0 0 25px #ff6b6b22;
+}
+
+.home.blue {
+  inset:0 0 60% 60%;
+  background:
+    linear-gradient(145deg,#5477b7,#293f69);
+  box-shadow:inset 0 0 25px #7da7ff22;
+}
+
+.home.green {
+  inset:60% 60% 0 0;
+  background:
+    linear-gradient(145deg,#4b9f70,#24543f);
+  box-shadow:inset 0 0 25px #63d59622;
+}
+
+.home.yellow {
+  inset:60% 0 0 60%;
+  background:
+    linear-gradient(145deg,#d2a936,#80621f);
+  box-shadow:inset 0 0 25px #ffe27a22;
+}
+
+.yard {
+  display:grid;
+  grid-template:repeat(2,1fr)/repeat(2,1fr);
+  gap:11%;
+  width:100%;
+  height:100%;
+  padding:13%;
+  border-radius:16%;
+  background:#0d1019aa;
+  border:1px solid #ffffff18;
+  box-shadow:
+    inset 0 0 18px #00000045,
+    inset 0 1px 0 #ffffff0b;
+  backdrop-filter:blur(3px);
+}
+
+.token {
+  position:absolute;
+  z-index:6;
+  display:grid;
+  place-items:center;
+
+  width:76%;
+  height:76%;
+  left:12%;
+  top:12%;
+
+  border:2px solid #ffffffdd;
+  border-radius:50%;
+
+  color:#fff;
+  font:800 clamp(7px,1vw,12px) monospace;
+
+  cursor:default;
+
+  background:
+    radial-gradient(
+      circle at 32% 27%,
+      #ffffffaa 0 9%,
+      transparent 10%
+    ),
+    radial-gradient(
+      circle at 50% 55%,
+      #ffffff22 0 35%,
+      transparent 36%
+    ),
+    currentColor;
+
+  box-shadow:
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 3px 0 #4d321f55,
+    0 5px 9px #4d321f40;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+
+.token.red {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#f58b80,#c94338);
+}
+
+.token.green {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#63b986,#27784e);
+}
+
+.token.yellow {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#f4d66a,#c39319);
+}
+
+.token.blue {
+  background:
+    radial-gradient(circle at 32% 27%, #ffffffaa 0 9%, transparent 10%),
+    linear-gradient(145deg,#7198d2,#31588f);
+}
+
+.yard .token {
+  position:relative;
+  width:100%;
+  height:100%;
+  left:auto;
+  top:auto;
+}
+
+.token.valid {
+  cursor:pointer;
+  outline:3px solid #fffbe4;
+  outline-offset:4px;
+
+  animation:selectablePiece 1s ease-in-out infinite;
+
+  filter:brightness(1.12);
+
+  transform:translateY(-4px) scale(1.08);
+
+  box-shadow:
+    0 0 0 6px #fff9dc88,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 7px 0 #4d321f55,
+    0 11px 15px #4d321f45;
+}
+
+.token.valid:hover {
+  transform:translateY(-7px) scale(1.16);
+  filter:brightness(1.2);
+}
+
+.token.valid:active {
+  transform:translateY(0) scale(.92);
+}
+
+  box-shadow:
+    0 0 0 5px #fff9dc66,
+    inset 0 2px 3px #ffffff80,
+    inset 0 -4px 5px #00000030,
+    0 6px 0 #4d321f55,
+    0 9px 13px #4d321f40;
+}
+
+.token.valid:hover {
+  transform:translateY(-5px) scale(1.13);
+  filter:brightness(1.18);
+}
+
+.token.valid:active {
+  transform:translateY(0) scale(.94);
+  transition:transform .08s ease;
+}
+@keyframes selectablePiece {
+  0%,100% {
+    transform:translateY(-3px) scale(1.05);
+  }
+
+  50% {
+    transform:translateY(-6px) scale(1.1);
+  }
+}
+.token:disabled {
+  opacity:1;
+}
+
+.token.finished {
+  background:
+    radial-gradient(circle at 32% 27%,#ffffffaa 0 9%,transparent 10%),
+    linear-gradient(145deg,#fff8d9,#e7c866)!important;
+
+  color:#8b692d;
+
+  border-color:#a77b32;
+
+  box-shadow:
+    inset 0 2px 3px #ffffffaa,
+    inset 0 -3px 5px #00000018,
+    0 3px 0 #80632955,
+    0 5px 9px #4d321f30;
+}
+  
+.yard .token {
+  position:relative;
+  width:100%;
+  height:100%;
+  left:auto;
+  top:auto;
+}
+
+.token.finished {
+  background:#fff5cf!important;
+  color:#8b692d;
+  border-color:#a77b32;
+}
+
+.stack-1 {
+  margin-left:13%;
+  margin-top:13%;
+}
+
+.stack-2 {
+  margin-left:-13%;
+  margin-top:13%;
+}
+
+.stack-3 {
+  margin-left:13%;
+  margin-top:-13%;
+}
+@keyframes selectablePiece {
+
+  0%,100% {
+    transform:translateY(-4px) scale(1.08);
+    filter:brightness(1.1);
+  }
+
+  50% {
+    transform:translateY(-8px) scale(1.13);
+    filter:brightness(1.22);
+  }
+
+}
+@keyframes pulse {
+  50% {
+    box-shadow:
+      0 0 0 6px #fff9dc55,
+      0 3px 0 #4d321f55;
+  }
+}
+/* ANIMACIÓN DE FICHAS */
+.token.moving-piece {
+  animation: pieceMove .28s ease-out;
+}
+
+@keyframes pieceMove {
+  0% {
+    transform: scale(.82);
+    opacity:.65;
+  }
+
+  60% {
+    transform: scale(1.14);
+    opacity:1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity:1;
+  }
+}
+/* =========================================
+   LLEGADA AL CENTRO — 2 PEQUEÑOS SALTOS
+   ========================================= */
+
+.token.arrived {
+  animation: arrivalBounce 0.9s ease-out;
+  z-index: 30;
+}
+
+@keyframes arrivalBounce {
+
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  18% {
+    transform: translateY(-9px) scale(1.08);
+  }
+
+  34% {
+    transform: translateY(0) scale(1);
+  }
+
+  52% {
+    transform: translateY(-6px) scale(1.05);
+  }
+
+  68% {
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+}
+/* =====================================================
+   ANIMACIÓN DE CAPTURA
+   ===================================================== */
+
+.token.captured {
+  z-index: 50 !important;
+}
+
+/* Señal visual de captura */
+.capture-mark {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #e53935;
+  color: white;
+
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
+
+  border: 3px solid white;
+
+  box-shadow:
+    0 0 0 4px #e5393555,
+    0 5px 14px #0006;
+
+  transform: translate(-50%, -50%) scale(.2);
+  opacity: 0;
+
+  animation: captureMark 650ms cubic-bezier(.2,.8,.3,1) forwards;
+}
+
+/* La ficha capturada tiembla */
+.token.captured {
+  animation: capturedShake 500ms ease-in-out forwards;
+}
+
+@keyframes capturedShake {
+
+  0% {
+    transform: scale(1) rotate(0);
+  }
+
+  15% {
+    transform: scale(1.15) rotate(-8deg);
+  }
+
+  30% {
+    transform: scale(1.18) rotate(8deg);
+  }
+
+  45% {
+    transform: scale(1.10) rotate(-5deg);
+  }
+
+  60% {
+    transform: scale(1) rotate(3deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes captureMark {
+
+  0% {
+    transform: translate(-50%, -50%) scale(.2) rotate(-15deg);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(1.25) rotate(5deg);
+    opacity: 1;
+  }
+
+  35% {
+    transform: translate(-50%, -50%) scale(1) rotate(0);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translate(-50%, -70%) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -95%) scale(.75);
+    opacity: 0;
+  }
+}
+
+/* Ficha que viaja lentamente hacia su casa */
+.token.capture-flying {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  transition: none !important;
+}
+
+.legend {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px 18px;
+  padding-top:14px;
+  color:var(--muted);
+  font-size:.7rem;
+}
+
+.legend span {
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.legend b {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--safe);
+}
+
+.sidebar {
+  display:grid;
+  gap:14px;
+}
+
+.panel {
+  padding:18px;
+  border:1px solid #ffffff12;
+  border-radius:20px;
+  background:
+    linear-gradient(145deg,#202535e8,#121621e8);
+  box-shadow:
+    0 16px 35px #00000035,
+    inset 0 1px 0 #ffffff0b;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.status-label {
+  color:#9b8cff;
+  font:800 .63rem monospace;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  text-shadow:0 0 12px #8c7cff35;
+}
+
+.status-player {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:12px 0 17px;
+}
+
+.orb {
+  width:15px;
+  height:15px;
+  border-radius:50%;
+}
+
+.status-player strong,
+.status-player small {
+  display:block;
+}
+
+.status-player strong {
+  font-size:1.05rem;
+  color:#ffffff;
+  font-weight:800;
+  text-shadow:0 1px 4px #000000aa;
+}
+
+.status-player small {
+  margin-top:3px;
+  color:var(--muted);
+  font-size:.72rem;
+}
+
+.dice-row {
+  display:grid;
+  grid-template-columns:68px 1fr;
+  gap:14px;
+  align-items:center;
+  padding:14px;
+  border:1px solid #ffffff12;
+  border-radius:18px;
+  background:linear-gradient(145deg,#1d2230,#151925);
+  box-shadow:
+    0 12px 28px #00000030,
+    inset 0 1px 0 #ffffff0a;
+}
+
+.die {
+  display:grid;
+  grid-template:repeat(3,1fr)/repeat(3,1fr);
+  gap:4px;
+  width:68px;
+  height:68px;
+  padding:10px;
+  border:1px solid #ffffff22;
+  border-radius:18px;
+  background:
+    linear-gradient(145deg,#f8f9ff,#dfe3f0);
+  box-shadow:
+    0 10px 22px #00000045,
+    inset 0 1px 2px #ffffff,
+    inset 0 -3px 5px #00000018,
+    0 0 0 3px #8c7cff12;
+}
+
+.pip {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:#20263a;
+  opacity:0;
+  box-shadow:
+    inset 0 2px 2px #ffffff20,
+    0 1px 2px #00000055;
+  transform:scale(.92);
+  transition:
+    opacity .15s ease,
+    transform .15s ease;
+}
+
+.pip.on {
+  opacity:1;
+  transform:scale(1);
+}
+
+.pip.on {
+  opacity:1;
+}
+
+.rolling {
+  animation:
+    diceRoll .18s ease-in-out infinite,
+    diceShake .55s ease-in-out infinite;
+  transform-origin:center;
+}
+
+@keyframes diceRoll {
+  0% {
+    transform:rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform:rotate(18deg) scale(1.06);
+  }
+
+  50% {
+    transform:rotate(-18deg) scale(1.1);
+  }
+
+  75% {
+    transform:rotate(12deg) scale(1.06);
+  }
+
+  100% {
+    transform:rotate(0deg) scale(1);
+  }
+}
+
+@keyframes diceShake {
+  0%,100% {
+    filter:brightness(1);
+  }
+
+  50% {
+    filter:brightness(1.12);
+  }
+}
+
+.die.result {
+  animation:diceResult .3s ease-out;
+}
+
+@keyframes diceResult {
+  0% {
+    transform:scale(.82) rotate(-8deg);
+    opacity:.65;
+  }
+
+  55% {
+    transform:scale(1.12) rotate(4deg);
+    opacity:1;
+  }
+
+  100% {
+    transform:scale(1) rotate(0);
+    opacity:1;
+  }
+}
+
+.hint {
+  min-height:34px;
+  margin:15px 0 0;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.4;
+}
+
+.hint.pass {
+  color:#ff9a9a;
+}
+
+.panel h3 {
+  margin:0 0 15px;
+  font-size:.93rem;
+  color:#ffffff;
+  font-weight:850;
+  letter-spacing:-.02em;
+}
+
+.score-grid {
+  display:grid;
+  grid-template-columns:1fr 38px 48px 38px;
+  align-items:center;
+  gap:8px;
+  padding:12px;
+  border:1px solid #ffffff0d;
+  border-radius:15px;
+  background:#151925aa;
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    inset 0 0 20px #00000020;
+}
+
+.score-head {
+  color:#8f97aa;
+  font:800 .57rem monospace;
+  text-align:center;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+.score-name {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-size:.78rem;
+  color:#ffffff;
+  font-weight:750;
+  text-shadow:0 1px 3px #00000099;
+}
+
+.score-name span {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.score-dot {
+  width:9px;
+  height:9px;
+  flex:0 0 9px;
+  border-radius:50%;
+  box-shadow:0 0 8px currentColor;
+}
+
+.score-value {
+  color:#cbd1df;
+  font:800 .77rem monospace;
+  text-align:center;
+}
+
+.rules {
+  color:#667283;
+  font-size:.75rem;
+  line-height:1.4;
+}
+
+.rule {
+  display:flex;
+  gap:8px;
+  margin:10px 0;
+}
+
+.rule b {
+  color:#ad7d35;
+}
+
+.outline {
+  width:100%;
+  min-height:42px;
+  border:1px solid #cdb47c;
+  border-radius:13px;
+  background:transparent;
+  color:#8a682e;
+  font-weight:750;
+  cursor:pointer;
+}
+
+.winner {
+  position:fixed;
+  z-index:20;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:#1c283dcc;
+}
+
+.winner-card {
+  width:min(420px,100%);
+  padding:34px;
+  border-radius:27px;
+  background:#fffdf8;
+  text-align:center;
+}
+
+.winner-seal {
+  display:grid;
+  place-items:center;
+  width:70px;
+  height:70px;
+  margin:0 auto 20px;
+  border-radius:50%;
+  background:#f1c84f;
+  color:#fff;
+  font-size:2rem;
+}
+
+.winner-card h2 {
+  margin-bottom:10px;
+  font-size:2rem;
+}
+
+.winner-card p {
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.winner-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:23px;
+}
+
+.winner-actions button {
+  min-height:44px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:750;
+}
+
+.winner-actions .secondary {
+  border:1px solid #d9c59a;
+  background:transparent;
+  color:#7f622e;
+}
+
+.winner-actions .primary {
+  border:0;
+  background:var(--navy);
+  color:#fff;
+}
+
+/* =====================================================
+   MENÚ DEL LOBBYY
+   ===================================================== */
+
+.lobby-menu {
+  display:grid;
+  gap:10px;
+  margin:25px 0 20px;
+}
+
+.lobby-section-title {
+  margin:4px 0 2px;
+  color:#9b7438;
+  font:700 .65rem monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.lobby-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  min-height:58px;
+  padding:12px 15px;
+
+  border:1px solid #e5dfd3;
+  border-radius:15px;
+
+  background:#fbf7ed;
+  color:var(--ink);
+
+  text-align:left;
+  cursor:pointer;
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+.lobby-option:hover {
+  transform:translateY(-2px);
+  border-color:#cda83c;
+}
+
+.lobby-option.selected {
+  border:2px solid #d5aa3d;
+  padding:11px 14px;
+
+  background:#fff9e7;
+
+  box-shadow:
+    0 7px 18px #b1872020;
+}
+
+.lobby-option-left {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.lobby-icon {
+  display:grid;
+  place-items:center;
+
+  width:35px;
+  height:35px;
+
+  border-radius:11px;
+
+  background:#f1e6cc;
+
+  font-size:1.1rem;
+}
+
+.lobby-option strong,
+.lobby-option small {
+  display:block;
+}
+
+.lobby-option strong {
+  font-size:.92rem;
+}
+
+.lobby-option small {
+  margin-top:3px;
+  color:var(--muted);
+  font-size:.68rem;
+}
+
+.lobby-check {
+  display:grid;
+  place-items:center;
+
+  width:22px;
+  height:22px;
+
+  border:2px solid #d6c8ad;
+  border-radius:50%;
+
+  color:transparent;
+  font-size:.7rem;
+  font-weight:900;
+}
+
+.lobby-option.selected .lobby-check {
+  border-color:#c79a31;
+  background:#d9a928;
+  color:#fff;
+}
+
+.sound-option {
+  margin-top:5px;
+}
+
+.sound-option .lobby-icon {
+  background:#e8edf5;
+}
+
+.sound-status {
+  color:#8a682e;
+  font:800 .65rem monospace;
+  letter-spacing:.05em;
+}
+
+@media (max-width:920px) {
+
+  .setup {
+    grid-template-columns:1fr;
+    gap:35px;
+    padding:25px 0;
+  }
+
+  .setup-copy {
+    text-align:center;
+  }
+
+  .eyebrow,
+  .setup-note {
+    justify-content:center;
+  }
+
+  .setup-lead {
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .mini-board {
+    display:none;
+  }
+
+  .game-layout {
+    grid-template-columns:1fr;
+  }
+
+  .sidebar {
+    grid-template-columns:1fr 1fr;
+  }
+
+  .status-panel,
+  .rules {
+    grid-column:1/-1;
+  }
+}
+
+@media (max-width:560px) {
+
+  .shell {
+    position: relative;
+    width:min(100% - 22px,500px);
+    padding-top:12px;
+  }
+
+  .topbar {
+    margin-bottom:24px;
+  }
+
+  .brand-logo {
+    width:36px;
+    height:36px;
+  }
+
+  .brand-name {
+    font-size:1rem;
+  }
+
+  .brand-caption {
+    display:none;
+  }
+
+  .setup {
+    min-height:auto;
+    padding:22px 0 35px;
+  }
+
+  .setup-title {
+    margin-top:18px;
+    font-size:clamp(3.2rem,16vw,5rem);
+  }
+
+  .setup-lead {
+    font-size:.93rem;
+  }
+
+  .setup-card {
+    padding:22px 20px;
+    border-radius:22px;
+  }
+
+  .game-intro {
+    display:block;
+  }
+
+  .game-intro h1 {
+    font-size:2rem;
+  }
+
+  .turn-chip {
+    display:inline-block;
+    margin-top:12px;
+  }
+
+  .board-frame {
+    padding:5px;
+    border-radius:17px;
+  }
+
+  .board {
+    border-radius:12px;
+  }
+
+  .legend {
+    font-size:.58rem;
+    gap:7px 10px;
+  }
+
+  .sidebar {
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .status-panel,
+  .rules {
+    grid-column:auto;
+  }
+
+  .winner-card {
+    padding:27px 20px;
+  }
+}
+/* CELEBRACIÓN AL COMPLETAR LAS 4 FICHAS */
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgba(32,43,62,.45);
+  animation: celebrationFade .35s ease-out;
+}
+
+.celebration-card {
+  position: relative;
+  width: min(90%, 430px);
+  padding: 32px 24px;
+  text-align: center;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 28px;
+  box-shadow: 0 18px 50px rgba(32,43,62,.28);
+  animation: celebrationPop .7s cubic-bezier(.2,.85,.3,1.25);
+}
+
+.celebration-trophy {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 12px;
+  animation: trophyBounce .9s ease-in-out infinite alternate;
+}
+
+.celebration-card h2 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.celebration-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+@keyframes celebrationFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes celebrationPop {
+  0% {
+    transform: scale(.55) rotate(-4deg);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.08) rotate(1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes trophyBounce {
+  from { transform: translateY(0) rotate(-4deg); }
+  to { transform: translateY(-10px) rotate(4deg); }
+}
+/* =========================================
+   CONFETI DE LLEGADA
+   ========================================= */
+
+.arrival-confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 99999;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -25px;
+  width: 8px;
+  height: 14px;
+  display: block;
+  opacity: 1;
+  border-radius: 2px;
+  animation: confettiFall 3s linear forwards;
+}
+
+@keyframes confettiFall {
+
+  0% {
+    transform: translateY(-25px) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform:
+      translate(
+        var(--confetti-x),
+        110vh
+      )
+      rotate(var(--confetti-r));
+
+    opacity: 0;
+  }
+
+}
+/* =========================================
+   MENÚ DE CONFIGURACIÓN
+   ========================================= */
+
+.settings-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+
+  width: 46px;
+  height: 46px;
+
+  border: 1px solid #202b3e22;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #202b3e;
+
+  font-size: 21px;
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px #202b3e18;
+
+  z-index: 80;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+  width: 46px;
+  height: 46px;
+
+  border: 1px solid #202b3e22;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #202b3e;
+
+  font-size: 21px;
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px #202b3e18;
+
+  z-index: 80;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.settings-button:hover {
+  transform: rotate(25deg) scale(1.05);
+
+  box-shadow:
+    0 7px 18px #202b3e25;
+}
+
+.settings-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: rgba(32,43,62,.28);
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+
+  padding: 76px 18px 18px;
+
+  z-index: 1000;
+
+  animation: settingsFade .18s ease-out;
+}
+
+.settings-panel {
+  width: min(330px, calc(100vw - 36px));
+
+  background: var(--paper);
+
+  border: 1px solid #202b3e18;
+  border-radius: 22px;
+
+  padding: 18px;
+
+  box-shadow:
+    0 20px 50px #202b3e30;
+
+  animation: settingsOpen .22s ease-out;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.settings-title strong {
+  font-size: 20px;
+}
+
+.settings-close {
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #202b3e0d;
+  color: var(--ink);
+
+  font-size: 18px;
+
+  cursor: pointer;
+}
+
+.settings-option {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  padding: 13px 12px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: transparent;
+
+  color: var(--ink);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.settings-option:hover {
+  background: #202b3e0b;
+  transform: translateX(3px);
+}
+
+.settings-option-icon {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: #ffffff80;
+
+  font-size: 18px;
+}
+
+.settings-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-option-text strong {
+  font-size: 14px;
+}
+
+.settings-option-text small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+@keyframes settingsFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes settingsOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width:920px) {
+
+  .setup-modern {
+    grid-template-columns:1fr;
+    min-height:auto;
+    gap:35px;
+    padding:35px 0 50px;
+  }
+
+  .setup-copy {
+    text-align:center;
+  }
+
+  .setup-modern .eyebrow {
+    justify-content:center;
+  }
+
+  .setup-lead {
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .setup-status {
+    margin-top:25px;
+  }
+}
+
+@media (max-width:560px) {
+
+  .setup-modern {
+    padding:20px 0 35px;
+    gap:25px;
+  }
+
+  .setup-card-modern {
+    padding:21px 18px;
+    border-radius:24px;
+  }
+
+  .setup-title-small {
+    font-size:clamp(2.8rem,13vw,4.2rem);
+  }
+
+  .player-count-card {
+    min-height:100px;
+  }
+
+  .setup-actions {
+    grid-template-columns:1fr;
+  }
+
+  .secondary-button {
+    order:2;
+  }
+
+  .name-field-content {
+    display:block;
+  }
+
+  .name-field input {
+    width:100%;
+    margin-top:4px;
+    text-align:left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-copy,
+  .setup-card-modern {
+    animation:none;
+  }
+
+  .mode-card,
+  .player-count-card,
+  .color-card,
+  .sound-mini,
+  .secondary-button {
+    transition:none;
+  }
+}
+@media (max-width:560px) {
+
+  .board-frame {
+    padding:6px;
+    border-radius:20px;
+  }
+
+  .board {
+    border-radius:14px;
+  }
+
+  .cell {
+    border-width:.7px;
+  }
+
+  .yard {
+    border-radius:13%;
+  }
+
+}
+/* =========================================
+   CÓMO JUGAR
+   ========================================= */
+
+.how-to-play-panel {
+  margin-top: 10px;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  background: #ffffff70;
+
+  border: 1px solid #202b3e12;
+
+  animation: settingsOpen .22s ease-out;
+}
+
+.how-to-play-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 15px;
+}
+
+.how-to-play-kicker {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--ink);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .14em;
+}
+
+.how-to-play-header h3 {
+  margin: 0;
+
+  font-size: 20px;
+
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.how-to-play-close {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #202b3e0d;
+  color: var(--ink);
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.how-to-play-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.how-to-play-rule {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding: 10px;
+
+  border-radius: 13px;
+
+  background: #ffffff80;
+}
+
+.how-to-play-rule > span {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #202b3e08;
+
+  font-size: 16px;
+}
+
+.how-to-play-rule strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 12px;
+
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.how-to-play-rule p {
+  margin: 0;
+
+  color: #4f5b6d;
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.how-to-play-back {
+  width: 100%;
+
+  margin-top: 13px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #202b3e16;
+  border-radius: 12px;
+
+  background: #ffffff80;
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.how-to-play-back:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+/* =========================================
+   ACERCA DE GREYX LUDO
+   ========================================= */
+
+.about-greyx-panel {
+  margin-top: 10px;
+
+  padding: 17px;
+
+  border-radius: 18px;
+
+  background: #ffffff70;
+
+  border: 1px solid #202b3e12;
+
+  animation: settingsOpen .22s ease-out;
+}
+
+.about-greyx-header {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.about-greyx-logo {
+  width: 45px;
+  height: 45px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 14px;
+
+  background: #202b3e0b;
+
+  font-size: 23px;
+}
+
+.about-greyx-title {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.about-greyx-title span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .15em;
+}
+
+.about-greyx-title h3 {
+  margin: 0;
+
+  color: var(--ink);
+
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.about-greyx-close {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #202b3e0d;
+  color: var(--ink);
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.about-greyx-description {
+  padding: 12px;
+
+  border-radius: 13px;
+
+  background: #ffffff80;
+
+  margin-bottom: 10px;
+}
+
+.about-greyx-description p {
+  margin: 0;
+
+  color: #4f5b6d;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.about-greyx-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.about-greyx-info-row {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px;
+
+  border-radius: 12px;
+
+  background: #ffffff80;
+}
+
+.about-greyx-info-row > span {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  background: #202b3e08;
+
+  font-size: 15px;
+}
+
+.about-greyx-info-row div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+.about-greyx-info-row strong {
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.about-greyx-info-row small {
+  color: #4f5b6d;
+
+  font-size: 9px;
+}
+
+.about-greyx-divider {
+  height: 1px;
+
+  margin: 13px 0;
+
+  background: #202b3e12;
+}
+
+.about-greyx-creator {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.about-greyx-creator-icon {
+  width: 35px;
+  height: 35px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #202b3e0b;
+
+  font-size: 16px;
+}
+
+.about-greyx-creator div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+.about-greyx-creator div span {
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .12em;
+}
+
+.about-greyx-creator div strong {
+  color: var(--ink);
+
+  font-size: 12px;
+}
+
+.about-greyx-version {
+  margin-top: 12px;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: .08em;
+
+  text-align: center;
+}
+
+.about-greyx-back {
+  width: 100%;
+
+  margin-top: 13px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #202b3e16;
+  border-radius: 12px;
+
+  background: #ffffff80;
+  color: var(--ink);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.about-greyx-back:hover {
+  background: #ffffff;
+
+  transform: translateY(-1px);
+}
+/* =========================================
+   INTERRUPTOR DE SONIDO
+   ========================================= */
+
+.settings-toggle {
+  width: 38px;
+  height: 22px;
+
+  flex: 0 0 auto;
+
+  margin-left: auto;
+
+  padding: 3px;
+
+  border-radius: 20px;
+
+  background: #202b3e18;
+
+  transition:
+    background .2s ease;
+}
+
+.settings-toggle span {
+  display: block;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 5px #202b3e20;
+
+  transform: translateX(0);
+
+  transition:
+    transform .2s ease;
+}
+
+.settings-toggle.active {
+  background: var(--ink);
+}
+
+.settings-toggle.active span {
+  transform: translateX(16px);
+}
+
+/* INTRO NUEVA */
+.gx-intro{
+  position:fixed;inset:0;z-index:999999;
+  background:radial-gradient(circle at 50% 45%,#6d21ff28 0,transparent 40%),#070911;
+  overflow:hidden;opacity:1;transition:opacity .8s ease;
+}
+.gx-intro.hide{opacity:0;pointer-events:none}
+
+.gx-scene{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;transition:opacity 1.6s ease;
+}
+.gx-scene.gx-off{opacity:0}
+
+.gx-pop{animation:gxIn 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gxIn{
+  from{opacity:0;transform:scale(.8)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.gx-intro svg{width:min(70vw,400px);height:auto}
+
+.gx-name{
+  margin-top:26px;
+  color:#f0f0f2;
+  font-family:"Syncopate","Arial Black",sans-serif;
+  font-weight:700;
+  font-size:clamp(1.7rem,8vw,3.8rem);
+  line-height:1;
+  letter-spacing:.22em;
+  margin-right:-.22em;
+  transform:scaleX(1.25);
+will-change:transform;
+-webkit-font-smoothing:antialiased;
+text-rendering:geometricPrecision;
+
+}
+
+.gx-letter{
+  display:inline-block;
+  opacity:0;
+  transform:translate3d(-18px,0,0);
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  animation:gxLetter .6s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.gx-letter.gx-x{
+  color:#6d21ff;
+  text-shadow:0 0 12px #6d21ff,0 0 35px #6d21ff;
+}
+@keyframes gxLetter{
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+
+.gx-loading-box{width:min(220px,60vw);text-align:center}
+.gx-loading-text{
+  color:#8e96a8;font:700 .7rem monospace;
+  letter-spacing:.3em;margin-bottom:14px;
+}
+.gx-bar{height:3px;border-radius:99px;background:#ffffff14;overflow:hidden}
+.gx-bar i{
+  display:block;width:0;height:100%;border-radius:inherit;
+  background:#6d21ff;box-shadow:0 0 10px #6d21ff;
+}
+.gx-bar.run i{width:100%;transition:width 1.9s ease-in-out}
+/* =========================================
+   LOBBY — MEJORAS
+   ========================================= */
+
+/* Tarjeta oscura (quita el fondo crema y el círculo amarillo) */
+.setup-card.setup-card-modern{
+  background:linear-gradient(145deg,#1d2232,#121622);
+  border:1px solid #ffffff14;
+  box-shadow:0 30px 80px #00000066, inset 0 1px 0 #ffffff0d;
+}
+.setup-card.setup-card-modern::after{display:none}
+
+/* Título legible, sin letras encimadas */
+.setup-title{
+  line-height:.92;
+  letter-spacing:-.04em;
+}
+.setup-title span{
+  letter-spacing:-.03em;
+  background:linear-gradient(90deg,#8c7cff,#c9c0ff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.setup-card-modern h2{letter-spacing:-.02em}
+
+/* Botones de modo más pulidos */
+.mode-card{
+  background:linear-gradient(145deg,#ffffff0a,#ffffff04);
+  border-color:#ffffff12;
+}
+.mode-icon{
+  background:linear-gradient(145deg,#8c7cff22,#ffffff0a);
+  border:1px solid #ffffff10;
+}
+.mode-card.selected{
+  border-color:#8c7cffaa;
+  background:linear-gradient(100deg,#8c7cff22,#ffffff08);
+  box-shadow:0 0 0 1px #8c7cff33, 0 10px 28px #00000033;
+}
+
+/* Botón de ajustes tipo cristal oscuro */
+.settings-button{
+  top:calc(14px + env(safe-area-inset-top, 0px));
+  right:14px;
+  width:44px;
+  height:44px;
+  font-size:19px;
+  background:#ffffff0d;
+  border:1px solid #ffffff1c;
+  color:#fff;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 6px 18px #00000040;
+}
+
+/* Que el contenido no quede debajo de la hora/batería */
+.shell{padding-top:calc(24px + env(safe-area-inset-top, 0px))}
+/* LOGO DE LA ESQUINA */
+.brand{gap:10px}
+
+.brand-mark{
+  width:44px;
+  height:auto;
+  flex:0 0 auto;
+}
+
+.brand-word{
+  color:#fff;
+  font-family:"Syncopate","Arial Black",sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:.14em;
+  line-height:1;
+}
+.brand-word span{
+  color:#6d21ff;
+  text-shadow:0 0 10px #6d21ff88;
+}
+/* =========================================
+   CONFIGURACIÓN — TEMA OSCURO
+   ========================================= */
+
+/* Fondo que cubre toda la pantalla */
+.settings-overlay{
+  position:fixed;
+  inset:0;
+  padding:calc(70px + env(safe-area-inset-top, 0px)) 14px 14px;
+  background:rgba(5,6,12,.62);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+
+/* Panel */
+.settings-panel{
+  width:min(350px,100%);
+  max-height:calc(100vh - 100px);
+  overflow-y:auto;
+  padding:18px;
+  color:#fff;
+  background:linear-gradient(145deg,#222740,#131725);
+  border:1px solid #ffffff14;
+  border-radius:24px;
+  box-shadow:0 30px 70px #000000aa, inset 0 1px 0 #ffffff12;
+}
+
+.settings-title strong{color:#fff;font-size:1.15rem}
+
+.settings-close,
+.how-to-play-close,
+.about-greyx-close{
+  background:#ffffff12;
+  color:#fff;
+}
+
+/* Opciones */
+.settings-option{
+  color:#fff;
+  margin-bottom:4px;
+  border:1px solid transparent;
+}
+.settings-option:hover{
+  background:#ffffff0c;
+  border-color:#ffffff10;
+}
+.settings-option-icon{
+  background:linear-gradient(145deg,#8c7cff26,#ffffff0a);
+  border:1px solid #ffffff10;
+}
+.settings-option-text strong{color:#fff}
+.settings-option-text small{color:#8e97aa}
+
+/* Interruptor de sonido */
+.settings-toggle{background:#ffffff1c}
+.settings-toggle.active{
+  background:#7b68e8;
+  box-shadow:0 0 12px #7b68e866;
+}
+
+/* Subpaneles: Cómo jugar y Acerca de */
+.how-to-play-panel,
+.about-greyx-panel{
+  background:#ffffff08;
+  border:1px solid #ffffff12;
+}
+.how-to-play-kicker,
+.about-greyx-title span,
+.about-greyx-creator div span{color:#9f91ff}
+
+.how-to-play-header h3,
+.about-greyx-title h3,
+.how-to-play-rule strong,
+.about-greyx-info-row strong,
+.about-greyx-creator div strong{color:#fff}
+
+.how-to-play-rule,
+.about-greyx-description,
+.about-greyx-info-row{
+  background:#ffffff08;
+}
+.how-to-play-rule > span,
+.about-greyx-info-row > span,
+.about-greyx-logo,
+.about-greyx-creator-icon{
+  background:#8c7cff1f;
+}
+.how-to-play-rule p,
+.about-greyx-description p,
+.about-greyx-info-row small{color:#a3abbd}
+
+.about-greyx-divider{background:#ffffff12}
+.about-greyx-version{color:#6f788b}
+
+.how-to-play-back,
+.about-greyx-back{
+  background:#ffffff0d;
+  color:#fff;
+  border-color:#ffffff14;
+}
+.how-to-play-back:hover,
+.about-greyx-back:hover{background:#ffffff18}
+/* ===== CIERRE ETAPA 1 ===== */
+
+/* Ganador y celebración en oscuro */
+.winner{background:rgba(5,6,12,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.winner-card,.celebration-card{
+  background:linear-gradient(145deg,#222740,#131725);
+  border:1px solid #ffffff18;color:#fff;
+  box-shadow:0 30px 80px #000000aa,inset 0 1px 0 #ffffff12;
+}
+.winner-card h2,.celebration-card h2{color:#fff}
+.winner-card p,.celebration-card p{color:#a3abbd}
+.winner-seal{background:linear-gradient(145deg,#ffe27a,#d9a928);box-shadow:0 0 30px #d9a92866}
+.winner-actions .secondary{border-color:#ffffff22;color:#fff;background:#ffffff0a}
+.winner-actions .primary-button{min-height:44px;box-shadow:0 4px 0 #3d357d}
+
+/* Tablero más pulido */
+.board-frame{padding:8px;border-radius:26px}
+.cell.track{background:linear-gradient(145deg,#2a3045,#202638)}
+.cell.safe::before{color:#d9c8ff}
+.token{border-width:2px;font-weight:900}
+.token.valid{outline-color:#fff;filter:brightness(1.15)}
+.finish{border-radius:12px;box-shadow:0 0 30px #8c7cff44,inset 0 0 20px #ffffff22}
+
+/* Partida en celular */
+@media (max-width:560px){
+  .game-intro{padding:14px;margin-bottom:14px}
+  .game-intro h1{font-size:1.5rem}
+  .game-intro p{display:none}
+  .turn-chip{margin-top:10px;font-size:.7rem}
+  .cell.safe::before{font-size:9px}
+  .token{font-size:7px}
+  .dice-row{grid-template-columns:62px 1fr;padding:12px}
+  .die{width:62px;height:62px;padding:9px}
+}
+/* Centrar encabezado de las tarjetas */
+.setup-card-header{
+  text-align:center;
+}
+.setup-card-kicker{
+  text-align:center;
+}
+.gx-gate{
+  position:fixed;inset:0;z-index:9999999;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:34px;
+  background:radial-gradient(circle at 50% 45%,#6d21ff28 0,transparent 40%),#070911;
+  cursor:pointer;
+}
+.gx-gate svg{width:min(45vw,220px);height:auto}
+.gx-gate-text{
+  color:#8e96a8;font:700 .75rem monospace;
+  letter-spacing:.35em;
+  animation:gxPulse 1.6s ease-in-out infinite;
+}
+@keyframes gxPulse{0%,100%{opacity:.35}50%{opacity:1}}
+.lang-option{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:13px 14px;
+  border:1px solid #ffffff12;border-radius:13px;
+  background:#ffffff08;color:#fff;
+  font-weight:700;font-size:.9rem;cursor:pointer;
+}
+.lang-option.selected{border-color:#8c7cffaa;background:#8c7cff22}
+.lang-check{color:#b9aeff;font-weight:900}
+.game-intro h1{
+  letter-spacing:-.01em;
+}
+.finish{
+  background:conic-gradient(
+    from 45deg,
+    #d9a928 0 25%,
+    #368f60 25% 50%,
+    #e53935 50% 75%,
+    #426ba8 75% 100%
+  );
+}
+/* DADO */
+.die.six{
+  box-shadow:0 0 0 2px #ffd54f88,0 0 16px #ffd54f66,0 10px 22px #00000045;
+}
+
+/* SALTO DE FICHA */
+.token.hop{animation:tokenHop .18s ease-out}
+@keyframes tokenHop{
+  0%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-28%) scale(1.18)}
+  100%{transform:translateY(0) scale(1)}
+}
+
+/* CONTADOR */
+.score-value.full{color:#ffd54f}
+
+/* META */
+.finish.pulse{animation:finishPulse .9s ease-out}
+@keyframes finishPulse{
+  0%{box-shadow:0 0 0 0 #ffffff88,0 0 25px #8c7cff25}
+  60%{box-shadow:0 0 0 22px #ffffff00,0 0 50px #ffe27a99}
+  100%{box-shadow:0 0 0 0 #ffffff00,0 0 25px #8c7cff25}
+}
+
+</style>
+<div id="app" class="app"></div>
+
+<script>
+(() => {
+
+const colors = ["red","green","yellow","blue"];
+
+const names = {
+  red:"Coral",
+  green:"Pradera",
+  yellow:"Sol",
+  blue:"Puerto"
+};
+
+const playersByCount = {
+  2:["red","yellow"],
+  3:["red","green","yellow"],
+  4:["red","green","yellow","blue"]
+};
+
+/*
+===========================================================
+RECORRIDO PRINCIPAL
+
+Ahora las entradas están alineadas con las nuevas casas:
+
+ROJO     → arriba izquierda
+AZUL     → arriba derecha
+VERDE    → abajo izquierda
+AMARILLO → abajo derecha
+===========================================================
+*/
+const track = [
+
+  [6,1],
+  [6,2],
+  [6,3],
+  [6,4],
+  [6,5],
+
+  [5,6],
+  [4,6],
+  [3,6],
+  [2,6],
+  [1,6],
+  [0,6],
+
+  [0,7],
+  [0,8],
+
+  [1,8],
+  [2,8],
+  [3,8],
+  [4,8],
+  [5,8],
+
+  [6,9],
+  [6,10],
+  [6,11],
+  [6,12],
+  [6,13],
+  [6,14],
+
+  [7,14],
+
+  [8,14],
+  [8,13],
+  [8,12],
+  [8,11],
+  [8,10],
+  [8,9],
+
+  [9,8],
+  [10,8],
+  [11,8],
+  [12,8],
+  [13,8],
+  [14,8],
+
+  [14,7],
+  [14,6],
+
+  [13,6],
+  [12,6],
+  [11,6],
+  [10,6],
+  [9,6],
+
+  // AQUÍ YA NO PASA POR [8,6]
+  // GIRA HACIA LA IZQUIERDA
+  [8,5],
+  [8,4],
+  [8,3],
+  [8,2],
+  [8,1],
+  [8,0],
+
+  [7,0],
+
+  // Casilla que faltaba para completar las 52
+  [6,0]
+];
+
+/*
+Entradas de salida:
+
+ROJO     = 0   → [6,1]
+AZUL     = 13  → [1,8]
+AMARILLO = 25  → [8,13]
+VERDE    = 38  → [13,6]
+*/
+
+const startIndex = {
+  red: 0,      // [6,1]
+  blue: 13,    // [1,8]
+  yellow: 26,  // [8,13]
+  green: 39    // [13,6]
+};
+
+/*
+===========================================================
+PASILLOS FINALES
+
+ROJO:
+izquierda → centro
+
+AZUL:
+arriba derecha → centro
+RECTO por la columna 7
+
+VERDE:
+abajo izquierda → centro
+RECTO por la columna 7
+
+AMARILLO:
+derecha → centro
+===========================================================
+*/
+
+const lanes = {
+  red: [
+    [7,1],
+    [7,2],
+    [7,3],
+    [7,4],
+    [7,5]
+  ],
+
+  blue: [
+    [1,7],
+    [2,7],
+    [3,7],
+    [4,7],
+    [5,7]
+  ],
+
+  yellow: [
+    [7,13],
+    [7,12],
+    [7,11],
+    [7,10],
+    [7,9]
+  ],
+
+  green: [
+    [13,7],
+    [12,7],
+    [11,7],
+    [10,7],
+    [9,7]
+  ]
+};
+
+/*
+Estrellas seguras.
+
+Las salidas de todos los colores
+son casillas seguras.
+*/
+
+const safe = new Set([
+  0,
+  8,
+  13,
+  21,
+  26,
+  34,
+  39,
+  47
+]);
+
+const app = document.getElementById("app");
+// ===============================
+// SISTEMA DE SONIDOS
+// ===============================
+
+let audioContext;
+let audioUnlocked = false;
+let masterGain = null;
+let audioNeedsWake = false;
+let audioBroken = false;
+
+function createAudioContext() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  audioContext = new AC();
+  masterGain = null;
+  musicGain = null;
+  return audioContext;
+}
+
+function getAudioContext() {
+  if (!audioContext) createAudioContext();
+  if (audioContext.state !== "running") {
+    audioContext.resume().catch(() => {});
+  }
+  return audioContext;
+}
+
+function getMaster() {
+  const ctx = getAudioContext();
+  if (!masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 3;
+
+    const limiter = ctx.createDynamicsCompressor();
+    masterGain.connect(limiter);
+    limiter.connect(ctx.destination);
+  }
+  return masterGain;
+}
+
+function playSilentBlip() {
+  try {
+    const b = audioContext.createBuffer(1, 1, 22050);
+    const s = audioContext.createBufferSource();
+    s.buffer = b;
+    s.connect(audioContext.destination);
+    s.start(0);
+  } catch (e) {}
+}
+
+function rebuildAudio() {
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicMode = null;
+
+  const old = audioContext;
+  audioContext = null;
+  masterGain = null;
+  musicGain = null;
+
+  if (old) {
+    try { old.close().catch(() => {}); } catch (e) {}
+  }
+
+  createAudioContext();
+  audioContext.resume().catch(() => {});
+  playSilentBlip();
+
+  audioBroken = false;
+  audioNeedsWake = false;
+  syncMusic();
+}
+
+function wakeAudio() {
+  if (!audioUnlocked) return;
+
+  if (audioBroken) {
+    rebuildAudio();
+    return;
+  }
+
+  if (!audioContext) return;
+  if (audioContext.state === "running" && !audioNeedsWake) return;
+
+  audioContext.resume().catch(() => {});
+  playSilentBlip();
+
+  const ctx = audioContext;
+  setTimeout(() => {
+    if (ctx !== audioContext) return;
+    if (ctx.state === "running") {
+      audioNeedsWake = false;
+      audioBroken = false;
+    } else {
+      audioBroken = true;
+    }
+  }, 400);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) audioNeedsWake = true;
+});
+window.addEventListener("pagehide", () => { audioNeedsWake = true; });
+window.addEventListener("pageshow", () => { audioNeedsWake = true; });
+
+["touchend", "pointerup", "click"].forEach(ev =>
+  document.addEventListener(ev, wakeAudio, { passive: true })
+);
+
+function tone(frequency, duration = 0.12, type = "sine", volume = 0.045, delay = 0) {
+  const ctx = getAudioContext();
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.value = frequency;
+
+  gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+  gain.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + delay + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+
+  oscillator.connect(gain);
+  gain.connect(getMaster());
+
+
+  oscillator.start(ctx.currentTime + delay);
+  oscillator.stop(ctx.currentTime + delay + duration + 0.03);
+}
+
+function sweep(from, to, duration, type = "sine", volume = 0.04) {
+  const ctx = getAudioContext();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+
+  o.type = type;
+  o.frequency.setValueAtTime(from, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(to, ctx.currentTime + duration);
+
+  g.gain.setValueAtTime(0.001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + duration * 0.3);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+  o.connect(g);
+  g.connect(getMaster());
+  o.start();
+  o.stop(ctx.currentTime + duration + 0.03);
+}
+
+function playSound(type) {
+  if (!state.sound) return;
+
+  if (type === "dice") {
+    tone(180, 0.08, "square", 0.035);
+    tone(260, 0.08, "square", 0.03, 0.09);
+    tone(340, 0.08, "square", 0.025, 0.18);
+    return;
+  }
+  if (type === "move") { tone(430, 0.07, "triangle", 0.025); return; }
+  if (type === "land") {
+    tone(620, 0.12, "sine", 0.04);
+    tone(820, 0.14, "sine", 0.035, 0.1);
+    return;
+  }
+  if (type === "capture") {
+    tone(170, 0.09, "square", 0.045);
+    tone(120, 0.12, "sawtooth", 0.035, 0.08);
+    tone(75, 0.18, "sawtooth", 0.028, 0.18);
+    return;
+  }
+  if (type === "six") {
+    tone(520, 0.12, "sine", 0.04);
+    tone(700, 0.18, "sine", 0.04, 0.12);
+    return;
+  }
+  if (type === "winner") {
+    tone(523, 0.16, "sine", 0.05);
+    tone(659, 0.16, "sine", 0.05, 0.16);
+    tone(784, 0.25, "sine", 0.05, 0.32);
+    return;
+  }
+
+  /* ---- NUEVOS ---- */
+if (type === "goal") {
+  tone(784, 0.1, "sine", 0.05);
+  tone(988, 0.1, "sine", 0.05, 0.1);
+  tone(1319, 0.3, "sine", 0.055, 0.2);
+  return;
+}
+
+  if (type === "click") { tone(720, 0.05, "triangle", 0.03); return; }
+  if (type === "back") { tone(460, 0.06, "triangle", 0.028); return; }
+  if (type === "start") {
+    tone(392, 0.1, "sine", 0.045);
+    tone(523, 0.1, "sine", 0.045, 0.1);
+    tone(659, 0.22, "sine", 0.05, 0.2);
+    return;
+  }
+  if (type === "introHit") {
+    sweep(180, 45, 1.3, "sine", 0.14);
+    tone(110, 1.0, "triangle", 0.04, 0.02);
+    tone(660, 0.9, "sine", 0.015, 0.12);
+    return;
+  }
+  if (type === "letter") { tone(1400, 0.05, "square", 0.012); return; }
+  if (type === "letterX") {
+    tone(900, 0.35, "sawtooth", 0.02);
+    tone(1350, 0.45, "sine", 0.03, 0.05);
+    return;
+  }
+  if (type === "whoosh") { sweep(250, 1400, 1.2, "sine", 0.03); return; }
+  if (type === "ready") {
+    tone(523, 0.12, "sine", 0.04);
+    tone(784, 0.28, "sine", 0.045, 0.12);
+  }
+}
+
+function playUiSound(action) {
+  if (action === "roll" || action === "token") return;
+  if (action === "back-setup" || action.startsWith("close-")) { playSound("back"); return; }
+  if (action === "start" || action === "again") { playSound("start"); return; }
+  playSound("click");
+}
+
+/* ---------- MÚSICA DE FONDO ---------- */
+
+let musicGain = null;
+let musicTimer = null;
+let musicMode = null;
+let musicStep = 0;
+let nextNoteTime = 0;
+
+const musicSets = {
+  menu: {
+    bpm: 84,
+    chords: [
+      [220.00, 261.63, 329.63],
+      [174.61, 220.00, 261.63],
+      [261.63, 329.63, 392.00],
+      [196.00, 246.94, 293.66]
+    ]
+  },
+  game: {
+    bpm: 108,
+    chords: [
+      [196.00, 233.08, 293.66],
+      [155.56, 196.00, 233.08],
+      [233.08, 293.66, 349.23],
+      [174.61, 220.00, 261.63]
+    ]
+  }
+};
+
+function getMusicGain() {
+  const ctx = getAudioContext();
+  if (!musicGain) {
+    musicGain = ctx.createGain();
+    musicGain.gain.value = 1;
+    musicGain.connect(getMaster());
+  }
+  return musicGain;
+}
+
+function musicNote(freq, when, dur, type, vol) {
+  const ctx = getAudioContext();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+
+  o.type = type;
+  o.frequency.value = freq;
+
+  g.gain.setValueAtTime(0.0001, when);
+  g.gain.exponentialRampToValueAtTime(vol, when + 0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+
+  o.connect(g);
+  g.connect(getMusicGain());
+  o.start(when);
+  o.stop(when + dur + 0.05);
+}
+
+function scheduleMusic() {
+  const set = musicSets[musicMode];
+  if (!set) return;
+
+  const ctx = getAudioContext();
+  const stepDur = 60 / set.bpm / 2;
+  if (nextNoteTime < ctx.currentTime) nextNoteTime = ctx.currentTime + 0.05;
+
+  while (nextNoteTime < ctx.currentTime + 0.3) {
+    const bar = Math.floor(musicStep / 8) % set.chords.length;
+    const pos = musicStep % 8;
+    const chord = set.chords[bar];
+
+    if (pos === 0) {
+      chord.forEach(f => musicNote(f / 2, nextNoteTime, stepDur * 8, "sine", 0.022));
+    }
+
+    const arp = [0, 1, 2, 1, 2, 1, 0, 1][pos];
+    musicNote(chord[arp] * 2, nextNoteTime, stepDur * 1.6, "triangle", 0.014);
+
+    nextNoteTime += stepDur;
+    musicStep++;
+  }
+}
+
+function stopMusic() {
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicMode = null;
+
+  if (musicGain) {
+    const ctx = getAudioContext();
+    musicGain.gain.cancelScheduledValues(ctx.currentTime);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, ctx.currentTime);
+    musicGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+  }
+}
+
+function startMusic(mode) {
+  if (!state.music || !audioUnlocked) return;
+  if (musicMode === mode) return;
+
+  const wasPlaying = musicMode !== null;
+  stopMusic();
+  musicMode = mode;
+
+  setTimeout(() => {
+    if (musicMode !== mode) return;
+
+    const ctx = getAudioContext();
+    const g = getMusicGain();
+
+    g.gain.cancelScheduledValues(ctx.currentTime);
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(1, ctx.currentTime + 1.5);
+
+    musicStep = 0;
+    nextNoteTime = ctx.currentTime + 0.1;
+    musicTimer = setInterval(scheduleMusic, 100);
+  }, wasPlaying ? 550 : 0);
+}
+
+function syncMusic() {
+  if (!audioUnlocked) return;
+
+  if (!state.music) {
+    if (musicMode) stopMusic();
+    return;
+  }
+
+  startMusic(state.phase === "playing" ? "game" : "menu");
+}
+const blankTokens = () =>
+  [0,1,2,3].map(id => ({
+    id,
+    progress:-1
+  }));
+
+const freshTokens = () => ({
+  red:blankTokens(),
+  green:blankTokens(),
+  yellow:blankTokens(),
+  blue:blankTokens()
+});
+
+function playerLabel(color) {
+  return state.playerNames[color].trim() || names[color];
+}
+
+const state = {
+  phase:"setup",
+  sound:true,
+  music:true,
+  settingsOpen:false,
+  settingsThemeOpen:false,
+  howToPlayOpen:false,
+  aboutGreyxOpen:false,
+  languageOpen:false,
+  lang:loadLang(),
+  confirmAction:null,
+  hop:null,
+  arrived:null,
+  celebrating:false,
+  count:4,
+  mode:"local",
+  setupStep:1,
+  botCount:1,
+  humanColor:"red",
+playerNames:{
+  red:"",
+  green:"",
+  yellow:"",
+  blue:""
+},
+
+players:[],
+  tokens:freshTokens(),
+  active:0,
+  lastRoll:null,
+  roll:null,
+  rolling:false,
+  moving:false,
+  valid:new Set(),
+  message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
+  winner:null
+};
+/* ========== IDIOMAS ========== */
+
+const LANGS = { es:"Español", en:"English", pt:"Português" };
+
+function loadLang() {
+  try {
+    const saved = localStorage.getItem("gx-lang");
+    if (["es","en","pt"].includes(saved)) return saved;
+  } catch (e) {}
+  const nav = (navigator.language || "es").slice(0,2).toLowerCase();
+  return ["en","pt"].includes(nav) ? nav : "es";
+}
+
+const DICT = {
+
+en: {
+"El clásico juego de mesa, llevado a una experiencia moderna para compartir y competir.": "The classic board game, brought to a modern experience to share and compete.",
+"SIN CUENTAS · JUEGO LOCAL": "NO ACCOUNTS · LOCAL PLAY",
+"NUEVA PARTIDA": "NEW GAME",
+"¿Cómo quieres jugar?": "How do you want to play?",
+"Elige una modalidad para comenzar.": "Pick a mode to start.",
+"Jugar local": "Play local",
+"Comparte el dispositivo con tus amigos.": "Share the device with your friends.",
+"Contra bot": "Vs bot",
+"Juega contra rivales automáticos.": "Play against automatic rivals.",
+"PARTIDA LOCAL": "LOCAL GAME",
+"ELIGE TU": "CHOOSE YOUR",
+"MESA.": "TABLE.",
+"Decide cuántas personas participarán en esta partida.": "Decide how many people will play this game.",
+"JUGADORES": "PLAYERS",
+"¿Cuántos juegan?": "How many are playing?",
+"Puedes cambiarlo para cada partida.": "You can change it for every game.",
+"DUELO": "DUEL",
+"TRÍO": "TRIO",
+"MESA COMPLETA": "FULL TABLE",
+"← Volver": "← Back",
+"Continuar →": "Continue →",
+"MODO BOT": "BOT MODE",
+"CONTRA": "VERSUS",
+"IA.": "AI.",
+"Elige cuántos rivales automáticos quieres enfrentar.": "Choose how many automatic rivals you want to face.",
+"RIVALES": "RIVALS",
+"¿Cuántos bots?": "How many bots?",
+"Tú jugarás contra los colores restantes.": "You will play against the remaining colors.",
+"2 RIVALES": "2 RIVALS",
+"3 RIVALES": "3 RIVALS",
+"PERSONALIZAR": "CUSTOMIZE",
+"PONGAN SUS": "ENTER YOUR",
+"NOMBRES.": "NAMES.",
+"Dale una identidad a cada jugador antes de comenzar.": "Give each player an identity before starting.",
+"Nombre de cada ficha": "Name for each piece",
+"Si lo dejas vacío, usaremos el nombre del color.": "If you leave it empty, we'll use the color name.",
+"Nombre": "Name",
+"🎲 Comenzar partida": "🎲 Start game",
+"TU FICHA": "YOUR PIECE",
+"Escoge la ficha que quieres controlar durante la partida.": "Choose the piece you want to control during the game.",
+"JUGADOR": "PLAYER",
+"Tu color": "Your color",
+"Los bots ocuparán los colores restantes.": "The bots will take the remaining colors.",
+"Seleccionado": "Selected",
+"Elegir": "Choose",
+"Tu nombre": "Your name",
+"🤖 Comenzar": "🤖 Start",
+"Turno del bot.": "Bot's turn.",
+"Tu turno.": "Your turn.",
+"Pasen el dispositivo después de cada jugada. El tablero se encarga del resto.": "Pass the device after each move. The board takes care of the rest.",
+"Turno actual": "Current turn",
+"Bot automático": "Automatic bot",
+"Lanzando…": "Rolling…",
+"Elige una ficha": "Choose a piece",
+"Lanzar dado": "Roll die",
+"Marcador de la mesa": "Table scoreboard",
+"CASA": "HOME",
+"TABLERO": "BOARD",
+"META": "GOAL",
+"Lanza el dado para comenzar. Un seis saca una ficha de casa.": "Roll the die to start. A six brings a piece out of home.",
+"Tu turno. Lanza el dado para comenzar.": "Your turn. Roll the die to start.",
+"Tu turno. Lanza el dado.": "Your turn. Roll the die.",
+"El dado está rodando…": "The die is rolling…",
+"Una ficha puede moverse. Tócala para jugar.": "One piece can move. Tap it to play.",
+"Elige una ficha iluminada.": "Choose a highlighted piece.",
+"Moviendo ficha…": "Moving piece…",
+"¡Captura! Tienes otro turno.": "Capture! You get another turn.",
+"🏁 ¡Ficha en la meta! Tienes otro turno.": "🏁 Piece at the goal! You get another turn.",
+"¡Un seis! Tienes otro turno.": "A six! You get another turn.",
+"Configuración": "Settings",
+"Sonido": "Sound",
+"Efectos de sonido activados": "Sound effects on",
+"Efectos de sonido desactivados": "Sound effects off",
+"Música": "Music",
+"Música de fondo activada": "Background music on",
+"Música de fondo desactivada": "Background music off",
+"Idioma": "Language",
+"🌐 Idioma": "🌐 Language",
+"Nueva partida": "New game",
+"¿Seguro? Toca otra vez": "Sure? Tap again",
+"Se reiniciará la partida": "The game will restart",
+"Reiniciar con los mismos jugadores": "Restart with the same players",
+"Salir al menú": "Exit to menu",
+"Se perderá la partida actual": "The current game will be lost",
+"Volver a la pantalla inicial": "Return to the start screen",
+"Cómo jugar": "How to play",
+"📖 Cómo jugar": "📖 How to play",
+"Reglas y funcionamiento": "Rules and how it works",
+"Lanza el dado": "Roll the die",
+"Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.": "Roll the die on your turn and move a piece by the number you get.",
+"Saca una ficha": "Bring out a piece",
+"Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.": "You need a 6 to bring a piece out of home and place it on the starting square.",
+"Captura fichas": "Capture pieces",
+"Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.": "If you land on a rival piece on a valid square, you capture it and it goes back home.",
+"Casillas seguras": "Safe squares",
+"Algunas casillas protegen las fichas y evitan que puedan ser capturadas.": "Some squares protect pieces so they can't be captured.",
+"Llega a la meta": "Reach the goal",
+"Lleva tus fichas hasta el centro del tablero para completar el recorrido.": "Take your pieces to the center of the board to complete the journey.",
+"← Volver a configuración": "← Back to settings",
+"Acerca de Greyx Ludo": "About Greyx Ludo",
+"Conoce el proyecto y su creador": "Learn about the project and its creator",
+"Un clásico juego de mesa reinventado como una experiencia digital moderna, sencilla y divertida.": "A classic board game reinvented as a modern, simple and fun digital experience.",
+"Proyecto": "Project",
+"Creado con": "Built with",
+"Concepto": "Concept",
+"Un Ludo hecho para jugar y compartir": "A Ludo made to play and share",
+"CREADOR": "CREATOR",
+"GREYX LUDO · PROYECTO INDEPENDIENTE": "GREYX LUDO · INDEPENDENT PROJECT",
+"Cerrar": "Close",
+"Cerrar cómo jugar": "Close how to play",
+"¡Las 4 fichas llegaron!": "All 4 pieces made it!",
+"Todas sus fichas llegaron a la meta. Una gran vuelta alrededor del tablero.": "All their pieces reached the goal. A great lap around the board.",
+"Configurar": "Set up",
+"Jugar otra vez": "Play again",
+"CARGANDO": "LOADING",
+"TOCA PARA ENTRAR": "TAP TO ENTER"
+},
+
+pt: {
+"El clásico juego de mesa, llevado a una experiencia moderna para compartir y competir.": "O clássico jogo de tabuleiro, levado a uma experiência moderna para compartilhar e competir.",
+"SIN CUENTAS · JUEGO LOCAL": "SEM CONTAS · JOGO LOCAL",
+"NUEVA PARTIDA": "NOVA PARTIDA",
+"¿Cómo quieres jugar?": "Como você quer jogar?",
+"Elige una modalidad para comenzar.": "Escolha um modo para começar.",
+"Jugar local": "Jogar local",
+"Comparte el dispositivo con tus amigos.": "Compartilhe o dispositivo com seus amigos.",
+"Juega contra rivales automáticos.": "Jogue contra rivais automáticos.",
+"ELIGE TU": "ESCOLHA SUA",
+"Decide cuántas personas participarán en esta partida.": "Decida quantas pessoas vão participar desta partida.",
+"JUGADORES": "JOGADORES",
+"¿Cuántos juegan?": "Quantos jogam?",
+"Puedes cambiarlo para cada partida.": "Você pode mudar a cada partida.",
+"TRÍO": "TRIO",
+"MESA COMPLETA": "MESA CHEIA",
+"← Volver": "← Voltar",
+"CONTRA": "CONTRA A",
+"Elige cuántos rivales automáticos quieres enfrentar.": "Escolha quantos rivais automáticos você quer enfrentar.",
+"RIVALES": "RIVAIS",
+"¿Cuántos bots?": "Quantos bots?",
+"Tú jugarás contra los colores restantes.": "Você jogará contra as cores restantes.",
+"2 RIVALES": "2 RIVAIS",
+"3 RIVALES": "3 RIVAIS",
+"PONGAN SUS": "ESCOLHAM SEUS",
+"NOMBRES.": "NOMES.",
+"Dale una identidad a cada jugador antes de comenzar.": "Dê uma identidade a cada jogador antes de começar.",
+"Nombre de cada ficha": "Nome de cada peça",
+"Si lo dejas vacío, usaremos el nombre del color.": "Se deixar vazio, usaremos o nome da cor.",
+"Nombre": "Nome",
+"🎲 Comenzar partida": "🎲 Começar partida",
+"TU FICHA": "SUA PEÇA",
+"COLOR.": "COR.",
+"Escoge la ficha que quieres controlar durante la partida.": "Escolha a peça que você quer controlar durante a partida.",
+"JUGADOR": "JOGADOR",
+"Tu color": "Sua cor",
+"Los bots ocuparán los colores restantes.": "Os bots ficarão com as cores restantes.",
+"Seleccionado": "Selecionado",
+"Elegir": "Escolher",
+"Tu nombre": "Seu nome",
+"🤖 Comenzar": "🤖 Começar",
+"Turno del bot.": "Vez do bot.",
+"Tu turno.": "Sua vez.",
+"Pasen el dispositivo después de cada jugada. El tablero se encarga del resto.": "Passem o dispositivo depois de cada jogada. O tabuleiro cuida do resto.",
+"Turno actual": "Vez atual",
+"Lanzando…": "Lançando…",
+"Elige una ficha": "Escolha uma peça",
+"Lanzar dado": "Lançar dado",
+"Marcador de la mesa": "Placar da mesa",
+"TABLERO": "TABULEIRO",
+"Lanza el dado para comenzar. Un seis saca una ficha de casa.": "Lance o dado para começar. Um seis tira uma peça de casa.",
+"Tu turno. Lanza el dado para comenzar.": "Sua vez. Lance o dado para começar.",
+"Tu turno. Lanza el dado.": "Sua vez. Lance o dado.",
+"El dado está rodando…": "O dado está rolando…",
+"Una ficha puede moverse. Tócala para jugar.": "Uma peça pode se mover. Toque nela para jogar.",
+"Elige una ficha iluminada.": "Escolha uma peça iluminada.",
+"Moviendo ficha…": "Movendo peça…",
+"¡Captura! Tienes otro turno.": "Captura! Você joga novamente.",
+"🏁 ¡Ficha en la meta! Tienes otro turno.": "🏁 Peça na meta! Você joga novamente.",
+"¡Un seis! Tienes otro turno.": "Um seis! Você joga novamente.",
+"Configuración": "Configurações",
+"Sonido": "Som",
+"Efectos de sonido activados": "Efeitos sonoros ativados",
+"Efectos de sonido desactivados": "Efeitos sonoros desativados",
+"Música de fondo activada": "Música de fundo ativada",
+"Música de fondo desactivada": "Música de fundo desativada",
+"🌐 Idioma": "🌐 Idioma",
+"Nueva partida": "Nova partida",
+"¿Seguro? Toca otra vez": "Tem certeza? Toque novamente",
+"Se reiniciará la partida": "A partida será reiniciada",
+"Reiniciar con los mismos jugadores": "Reiniciar com os mesmos jogadores",
+"Salir al menú": "Sair para o menu",
+"Se perderá la partida actual": "A partida atual será perdida",
+"Volver a la pantalla inicial": "Voltar à tela inicial",
+"Cómo jugar": "Como jogar",
+"📖 Cómo jugar": "📖 Como jogar",
+"Reglas y funcionamiento": "Regras e funcionamento",
+"Lanza el dado": "Lance o dado",
+"Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.": "Lance o dado na sua vez e mova uma peça de acordo com o número obtido.",
+"Saca una ficha": "Tire uma peça",
+"Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.": "Você precisa tirar um 6 para tirar uma peça de casa e colocá-la na casa inicial.",
+"Captura fichas": "Capture peças",
+"Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.": "Se você cair sobre uma peça rival em uma casa válida, você a captura e ela volta para a casa dela.",
+"Casillas seguras": "Casas seguras",
+"Algunas casillas protegen las fichas y evitan que puedan ser capturadas.": "Algumas casas protegem as peças e evitam que sejam capturadas.",
+"Llega a la meta": "Chegue à meta",
+"Lleva tus fichas hasta el centro del tablero para completar el recorrido.": "Leve suas peças até o centro do tabuleiro para completar o percurso.",
+"← Volver a configuración": "← Voltar às configurações",
+"Acerca de Greyx Ludo": "Sobre o Greyx Ludo",
+"Conoce el proyecto y su creador": "Conheça o projeto e seu criador",
+"Un clásico juego de mesa reinventado como una experiencia digital moderna, sencilla y divertida.": "Um clássico jogo de tabuleiro reinventado como uma experiência digital moderna, simples e divertida.",
+"Proyecto": "Projeto",
+"Creado con": "Criado com",
+"Concepto": "Conceito",
+"Un Ludo hecho para jugar y compartir": "Um Ludo feito para jogar e compartilhar",
+"CREADOR": "CRIADOR",
+"GREYX LUDO · PROYECTO INDEPENDIENTE": "GREYX LUDO · PROJETO INDEPENDENTE",
+"Cerrar": "Fechar",
+"Cerrar cómo jugar": "Fechar como jogar",
+"¡Las 4 fichas llegaron!": "As 4 peças chegaram!",
+"Todas sus fichas llegaron a la meta. Una gran vuelta alrededor del tablero.": "Todas as peças chegaram à meta. Uma grande volta ao redor do tabuleiro.",
+"Jugar otra vez": "Jogar novamente",
+"CARGANDO": "CARREGANDO",
+"TOCA PARA ENTRAR": "TOQUE PARA ENTRAR"
+}
+
+};
+
+const PATTERNS = [
+  [/^Jugador (\d+) · tu turno$/, { en:"Player $1 · your turn", pt:"Jogador $1 · sua vez" }],
+  [/^(🔴|🟢|🟡|🔵) TU TURNO · (.+)$/, { en:"$1 YOUR TURN · $2", pt:"$1 SUA VEZ · $2" }],
+  [/^🤖 TURNO DE (.+)$/, { en:"🤖 $1'S TURN", pt:"🤖 VEZ DE $1" }],
+  [/^Turno de (.+)\. El bot está pensando…$/, { en:"$1's turn. The bot is thinking…", pt:"Vez de $1. O bot está pensando…" }],
+  [/^(.+) está lanzando el dado…$/, { en:"$1 is rolling the die…", pt:"$1 está lançando o dado…" }],
+  [/^No hay movimientos válidos para (.+)\.$/, { en:"No valid moves for $1.", pt:"Não há movimentos válidos para $1." }],
+  [/^(.+) está eligiendo una ficha…$/, { en:"$1 is choosing a piece…", pt:"$1 está escolhendo uma peça…" }],
+  [/^¡Increíble partida, (.+)!$/, { en:"Amazing game, $1!", pt:"Que partida incrível, $1!" }],
+  [/^¡Gana (.+)!$/, { en:"$1 wins!", pt:"$1 venceu!" }]
+];
+
+function translateText(str, lang) {
+  const key = str.replace(/\s+/g, " ").trim();
+  if (!key) return null;
+
+  const d = DICT[lang];
+  if (d && d[key]) return d[key];
+
+  for (const [re, out] of PATTERNS) {
+    if (re.test(key)) return key.replace(re, out[lang]);
+  }
+  return null;
+}
+
+function translateDOM(root) {
+  const lang = state.lang;
+  if (!root || lang === "es") return;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(n => {
+    const r = translateText(n.nodeValue, lang);
+    if (r !== null) n.nodeValue = r;
+  });
+
+  root.querySelectorAll("[placeholder],[aria-label]").forEach(el => {
+    ["placeholder", "aria-label"].forEach(a => {
+      if (!el.hasAttribute(a)) return;
+      const r = translateText(el.getAttribute(a), lang);
+      if (r !== null) el.setAttribute(a, r);
+    });
+  });
+}
+
+function logoHeader() {
+  return `
+  <header class="topbar">
+    <div class="brand">
+
+      <svg class="brand-mark" viewBox="40 90 630 460"
+        xmlns="http://www.w3.org/2000/svg" aria-label="GREYX">
+        <path fill="#f0f0f2" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
+        <path fill="#f0f0f2" d="M255 295H440L385 365H275L237 318Z"/>
+        <path fill="#5b35f0" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
+      </svg>
+
+      <span class="brand-word">GREY<span>X</span></span>
+
+    </div>
+  </header>`;
+}
+
+
+function setupMarkup() {
+  
+  if (state.mainPlayOpen) {
+
+  return `
+    <section class="setup setup-modern setup-step">
+
+      <div class="setup-copy">
+
+        <div class="eyebrow">
+          NUEVA PARTIDA
+        </div>
+
+        <h1 class="setup-title">
+          ELIGE TU
+          <span>MODO.</span>
+        </h1>
+
+        <p class="setup-lead">
+          Decide cómo quieres jugar
+          esta partida.
+        </p>
+
+      </div>
+
+
+      <div class="setup-card setup-card-modern">
+
+        <div class="setup-card-header">
+
+          <span class="setup-card-kicker">
+            MODO DE JUEGO
+          </span>
+
+          <h2>
+            ¿Cómo quieres jugar?
+          </h2>
+
+          <p>
+            Elige una modalidad para comenzar.
+          </p>
+
+        </div>
+
+
+        <div class="mode-grid">
+
+          <button
+            class="mode-card"
+            data-action="local"
+          >
+
+            <span class="mode-icon">
+              👥
+            </span>
+
+            <span class="mode-info">
+
+              <strong>
+                Jugar local
+              </strong>
+
+              <small>
+                Comparte el dispositivo con tus amigos.
+              </small>
+
+            </span>
+
+            <span class="mode-arrow">
+              ›
+            </span>
+
+          </button>
+
+
+          <button
+            class="mode-card"
+            data-action="mode"
+          >
+
+            <span class="mode-icon">
+              🤖
+            </span>
+
+            <span class="mode-info">
+
+              <strong>
+                Contra bot
+              </strong>
+
+              <small>
+                Juega contra rivales automáticos.
+              </small>
+
+            </span>
+
+            <span class="mode-arrow">
+              ›
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <div class="setup-actions">
+
+          <button
+            class="secondary-button"
+            data-action="main-back"
+          >
+            ← Volver
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+  `;
+}
+
+  if (state.setupStep === 1) {
+
+  return `
+    <section class="setup setup-modern">
+
+      <div class="setup-copy">
+
+        <div class="eyebrow">
+          GREYX STUDIOS
+        </div>
+
+        <h1 class="setup-title">
+          LUDO
+          <span>GREYX</span>
+        </h1>
+
+        <p class="setup-lead">
+          El clásico juego de mesa,
+          llevado a una experiencia moderna
+          para compartir y competir.
+        </p>
+
+        <div class="setup-status">
+          <span class="status-dot"></span>
+          SIN CUENTAS · JUEGO LOCAL
+        </div>
+
+      </div>
+
+
+      <div class="setup-card setup-card-modern">
+
+        <div class="setup-card-glow"></div>
+
+        <div class="setup-card-header">
+          <span class="setup-card-kicker">
+            NUEVA PARTIDA
+          </span>
+
+          <h2>
+            ¿Cómo quieres jugar?
+          </h2>
+
+          <p>
+            Elige una modalidad para comenzar.
+          </p>
+        </div>
+
+
+        <div class="mode-grid">
+
+          <button
+            class="mode-card ${state.mode === "local" ? "selected" : ""}"
+            data-action="local"
+          >
+
+            <span class="mode-icon">👥</span>
+
+            <span class="mode-info">
+              <strong>Jugar local</strong>
+
+              <small>
+                Comparte el dispositivo con tus amigos.
+              </small>
+            </span>
+
+            <span class="mode-arrow">›</span>
+
+          </button>
+
+
+          <button
+            class="mode-card ${state.mode === "solo" ? "selected" : ""}"
+            data-action="mode"
+          >
+
+            <span class="mode-icon">🤖</span>
+
+            <span class="mode-info">
+              <strong>Contra bot</strong>
+
+              <small>
+                Juega contra rivales automáticos.
+              </small>
+            </span>
+
+            <span class="mode-arrow">›</span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+  `;
+}
+  /* =========================
+     JUGADORES LOCALES
+     ========================= */
+
+  if (state.setupStep === 2 && state.mode === "local") {
+
+    return `
+      <section class="setup setup-modern setup-step">
+
+        <div class="setup-copy">
+
+          <div class="eyebrow">
+            PARTIDA LOCAL
+          </div>
+
+          <h1 class="setup-title setup-title-small">
+            ELIGE TU
+            <span>MESA.</span>
+          </h1>
+
+          <p class="setup-lead">
+            Decide cuántas personas participarán
+            en esta partida.
+          </p>
+
+        </div>
+
+
+        <div class="setup-card setup-card-modern">
+
+          <div class="setup-card-header">
+
+            <span class="setup-card-kicker">
+              JUGADORES
+            </span>
+
+            <h2>
+              ¿Cuántos juegan?
+            </h2>
+
+            <p>
+              Puedes cambiarlo para cada partida.
+            </p>
+
+          </div>
+
+
+          <div class="player-count-grid">
+
+            ${[2,3,4].map(count => `
+              <button
+                class="player-count-card ${state.count === count ? "selected" : ""}"
+                data-action="local-count"
+                data-count="${count}"
+              >
+
+                <strong>${count}</strong>
+
+                <span>
+                  ${count === 2 ? "DUELO" :
+                    count === 3 ? "TRÍO" :
+                    "MESA COMPLETA"}
+                </span>
+
+              </button>
+            `).join("")}
+
+          </div>
+
+
+          <div class="setup-actions">
+
+            <button
+              class="secondary-button"
+              data-action="back-setup"
+            >
+              ← Volver
+            </button>
+
+            <button
+              class="primary-button"
+              data-action="local-continue"
+            >
+              Continuar →
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+    `;
+  }
+
+
+  /* =========================
+     BOT — CANTIDAD
+     ========================= */
+
+  if (state.setupStep === 2 && state.mode === "solo") {
+
+    return `
+      <section class="setup setup-modern setup-step">
+
+        <div class="setup-copy">
+
+          <div class="eyebrow">
+            MODO BOT
+          </div>
+
+          <h1 class="setup-title setup-title-small">
+            CONTRA
+            <span>IA.</span>
+          </h1>
+
+          <p class="setup-lead">
+            Elige cuántos rivales automáticos
+            quieres enfrentar.
+          </p>
+
+        </div>
+
+
+        <div class="setup-card setup-card-modern">
+
+          <div class="setup-card-header">
+
+            <span class="setup-card-kicker">
+              RIVALES
+            </span>
+
+            <h2>
+              ¿Cuántos bots?
+            </h2>
+
+            <p>
+              Tú jugarás contra los colores restantes.
+            </p>
+
+          </div>
+
+
+          <div class="player-count-grid bot-count-grid">
+
+            ${[1,2,3].map(count => `
+              <button
+                class="player-count-card ${state.botCount === count ? "selected" : ""}"
+                data-action="bot-count"
+                data-count="${count}"
+              >
+
+                <strong>${count}</strong>
+
+                <span>
+                  ${count === 1 ? "1 RIVAL" :
+                    count === 2 ? "2 RIVALES" :
+                    "3 RIVALES"}
+                </span>
+
+              </button>
+            `).join("")}
+
+          </div>
+
+
+          <div class="setup-actions">
+
+            <button
+              class="secondary-button"
+              data-action="back-setup"
+            >
+              ← Volver
+            </button>
+
+            <button
+              class="primary-button"
+              data-action="bot-continue"
+            >
+              Continuar →
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+    `;
+  }
+
+
+  /* =========================
+     NOMBRES — LOCAL
+     ========================= */
+
+  if (state.setupStep === 3 && state.mode === "local") {
+
+    return `
+      <section class="setup setup-modern setup-step">
+
+        <div class="setup-copy">
+
+          <div class="eyebrow">
+            PERSONALIZAR
+          </div>
+
+          <h1 class="setup-title setup-title-small">
+            PONGAN SUS
+            <span>NOMBRES.</span>
+          </h1>
+
+          <p class="setup-lead">
+            Dale una identidad a cada jugador
+            antes de comenzar.
+          </p>
+
+        </div>
+
+
+        <div class="setup-card setup-card-modern">
+
+          <div class="setup-card-header">
+
+            <span class="setup-card-kicker">
+              JUGADORES
+            </span>
+
+            <h2>
+              Nombre de cada ficha
+            </h2>
+
+            <p>
+              Si lo dejas vacío, usaremos el nombre del color.
+            </p>
+
+          </div>
+
+
+          <div class="name-list">
+
+            ${state.players.map(color => `
+              <label class="name-field">
+
+                <span class="name-color ${color}"></span>
+
+                <span class="name-field-content">
+
+                  <span>
+                    ${names[color]}
+                  </span>
+
+                  <input
+                    type="text"
+                    maxlength="14"
+                    placeholder="Nombre"
+                    value="${state.playerNames[color] || ""}"
+                    data-player-name="${color}"
+                  >
+
+                </span>
+
+              </label>
+            `).join("")}
+
+          </div>
+
+
+          <div class="setup-actions">
+
+            <button
+              class="secondary-button"
+              data-action="back-setup"
+            >
+              ← Volver
+            </button>
+
+            <button
+              class="primary-button"
+              data-action="start"
+            >
+              🎲 Comenzar partida
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+    `;
+  }
+
+
+  /* =========================
+     BOT — COLOR DEL JUGADOR
+     ========================= */
+
+  if (state.setupStep === 3 && state.mode === "solo") {
+
+    return `
+      <section class="setup setup-modern setup-step">
+
+        <div class="setup-copy">
+
+          <div class="eyebrow">
+            TU FICHA
+          </div>
+
+          <h1 class="setup-title setup-title-small">
+            ELIGE TU
+            <span>COLOR.</span>
+          </h1>
+
+          <p class="setup-lead">
+            Escoge la ficha que quieres controlar
+            durante la partida.
+          </p>
+
+        </div>
+
+
+        <div class="setup-card setup-card-modern">
+
+          <div class="setup-card-header">
+
+            <span class="setup-card-kicker">
+              JUGADOR
+            </span>
+
+            <h2>
+              Tu color
+            </h2>
+
+            <p>
+              Los bots ocuparán los colores restantes.
+            </p>
+
+          </div>
+
+
+          <div class="color-grid">
+
+            ${colors.map(color => `
+              <button
+                class="color-card ${state.humanColor === color ? "selected" : ""}"
+                data-action="human-color"
+                data-color="${color}"
+              >
+
+                <span class="color-preview ${color}"></span>
+
+                <span>
+                  <strong>${names[color]}</strong>
+                  <small>
+                    ${state.humanColor === color ? "Seleccionado" : "Elegir"}
+                  </small>
+                </span>
+
+              </button>
+            `).join("")}
+
+          </div>
+
+
+          <label class="name-field solo-name-field">
+
+            <span class="name-color ${state.humanColor}"></span>
+
+            <span class="name-field-content">
+
+              <span>Tu nombre</span>
+
+              <input
+                type="text"
+                maxlength="14"
+                placeholder="${names[state.humanColor]}"
+                value="${state.playerNames[state.humanColor] || ""}"
+                data-player-name="${state.humanColor}"
+              >
+
+            </span>
+
+          </label>
+
+
+          <div class="setup-actions">
+
+            <button
+              class="secondary-button"
+              data-action="back-setup"
+            >
+              ← Volver
+            </button>
+
+            <button
+              class="primary-button"
+              data-action="start"
+            >
+              🤖 Comenzar
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+    `;
+  }
+
+  return "";
+}
+
+function coord(color, progress) {
+  if (progress < 0 || progress > 57) {
+    return null;
+  }
+
+  // Meta central
+  if (progress === 57) {
+    return [7,7];
+  }
+
+  let cell;
+
+  if (progress <= 51) {
+    cell = track[
+      (startIndex[color] + progress) % track.length
+    ];
+  } else {
+    cell = lanes[color][progress - 52] || null;
+  }
+
+  if (!cell) {
+    return null;
+  }
+
+  return cell;
+}
+
+function trackIndex(color, progress) {
+  if (progress >= 0 && progress <= 51) {
+    return (
+      startIndex[color] + progress
+    ) % track.length;
+  }
+
+  return null;
+}
+const DIE_POS = {
+  1:[4], 2:[0,8], 3:[0,4,8],
+  4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]
+};
+
+let dieFlicker = null;
+
+function startDieFlicker() {
+  dieFlicker = setInterval(() => {
+    const n = Math.floor(Math.random() * 6) + 1;
+    document.querySelectorAll(".die .pip").forEach((p, i) => {
+      p.classList.toggle("on", DIE_POS[n].includes(i));
+    });
+  }, 80);
+}
+
+function stopDieFlicker() {
+  if (dieFlicker) { clearInterval(dieFlicker); dieFlicker = null; }
+}
+
+function die(n,rolling) {
+
+const positions = {
+
+1:[4],
+
+2:[0,8],
+
+3:[0,4,8],
+
+4:[0,2,6,8],
+
+5:[0,2,4,6,8],
+
+6:[0,2,3,5,6,8]
+
+};
+
+return `
+
+<div class="die ${rolling ? "rolling" : n ? "result" : ""} ${!rolling && n === 6 ? "six" : ""}">
+
+${Array.from(
+  {length:9},
+  (_,i)=>`
+
+<i
+class="pip ${
+  n && positions[n].includes(i)
+  ?"on"
+  :""
+}">
+</i>
+
+`
+).join("")}
+
+</div>
+
+`;
+
+}
+function boardMarkup() {
+const at = new Map();
+state.players.forEach(color => {
+
+state.tokens[color].forEach(token => {
+
+const c = coord(
+  color,
+  token.progress
+);
+
+if(c) {
+
+const key = c.join("-");
+
+at.set(
+key,
+[
+...(at.get(key)||[]),
+{color,token}
+]
+);
+
+}
+
+});
+
+});
+
+const laneAt = (r,c) =>
+
+colors.find(color =>
+
+lanes[color].some(
+([rr,cc]) =>
+rr===r && cc===c
+)
+
+);
+
+const trackAt = (r,c) =>
+
+track.findIndex(
+([rr,cc]) =>
+rr===r && cc===c
+);
+
+let cells="";
+
+for(let i=0;i<225;i++) {
+
+const r=Math.floor(i/15);
+const c=i%15;
+
+const ti=trackAt(r,c);
+
+const lane=laneAt(r,c);
+
+const key=`${r}-${c}`;
+
+const stack=at.get(key)||[];
+
+const start =
+ti>=0
+?
+colors.find(
+color =>
+startIndex[color]===ti
+)
+:
+"";
+
+const tokenHtml=stack.map(
+({color,token},slot)=>`
+
+<button
+
+class="token ${color}
+${
+state.valid.has(
+`${color}-${token.id}`
+)
+?
+"valid"
+:
+""
+}
+${
+token.progress===57
+?
+"finished"
+:
+""
+}
+${
+state.arrived &&
+state.arrived.color === color &&
+state.arrived.id === token.id
+?
+"arrived"
+:
+""
+}
+${
+token.captured
+?
+"captured"
+:
+""
+}
+${
+slot
+?
+`stack-${Math.min(slot,3)}`
+:
+""
+}"
+${
+state.hop &&
+state.hop.color === color &&
+state.hop.id === token.id
+?
+"hop"
+:
+""
+}
+
+data-action="token"
+
+data-color="${color}"
+
+data-token="${token.id}"
+
+${
+state.valid.has(
+`${color}-${token.id}`
+)
+?
+""
+:
+"disabled"
+}
+
+>
+
+${token.id+1}
+
+</button>
+
+`
+).join("");
+
+cells+=`
+
+<div
+
+class="cell
+
+${ti>=0?"track":""}
+
+${lane?`lane-${lane}`:""}
+
+${
+ti>=0 && safe.has(ti)
+?
+"safe"
+:
+""
+}
+
+${start?`start-${start}`:""}"
+
+style="
+grid-row:${r+1};
+grid-column:${c+1}
+"
+
+>
+
+${tokenHtml}
+
+</div>
+
+`;
+
+}
+
+const homes=state.players.map(
+color=>`
+
+<div class="home ${color}">
+
+<div class="yard">
+
+${state.tokens[color]
+
+.filter(
+t=>t.progress===-1
+)
+
+.map(t=>`
+
+<button
+
+class="token ${color}
+${
+state.valid.has(
+`${color}-${t.id}`
+)
+?
+"valid"
+:
+""
+}"
+
+data-action="token"
+
+data-color="${color}"
+
+data-token="${t.id}"
+
+${
+state.valid.has(
+`${color}-${t.id}`
+)
+?
+""
+:
+"disabled"
+}
+
+>
+
+${t.id+1}
+
+</button>
+
+`)
+.join("")}
+
+</div>
+
+</div>
+
+`
+).join("");
+
+return `
+
+<div class="board-frame">
+
+<div class="board">
+
+${cells}
+
+<div class="finish ${state.arrived ? "pulse" : ""}"></div>
+
+
+${homes}
+
+</div>
+
+</div>
+
+`;
+}
+function scores() {
+
+return `
+
+<section class="panel">
+
+<h3>
+Marcador de la mesa
+</h3>
+
+<div class="score-grid">
+
+<span></span>
+
+<span class="score-head">
+CASA
+</span>
+
+<span class="score-head">
+TABLERO
+</span>
+
+<span class="score-head">
+META
+</span>
+
+${state.players.map(color=>{
+
+const home =
+state.tokens[color]
+.filter(
+t=>t.progress===-1
+).length;
+
+const done =
+state.tokens[color]
+.filter(
+t=>t.progress===57
+).length;
+
+return `
+
+<span class="score-name">
+
+<i class="score-dot ${color}"></i>
+
+${playerLabel(color)}
+
+</span>
+
+<span class="score-value">
+${home}
+</span>
+
+<span class="score-value">
+${4-home-done}
+</span>
+
+<span class="score-value ${done === 4 ? "full" : ""}">
+${done}/4
+</span>
+
+`;
+
+}).join("")}
+
+</div>
+
+</section>
+
+`;
+
+}
+
+function gameMarkup() {
+
+const color =
+state.players[state.active];
+
+const shown =
+state.roll ||
+state.lastRoll;
+
+const pass =
+state.message.startsWith("No hay");
+
+return `
+
+<main>
+
+<div class="game-intro">
+
+<div>
+
+<h1>
+${
+  state.mode === "solo" && color !== state.humanColor
+  ? "Turno del bot."
+  : "Tu turno."
+}
+</h1>
+
+<p>
+Pasen el dispositivo después de cada jugada.
+El tablero se encarga del resto.
+</p>
+
+</div>
+
+<div class="turn-chip ${
+  color === "red"
+    ? "red-turn"
+    : color === "green"
+    ? "green-turn"
+    : color === "yellow"
+    ? "yellow-turn"
+    : "blue-turn"
+}">
+
+${
+  state.mode === "solo" && color !== state.humanColor
+    ? `🤖 TURNO DE ${playerLabel(color).toUpperCase()}`
+    : `${
+        color === "red"
+          ? "🔴"
+          : color === "green"
+          ? "🟢"
+          : color === "yellow"
+          ? "🟡"
+          : "🔵"
+      } TU TURNO · ${playerLabel(color).toUpperCase()}`
+}
+
+</div>
+</div>
+<div class="game-layout">
+<section class="board-wrap">
+${boardMarkup()}
+</section>
+<aside class="sidebar">
+<section class="panel status-panel">
+<span class="status-label">
+Turno actual
+</span>
+<div class="status-player">
+
+<i class="orb ${color}"></i>
+
+<div>
+
+<strong>
+${playerLabel(color)}
+</strong>
+
+<small>
+${
+  state.mode === "solo" && color !== state.humanColor
+  ? "Bot automático"
+  : `Jugador ${state.active + 1} · tu turno`
+}
+</small>
+
+</div>
+
+</div>
+
+<div class="dice-row">
+
+${die(
+  shown,
+  state.rolling
+)}
+
+<button
+
+class="roll-button"
+
+data-action="roll"
+
+${
+state.rolling ||
+state.moving ||
+state.roll!==null
+?
+"disabled"
+:
+""
+}
+
+>
+
+${
+state.rolling
+?
+"Lanzando…"
+:
+state.roll
+?
+"Elige una ficha"
+:
+"Lanzar dado"
+}
+
+</button>
+
+</div>
+
+<p class="hint ${pass?"pass":""}">
+
+${state.message}
+</p>
+${scores()}
+</section>
+</aside>
+</div>
+
+</main>
+
+`;
+
+}
+function showArrivalConfetti(color, pieces = 90) {
+
+  const palettes = {
+    red:["#e53935","#ff8a80","#ffd54f","#ffffff"],
+    green:["#368f60","#69f0ae","#ffd54f","#ffffff"],
+    yellow:["#d9a928","#ffe27a","#ff9800","#ffffff"],
+    blue:["#426ba8","#82b1ff","#b39ddb","#ffffff"]
+  };
+  const palette = palettes[color] || ["#e53935","#d9a928","#368f60","#426ba8"];
+
+  const container = document.createElement("div");
+  container.className = "arrival-confetti";
+  document.body.appendChild(container);
+
+  for (let i = 0; i < pieces; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}vw`;
+    piece.style.background = palette[Math.floor(Math.random() * palette.length)];
+    piece.style.setProperty("--confetti-x", `${(Math.random() - 0.5) * 300}px`);
+    piece.style.setProperty("--confetti-r", `${Math.random() * 720 - 360}deg`);
+    piece.style.animationDelay = `${Math.random() * 0.6}s`;
+    container.appendChild(piece);
+  }
+
+  setTimeout(() => {
+    if (container.parentNode) container.remove();
+  }, 4000);
+}
+
+function settingsMarkup() {
+
+  return `
+
+    <button
+      class="settings-button"
+      data-action="settings"
+      aria-label="Configuración"
+    >
+      ⚙️
+    </button>
+
+    ${
+      state.settingsOpen
+      ?
+      `
+
+      <div class="settings-overlay">
+
+        <section class="settings-panel">
+
+          <div class="settings-header">
+            <div class="settings-title">
+              <span>⚙️</span>
+              <strong>Configuración</strong>
+            </div>
+
+            <button class="settings-close" data-action="close-settings">
+              ✕
+            </button>
+          </div>
+
+          <button class="settings-option" data-action="settings-sound">
+            <span class="settings-option-icon sound-setting-icon">
+              ${state.sound ? "🔊" : "🔇"}
+            </span>
+            <span class="settings-option-text">
+              <strong>Sonido</strong>
+              <small>
+                ${state.sound
+                  ? "Efectos de sonido activados"
+                  : "Efectos de sonido desactivados"}
+              </small>
+            </span>
+            <span class="settings-toggle ${state.sound ? "active" : ""}">
+              <span></span>
+            </span>
+          </button>
+<button class="settings-option" data-action="settings-music">
+  <span class="settings-option-icon">${state.music ? "🎵" : "🔇"}</span>
+  <span class="settings-option-text">
+    <strong>Música</strong>
+    <small>${state.music ? "Música de fondo activada" : "Música de fondo desactivada"}</small>
+  </span>
+  <span class="settings-toggle ${state.music ? "active" : ""}">
+    <span></span>
+  </span>
+</button>
+          <button class="settings-option" data-action="settings-language">
+            <span class="settings-option-icon">🌐</span>
+            <span class="settings-option-text">
+              <strong>Idioma</strong>
+              <small>${LANGS[state.lang]}</small>
+            </span>
+          </button>
+
+          ${
+            state.languageOpen
+            ?
+            `
+            <div class="how-to-play-panel">
+              <div class="how-to-play-header">
+                <div>
+                  <span class="how-to-play-kicker">GREYX LUDO</span>
+                  <h3>🌐 Idioma</h3>
+                </div>
+                <button
+                  class="how-to-play-close"
+                  data-action="close-language"
+                  aria-label="Cerrar"
+                >✕</button>
+              </div>
+
+              <div class="how-to-play-content">
+                ${["es","en","pt"].map(code => `
+                  <button
+                    class="lang-option ${state.lang === code ? "selected" : ""}"
+                    data-action="set-lang"
+                    data-lang="${code}"
+                  >
+                    <span>${LANGS[code]}</span>
+                    <span class="lang-check">${state.lang === code ? "✓" : ""}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            `
+            :
+            ""
+          }
+
+          ${
+            state.phase === "playing"
+            ?
+            `
+            <button class="settings-option" data-action="settings-new-game">
+              <span class="settings-option-icon">🔄</span>
+              <span class="settings-option-text">
+                <strong>${state.confirmAction === "settings-new-game" ? "¿Seguro? Toca otra vez" : "Nueva partida"}</strong>
+                <small>${state.confirmAction === "settings-new-game" ? "Se reiniciará la partida" : "Reiniciar con los mismos jugadores"}</small>
+              </span>
+            </button>
+
+            <button class="settings-option" data-action="settings-menu">
+              <span class="settings-option-icon">🏠</span>
+              <span class="settings-option-text">
+                <strong>${state.confirmAction === "settings-menu" ? "¿Seguro? Toca otra vez" : "Salir al menú"}</strong>
+                <small>${state.confirmAction === "settings-menu" ? "Se perderá la partida actual" : "Volver a la pantalla inicial"}</small>
+              </span>
+            </button>
+            `
+            :
+            ""
+          }
+
+          <button class="settings-option" data-action="how-to-play">
+            <span class="settings-option-icon">📖</span>
+            <span class="settings-option-text">
+              <strong>Cómo jugar</strong>
+              <small>Reglas y funcionamiento</small>
+            </span>
+          </button>
+
+          ${
+            state.howToPlayOpen
+            ?
+            `
+            <div class="how-to-play-panel">
+
+              <div class="how-to-play-header">
+                <div>
+                  <span class="how-to-play-kicker">GREYX LUDO</span>
+                  <h3>📖 Cómo jugar</h3>
+                </div>
+                <button
+                  class="how-to-play-close"
+                  data-action="close-how-to-play"
+                  aria-label="Cerrar cómo jugar"
+                >✕</button>
+              </div>
+
+              <div class="how-to-play-content">
+
+                <div class="how-to-play-rule">
+                  <span>🎲</span>
+                  <div>
+                    <strong>Lanza el dado</strong>
+                    <p>Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🏠</span>
+                  <div>
+                    <strong>Saca una ficha</strong>
+                    <p>Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>💥</span>
+                  <div>
+                    <strong>Captura fichas</strong>
+                    <p>Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🛡️</span>
+                  <div>
+                    <strong>Casillas seguras</strong>
+                    <p>Algunas casillas protegen las fichas y evitan que puedan ser capturadas.</p>
+                  </div>
+                </div>
+
+                <div class="how-to-play-rule">
+                  <span>🏆</span>
+                  <div>
+                    <strong>Llega a la meta</strong>
+                    <p>Lleva tus fichas hasta el centro del tablero para completar el recorrido.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <button class="how-to-play-back" data-action="close-how-to-play">
+                ← Volver a configuración
+              </button>
+
+            </div>
+            `
+            :
+            ""
+          }
+
+          <button class="settings-option" data-action="about-greyx">
+            <span class="settings-option-icon">👤</span>
+            <span class="settings-option-text">
+              <strong>Acerca de Greyx Ludo</strong>
+              <small>Conoce el proyecto y su creador</small>
+            </span>
+          </button>
+
+          ${
+            state.aboutGreyxOpen
+            ?
+            `
+            <div class="about-greyx-panel">
+
+              <div class="about-greyx-header">
+                <div class="about-greyx-logo">🎲</div>
+                <div class="about-greyx-title">
+                  <span>GREYX STUDIOS</span>
+                  <h3>LUDO GREYX</h3>
+                </div>
+                <button
+                  class="about-greyx-close"
+                  data-action="close-about-greyx"
+                  aria-label="Cerrar"
+                >✕</button>
+              </div>
+
+              <div class="about-greyx-description">
+                <p>
+                  Un clásico juego de mesa reinventado como una
+                  experiencia digital moderna, sencilla y divertida.
+                </p>
+              </div>
+
+              <div class="about-greyx-info">
+
+                <div class="about-greyx-info-row">
+                  <span>🎮</span>
+                  <div>
+                    <strong>Proyecto</strong>
+                    <small>Greyx Ludo</small>
+                  </div>
+                </div>
+
+                <div class="about-greyx-info-row">
+                  <span>🧠</span>
+                  <div>
+                    <strong>Creado con</strong>
+                    <small>HTML · CSS · JavaScript</small>
+                  </div>
+                </div>
+
+                <div class="about-greyx-info-row">
+                  <span>✨</span>
+                  <div>
+                    <strong>Concepto</strong>
+                    <small>Un Ludo hecho para jugar y compartir</small>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="about-greyx-divider"></div>
+
+              <div class="about-greyx-creator">
+                <span class="about-greyx-creator-icon">👤</span>
+                <div>
+                  <span>CREADOR</span>
+                  <strong>Sebastián Greys</strong>
+                </div>
+              </div>
+
+              <div class="about-greyx-version">
+                GREYX LUDO · PROYECTO INDEPENDIENTE
+              </div>
+
+              <button class="about-greyx-back" data-action="close-about-greyx">
+                ← Volver a configuración
+              </button>
+
+            </div>
+            `
+            :
+            ""
+          }
+
+        </section>
+
+      </div>
+
+      `
+      :
+      ""
+    }
+
+  `;
+
+}
+
+function celebrationMarkup() {
+  return `
+    <div class="celebration">
+      <div class="celebration-card">
+        <div class="celebration-trophy">🏆</div>
+        <h2>¡Las 4 fichas llegaron!</h2>
+        <p>¡Increíble partida, ${playerLabel(state.winner || state.players[state.active])}!</p>
+      </div>
+    </div>
+  `;
+}
+function winnerMarkup() {
+
+return `
+
+<div class="winner">
+
+<div class="winner-card">
+
+<div class="winner-seal">
+★
+</div>
+
+<h2>
+¡Gana ${playerLabel(state.winner)}!
+</h2>
+
+<p>
+Todas sus fichas llegaron a la meta.
+Una gran vuelta alrededor del tablero.
+</p>
+
+<div class="winner-actions">
+
+<button
+class="secondary"
+data-action="setup"
+>
+Configurar
+</button>
+
+<button
+class="primary-button"
+data-action="again"
+>
+Jugar otra vez
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+function greyxLogoMarkup(){
+  return `
+    <svg viewBox="40 90 630 460" class="intro-logo"
+      xmlns="http://www.w3.org/2000/svg" aria-label="GREYX">
+      <path fill="#f0f0f2" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
+      <path fill="#f0f0f2" d="M255 295H440L385 365H275L237 318Z"/>
+      <path fill="#5b35f0" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
+    </svg>
+  `;
+}
+
+function showIntro(){
+
+  const old = document.getElementById("introScreen");
+  if(old) old.remove();
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="gx-intro" id="introScreen">
+
+      <div class="gx-scene" id="gxLogo">
+        <div class="gx-pop">
+          ${greyxLogoMarkup()}
+<div class="gx-name">
+  <span class="gx-letter" style="animation-delay:1.2s">G</span><span class="gx-letter" style="animation-delay:1.6s">R</span><span class="gx-letter" style="animation-delay:2.0s">E</span><span class="gx-letter" style="animation-delay:2.4s">Y</span><span class="gx-letter gx-x" style="animation-delay:2.8s">X</span>
+</div>
+
+        </div>
+      </div>
+
+      <div class="gx-scene gx-off" id="gxLoading">
+        <div class="gx-loading-box">
+          <div class="gx-loading-text">CARGANDO</div>
+          <div class="gx-bar" id="gxBar"><i></i></div>
+        </div>
+      </div>
+
+    </div>
+  `);
+playSound("introHit");
+[1200, 1600, 2000, 2400].forEach(ms =>
+  setTimeout(() => playSound("letter"), ms)
+);
+setTimeout(() => playSound("letterX"), 2800);
+setTimeout(() => playSound("whoosh"), 5000);
+setTimeout(() => playSound("ready"), 8500);
+
+  const intro = document.getElementById("introScreen");
+translateDOM(intro);
+
+  // 5s mostrando el logo, luego se desvanece (1.6s)
+  setTimeout(() => {
+    document.getElementById("gxLogo").classList.add("gx-off");
+  }, 5000);
+
+  // aparece la pantalla de carga
+  setTimeout(() => {
+    document.getElementById("gxLoading").classList.remove("gx-off");
+    document.getElementById("gxBar").classList.add("run");
+  }, 6700);
+
+  // termina y entra al juego
+  setTimeout(() => intro.classList.add("hide"), 8900);
+
+  setTimeout(() => {
+    intro.remove();
+    render();
+  }, 9700);
+}
+
+function render() {
+
+  app.innerHTML=`
+
+  <div class="shell">
+
+    ${logoHeader()}
+
+    ${
+      state.phase==="setup"
+      ?
+      setupMarkup()
+      :
+      gameMarkup()
+    }
+
+    ${settingsMarkup()}
+
+  </div>
+
+  ${
+    state.celebrating
+    ?
+    celebrationMarkup()
+    :
+    state.phase==="winner"
+    ?
+    winnerMarkup()
+    :
+    ""
+  }
+
+  `;
+  document.documentElement.lang = state.lang;
+  translateDOM(app);
+
+  bind();
+  syncMusic();
+
+}
+function bind() {
+
+  app.querySelectorAll("[data-action]")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const action = button.dataset.action;
+playUiSound(action);
+if (action === "settings-language") {
+  state.languageOpen = true;
+  render();
+}
+
+if (action === "close-language") {
+  state.languageOpen = false;
+  render();
+}
+
+if (action === "set-lang") {
+  state.lang = button.dataset.lang;
+  try { localStorage.setItem("gx-lang", state.lang); } catch (e) {}
+  render();
+}
+
+
+if (action === "settings-music") {
+  state.music = !state.music;
+  render();
+}
+
+        if (action === "settings") {
+          state.settingsOpen = true;
+          state.confirmAction = null;
+          render();
+        }
+
+        if (action === "close-settings") {
+          state.settingsOpen = false;
+          state.confirmAction = null;
+          render();
+        }
+
+        if (action === "settings-sound") {
+          state.sound = !state.sound;
+          render();
+        }
+
+        if (action === "how-to-play") {
+          state.howToPlayOpen = true;
+          render();
+        }
+
+        if (action === "close-how-to-play") {
+          state.howToPlayOpen = false;
+          render();
+        }
+
+        if (action === "about-greyx") {
+          state.aboutGreyxOpen = true;
+          render();
+        }
+
+        if (action === "close-about-greyx") {
+          state.aboutGreyxOpen = false;
+          render();
+        }
+
+        if (action === "settings-new-game" || action === "settings-menu") {
+
+          // Primer toque: pedir confirmación
+          if (state.confirmAction !== action) {
+            state.confirmAction = action;
+            render();
+            return;
+          }
+
+          // Segundo toque: ejecutar
+          state.confirmAction = null;
+          state.settingsOpen = false;
+          state.howToPlayOpen = false;
+          state.aboutGreyxOpen = false;
+
+          if (action === "settings-new-game") {
+            start(state.players.length);
+          } else {
+            setup();
+          }
+
+          return;
+        }
+        /* =========================
+           LOCAL
+           ========================= */
+        if (action === "local") {
+  state.mode = "local";
+  state.setupStep = 2;
+
+  // Preparar inmediatamente los jugadores
+  state.players = [
+    ...playersByCount[state.count]
+  ];
+
+  render();
+
+}
+        /* =========================
+           CANTIDAD LOCAL
+           ========================= */
+        if (action === "local-count") {
+
+  state.count = Number(button.dataset.count);
+
+  state.mode = "local";
+
+  // Actualizar los jugadores según la cantidad elegida
+  state.players = [
+    ...playersByCount[state.count]
+  ];
+  render();
+}
+        /* =========================
+           CONTINUAR LOCAL
+           ========================= */
+
+        if (action === "local-continue") {
+  // Asegurar que los jugadores estén definidos
+  state.players = [
+    ...playersByCount[state.count]
+  ];
+  state.setupStep = 3;
+  render();
+}
+        /* =========================
+           CONTRA BOT
+           ========================= */
+        if (action === "mode") {
+          state.mode = "solo";
+          state.setupStep = 2;
+          render();
+        }
+        /* =========================
+           CANTIDAD DE BOTS
+           ========================= */
+
+        if (action === "bot-count") {
+  state.botCount =
+    Number(button.dataset.count);
+  render();
+}
+        /* =========================
+           CONTINUAR BOT
+           ========================= */
+
+        if (action === "bot-continue") {
+
+          state.setupStep = 3;
+
+          render();
+
+        }
+
+
+        /* =========================
+           ELEGIR COLOR
+           ========================= */
+
+        if (action === "human-color") {
+
+          /*
+            Guardamos primero el nombre que
+            estaba escrito para el color anterior.
+          */
+
+          const oldInput =
+            app.querySelector(
+              `[data-player-name="${state.humanColor}"]`
+            );
+
+          if (oldInput) {
+            state.playerNames[state.humanColor] =
+              oldInput.value;
+          }
+
+          state.humanColor =
+            button.dataset.color;
+
+          render();
+
+        }
+
+
+        /* =========================
+           VOLVER
+           ========================= */
+
+        if (action === "back-setup") {
+
+          /*
+            Si estamos escribiendo nombres locales,
+            guardamos lo que ya escribieron antes
+            de regresar.
+          */
+
+          app.querySelectorAll("[data-player-name]")
+            .forEach(input => {
+
+              const color =
+                input.dataset.playerName;
+
+              state.playerNames[color] =
+                input.value;
+
+            });
+
+
+          if (state.setupStep === 3) {
+
+            state.setupStep = 2;
+
+          } else {
+
+            state.setupStep = 1;
+
+          }
+
+          render();
+
+        }
+
+
+        /* =========================
+           SONIDO
+           ========================= */
+
+        if (action === "sound") {
+
+          state.sound = !state.sound;
+
+          render();
+
+        }
+
+
+        /* =========================
+           EMPEZAR
+           ========================= */
+
+        if (action === "start") {
+
+          /*
+            Guardamos todos los nombres
+            antes de comenzar.
+          */
+
+          app.querySelectorAll("[data-player-name]")
+            .forEach(input => {
+
+              const color =
+                input.dataset.playerName;
+
+              state.playerNames[color] =
+                input.value;
+
+            });
+
+          start(state.count);
+
+        }
+
+
+        /* =========================
+           CONFIGURACIÓN
+           ========================= */
+
+        if (action === "setup") {
+
+          setup();
+
+        }
+
+
+        /* =========================
+           OTRA PARTIDA
+           ========================= */
+
+        if (action === "again") {
+
+          start(state.players.length);
+
+        }
+
+
+        /* =========================
+           DADO
+           ========================= */
+
+        if (action === "roll") {
+
+          rollDice();
+
+        }
+
+
+        /* =========================
+           FICHA
+           ========================= */
+
+        if (action === "token") {
+
+          move(
+            button.dataset.color,
+            Number(button.dataset.token)
+          );
+
+        }
+
+      });
+
+    });
+
+}
+
+function setup() {
+
+  state.phase = "setup";
+  state.winner = null;
+  state.valid = new Set();
+  state.roll = null;
+
+  state.setupStep = 1;
+  state.mode = "local";
+  state.count = 4;
+  state.botCount = 1;
+  state.humanColor = "red";
+  
+  state.playerNames = {
+  red:"",
+  green:"",
+  yellow:"",
+  blue:""
+};
+
+  render();
+
+}
+
+function start(count) {
+
+  if (state.mode === "solo") {
+
+    const botColors = colors
+      .filter(color => color !== state.humanColor)
+      .slice(0, state.botCount);
+
+    state.players = [
+      state.humanColor,
+      ...botColors
+    ];
+    console.log("JUGADORES:", state.players);
+    state.count = state.players.length;
+
+  } else {
+
+    state.count = count;
+
+    state.players = [
+      ...playersByCount[count]
+    ];
+
+  }
+
+  state.tokens = freshTokens();
+
+  state.active = 0;
+
+  state.lastRoll = null;
+  state.roll = null;
+
+  state.rolling = false;
+  state.moving = false;
+
+  state.valid = new Set();
+
+  state.winner = null;
+
+  state.message =
+    state.mode === "solo"
+      ? "Tu turno. Lanza el dado para comenzar."
+      : "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+
+  state.phase = "playing";
+
+  render();
+
+}
+
+function canMove(token,n) {
+
+return token.progress===-1
+
+?
+
+n===6
+
+:
+
+token.progress!==57 &&
+token.progress+n<=57;
+
+}
+
+function chooseBotMove(color) {
+  const options = [];
+
+  state.tokens[color].forEach(token => {
+    if (!canMove(token, state.roll)) return;
+
+    const finalProgress =
+      token.progress === -1
+      ? 0
+      : token.progress + state.roll;
+
+    let score = finalProgress;
+
+    if (token.progress === -1) score += 40;
+    if (finalProgress === 57) score += 200;
+
+    const landing = trackIndex(color, finalProgress);
+
+    if (landing !== null && !safe.has(landing)) {
+      state.players
+        .filter(opponent => opponent !== color)
+        .forEach(opponent => {
+          state.tokens[opponent].forEach(enemy => {
+            if (trackIndex(opponent, enemy.progress) === landing) {
+              score += 100;
+            }
+          });
+        });
+    }
+
+    options.push({ id: token.id, score });
+  });
+
+  if (!options.length) return null;
+
+  options.sort((a, b) => b.score - a.score);
+  return options[0].id;
+}
+
+function isBotTurn() {
+  return (
+    state.mode === "solo" &&
+    state.players[state.active] !== state.humanColor
+  );
+}
+
+function queueBotTurn(delay = 800) {
+  if (!isBotTurn()) return;
+
+  setTimeout(() => {
+    if (
+      state.phase === "playing" &&
+      isBotTurn() &&
+      !state.rolling &&
+      !state.moving &&
+      state.roll === null
+    ) {
+      rollDice(true);
+    }
+  }, delay);
+}
+
+function nextTurn() {
+  state.active = (state.active + 1) % state.players.length;
+  state.roll = null;
+  state.valid = new Set();
+
+  state.message = isBotTurn()
+    ? `Turno de ${playerLabel(state.players[state.active])}. El bot está pensando…`
+    : "Tu turno. Lanza el dado.";
+
+  render();
+  queueBotTurn();
+}
+
+function rollDice(fromBot = false) {
+  if (
+    state.rolling ||
+    state.moving ||
+    state.roll !== null ||
+    (isBotTurn() && !fromBot)
+  ) {
+    return;
+  }
+
+  state.rolling = true;
+
+  if (isBotTurn()) {
+ state.message = `${playerLabel(state.players[state.active])} está lanzando el dado…`;
+  } else {
+    state.message = "El dado está rodando…";
+  }
+
+  playSound("dice");
+  render();
+  setTimeout(() => {
+    const n = Math.floor(Math.random() * 6) + 1;
+    const color = state.players[state.active];
+
+    state.rolling = false;
+    state.lastRoll = n;
+    state.roll = n;
+
+    state.valid = new Set(
+      state.tokens[color]
+        .filter(token => canMove(token, n))
+        .map(token => `${color}-${token.id}`)
+    );
+    
+    if (state.valid.size === 1) {
+       const onlyToken = [...state.valid][0];
+       const id = Number(onlyToken.split("-")[1]);
+     render();
+
+    setTimeout(() => {
+      move(color, id);
+      }, 300);
+
+     return;
+ }
+
+    if (!state.valid.size) {
+state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
+
+      render();
+
+      setTimeout(() => {
+        nextTurn();
+      }, 900);
+
+      return;
+    }
+    if (isBotTurn()) {
+  state.message = `${playerLabel(color)} está eligiendo una ficha…`;
+      setTimeout(() => {
+        const tokenId = chooseBotMove(color);
+        if (tokenId !== null) move(color, tokenId);
+      }, 700);
+      return;
+    }
+    state.message =
+      state.valid.size === 1
+        ? "Una ficha puede moverse. Tócala para jugar."
+        : "Elige una ficha iluminada.";
+
+    render();
+}, 550);
+}
+
+function move(color, id) {
+  if (
+    state.phase !== "playing" ||
+    color !== state.players[state.active] ||
+    state.roll === null ||
+    !state.valid.has(`${color}-${id}`) ||
+    state.moving
+  ) {
+    return;
+  }
+
+  const n = state.roll;
+  const token = state.tokens[color][id];
+
+const startProgress =
+  token.progress === -1
+  ? -1
+  : token.progress;
+  const finalProgress = token.progress === -1 ? 0 : token.progress + n;
+
+  state.moving = true;
+  state.valid = new Set();
+  state.message = "Moviendo ficha…";
+  render();
+
+  let currentProgress = startProgress;
+
+  function animateStep() {
+
+  const nextProgress = currentProgress + 1;
+
+  // Si ya llegamos al destino, terminamos.
+  if (nextProgress > finalProgress) {
+    finishMove();
+    return;
+  }
+
+  currentProgress = nextProgress;
+
+  // Movemos la ficha exactamente una casilla.
+  state.tokens[color] = state.tokens[color].map(t =>
+    t.id === id
+      ? { ...t, progress: currentProgress }
+      : t
+  );
+state.hop = { color, id };
+  playSound("move");
+
+  render();
+
+  // Pequeña pausa entre cada casilla.
+  if (currentProgress < finalProgress) {
+    setTimeout(animateStep, 180);
+  } else {
+    setTimeout(finishMove, 120);
+  }
+}
+
+  function finishMove() {
+    state.hop = null;
+  let capturedTokens = [];
+
+  const updated = {
+    ...state.tokens,
+    [color]: state.tokens[color].map(t =>
+      t.id === id
+        ? { ...t, progress: finalProgress }
+        : t
+    )
+  };
+
+  const landing = trackIndex(color, finalProgress);
+
+  if (landing !== null && !safe.has(landing)) {
+    state.players
+      .filter(c => c !== color)
+      .forEach(opponent => {
+        updated[opponent] = updated[opponent].map(t => {
+          if (trackIndex(opponent, t.progress) === landing) {
+            capturedTokens.push({
+              color: opponent,
+              id: t.id
+            });
+
+            return {
+              ...t,
+              progress: t.progress,
+              captured: true
+            };
+          }
+
+          return t;
+        });
+      });
+  }
+
+  state.tokens = updated;
+  state.moving = false;
+
+  /*
+    Si hubo captura:
+    primero mostramos la ficha siendo capturada,
+    esperamos a que termine la animación
+    y después la mandamos a casa.
+  */
+if (capturedTokens.length) {
+
+  playSound("capture");
+  render();
+
+  // Primero mostramos claramente la captura
+  setTimeout(() => {
+    stopDieFlicker();
+    const animations = capturedTokens.map(
+      ({ color: capturedColor, id: capturedId }, index) => {
+
+        return new Promise(resolve => {
+
+          const piece = document.querySelector(
+            `.token.captured[data-color="${capturedColor}"][data-token="${capturedId}"]`
+          );
+
+          const home = document.querySelector(
+            `.home.${capturedColor} .yard`
+          );
+
+          if (!piece || !home) {
+            resolve();
+            return;
+          }
+
+          const pieceRect = piece.getBoundingClientRect();
+          const homeRect = home.getBoundingClientRect();
+
+          const startX =
+            pieceRect.left + pieceRect.width / 2;
+
+          const startY =
+            pieceRect.top + pieceRect.height / 2;
+
+          const endX =
+            homeRect.left + homeRect.width / 2;
+
+          const endY =
+            homeRect.top + homeRect.height / 2;
+
+          /* =========================================
+             CREAR LA X / CALAVERA
+             ========================================= */
+
+          const mark = document.createElement("div");
+
+          mark.className = "capture-mark";
+
+          /*
+             Puedes cambiar ☠ por ✕ si quieres
+             una X roja en lugar de calavera.
+          */
+          mark.textContent = "✕";
+
+          mark.style.left = `${startX}px`;
+          mark.style.top = `${startY}px`;
+
+          document.body.appendChild(mark);
+
+          /* =========================================
+             OCULTAR LA FICHA ORIGINAL
+             ========================================= */
+
+          piece.style.visibility = "hidden";
+
+          /* =========================================
+             CREAR FICHA QUE VIAJA A CASA
+             ========================================= */
+
+          const flyingPiece = piece.cloneNode(true);
+
+          flyingPiece.classList.remove("captured");
+          flyingPiece.classList.remove("valid");
+          flyingPiece.classList.add("capture-flying");
+
+          flyingPiece.style.position = "fixed";
+          flyingPiece.style.left = `${startX}px`;
+          flyingPiece.style.top = `${startY}px`;
+          flyingPiece.style.width = `${pieceRect.width}px`;
+          flyingPiece.style.height = `${pieceRect.height}px`;
+          flyingPiece.style.margin = "0";
+          flyingPiece.style.zIndex = "9999";
+          flyingPiece.style.pointerEvents = "none";
+
+          flyingPiece.style.transform =
+            "translate(-50%, -50%) scale(1)";
+
+          document.body.appendChild(flyingPiece);
+
+          /* =========================================
+             PEQUEÑO INSTANTE DESPUÉS DE LA CAPTURA
+             ========================================= */
+
+          setTimeout(() => {
+
+            /*
+              La señal desaparece antes
+              de comenzar el viaje.
+            */
+            mark.remove();
+
+            const animation = flyingPiece.animate(
+              [
+                {
+                  left: `${startX}px`,
+                  top: `${startY}px`,
+                  transform:
+                    "translate(-50%, -50%) scale(1)",
+                  opacity: 1
+                },
+
+                {
+                  left: `${endX}px`,
+                  top: `${endY}px`,
+                  transform:
+                    "translate(-50%, -50%) scale(.55)",
+                  opacity: .7
+                }
+              ],
+              {
+                duration: 1400,
+                easing: "cubic-bezier(.35,.05,.7,1)",
+                fill: "forwards"
+              }
+            );
+
+            animation.finished.then(() => {
+
+              flyingPiece.remove();
+
+              /*
+                La ficha finalmente vuelve a casa.
+              */
+              state.tokens[capturedColor] =
+                state.tokens[capturedColor].map(t =>
+                  t.id === capturedId
+                    ? {
+                        ...t,
+                        progress: -1,
+                        captured: false
+                      }
+                    : t
+                );
+
+              resolve();
+
+            });
+
+          }, 700 + index * 100);
+
+        });
+
+      }
+    );
+
+    Promise.all(animations).then(() => {
+      continueAfterMove(finalProgress);
+    });
+
+  }, 500);
+
+} else {
+
+  continueAfterMove(finalProgress);
+
+}
+
+  async function continueAfterMove(finalProgress) {
+    
+    if (finalProgress === 57) {
+
+  state.arrived = {
+    color: color,
+    id: id
+  };
+
+  render();
+
+  requestAnimationFrame(() => {
+
+    const piece = document.querySelector(
+      `.token[data-color="${color}"][data-token="${id}"]`
+    );
+
+    if (piece) {
+
+      piece.classList.remove("arrived");
+
+      void piece.offsetWidth;
+
+      piece.classList.add("arrived");
+
+    }
+
+  });
+
+  // Confeti al llegar al centro
+showArrivalConfetti(color);
+playSound("goal");
+
+  // Esperamos a que terminen los dos saltitos
+  await new Promise(resolve =>
+    setTimeout(resolve, 900)
+  );
+
+  state.arrived = null;
+}
+    if (state.tokens[color].every(token => token.progress === 57)) {
+  playSound("winner");
+  showArrivalConfetti(color, 180);
+
+  state.winner = color;
+  state.celebrating = true;
+  state.roll = null;
+
+  render();
+
+  await new Promise(resolve => setTimeout(resolve, 2200));
+
+  state.celebrating = false;
+  state.phase = "winner";
+
+  render();
+  return;
+}
+
+    if (!capturedTokens.length) {
+      playSound("land");
+    }
+
+        if (
+      n === 6 ||
+      capturedTokens.length ||
+      finalProgress === 57
+    ) {
+
+      state.roll = null;
+
+      if (n === 6 && !capturedTokens.length) {
+        playSound("six");
+      }
+
+      state.message =
+        capturedTokens.length
+          ? "¡Captura! Tienes otro turno."
+          : finalProgress === 57
+          ? "🏁 ¡Ficha en la meta! Tienes otro turno."
+          : "¡Un seis! Tienes otro turno.";
+
+      render();
+      queueBotTurn();
+
+    } else {
+
+      state.active =
+        (state.active + 1) % state.players.length;
+
+      state.roll = null;
+
+      state.message = isBotTurn()
+  ? `Turno de ${playerLabel(state.players[state.active])}. El bot está pensando…`
+  : "Tu turno. Lanza el dado.";
+
+      render();
+      queueBotTurn();
+    }
+  }
+}
+
+  animateStep();
+}
+console.log("GREYX: JavaScript funcionando");
+function startIntroWhenReady() {
+  if (document.fonts && document.fonts.load) {
+    Promise.race([
+      document.fonts.load('700 1em "Syncopate"'),
+      new Promise(r => setTimeout(r, 1500))
+    ]).then(showIntro);
+  } else {
+    showIntro();
+  }
+}
+
+function showTapGate() {
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="gx-gate" id="gxGate">
+      ${greyxLogoMarkup()}
+      <div class="gx-gate-text">TOCA PARA ENTRAR</div>
+    </div>
+  `);
+  translateDOM(document.getElementById("gxGate"));
+
+  document.getElementById("gxGate").addEventListener("click", () => {
+    audioUnlocked = true;
+    getAudioContext();
+    document.getElementById("gxGate").remove();
+    startIntroWhenReady();
+  }, { once: true });
+}
+
+showTapGate();
+
+})();
+</script>
+
+</body>
+</html>
