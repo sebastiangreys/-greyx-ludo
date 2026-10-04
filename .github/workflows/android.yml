@@ -18,6 +18,19 @@ jobs:
       - run: npx cap sync android
       - run: npm install @capacitor/assets --no-save
       - run: npx capacitor-assets generate --android
+      - name: Icono exacto
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick
+          R=android/app/src/main/res
+          rm -rf $R/mipmap-anydpi-v26
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            n=${d%%:*}
+            s=${d##*:}
+            mkdir -p $R/mipmap-$n
+            convert assets/icon-only.png -resize ${s}x${s} $R/mipmap-$n/ic_launcher.png
+            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
+          done
       - run: chmod +x android/gradlew
       - run: ./gradlew assembleDebug
         working-directory: android
