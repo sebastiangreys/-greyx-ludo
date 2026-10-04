@@ -3379,6 +3379,20 @@ text-rendering:geometricPrecision;
 }
 
 .gx-name{will-change:auto}
+/* RENDIMIENTO 2 */
+.cell{box-shadow:none!important}
+.cell.track{background:#242a3b}
+.cell.lane-red{background:#8f3541}
+.cell.lane-green{background:#2f7653}
+.cell.lane-yellow{background:#9a7a28}
+.cell.lane-blue{background:#41598f}
+.cell.start-red{background:#c94449}
+.cell.start-green{background:#3f9568}
+.cell.start-yellow{background:#c49a35}
+.cell.start-blue{background:#5273ac}
+
+.rolling{animation:diceRoll .18s ease-in-out infinite}
+.pip{transition:none}
 
 </style>
 <div id="app" class="app"></div>
@@ -5957,6 +5971,15 @@ translateDOM(intro);
     render();
   }, 9700);
 }
+function renderBoard() {
+  const wrap = document.querySelector(".board-wrap");
+  if (!wrap || state.phase !== "playing") {
+    render();
+    return;
+  }
+  wrap.innerHTML = boardMarkup();
+  bind(wrap);
+}
 
 function render() {
 
@@ -5998,9 +6021,9 @@ function render() {
   syncMusic();
 
 }
-function bind() {
+function bind(root = app) {
 
-  app.querySelectorAll("[data-action]")
+  root.querySelectorAll("[data-action]")
     .forEach(button => {
 
       button.addEventListener("click", () => {
@@ -6558,6 +6581,21 @@ state.message = `No hay movimientos válidos para ${playerLabel(color)}.`;
     render();
 }, 550);
 }
+function moveTokenDOM(color, id, progress) {
+  const btn = document.querySelector(
+    `.token[data-color="${color}"][data-token="${id}"]`
+  );
+  const pos = coord(color, progress);
+  const board = document.querySelector(".board");
+
+  if (!btn || !pos || !board) { render(); return; }
+
+  const cell = board.children[pos[0] * 15 + pos[1]];
+  if (!cell) { render(); return; }
+
+  btn.classList.remove("stack-1", "stack-2", "stack-3");
+  cell.appendChild(btn);
+}
 
 function move(color, id) {
   if (
@@ -6605,9 +6643,9 @@ const startProgress =
       : t
   );
 state.hop = { color, id };
-  playSound("move");
+    playSound("move");
 
-  render();
+  moveTokenDOM(color, id, currentProgress);
 
   // Pequeña pausa entre cada casilla.
   if (currentProgress < finalProgress) {
