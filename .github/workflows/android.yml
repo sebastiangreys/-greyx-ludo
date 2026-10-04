@@ -16,6 +16,8 @@ jobs:
       - run: npm install
       - run: mkdir -p www && cp index.html www/index.html
       - run: npx cap sync android
+      - run: npm install @capacitor/assets --no-save
+      - run: npx capacitor-assets generate --android
       - run: chmod +x android/gradlew
       - run: ./gradlew assembleDebug
         working-directory: android
