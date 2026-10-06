@@ -3393,6 +3393,18 @@ text-rendering:geometricPrecision;
 
 .rolling{animation:diceRoll .18s ease-in-out infinite}
 .pip{transition:none}
+/* TACTO ANDROID */
+html,body{-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+.token{will-change:transform}
+@media (hover:none){
+  .roll-button:hover,.primary-button:hover,.secondary-button:hover,
+  .mode-card:hover,.player-count-card:hover,.color-card:hover,
+  .settings-option:hover{
+    transform:none;
+    filter:none;
+  }
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -5980,22 +5992,85 @@ function renderBoard() {
   wrap.innerHTML = boardMarkup();
   bind(wrap);
 }
+function morphInto(root, html) {
+  const box = document.createElement("div");
+  box.innerHTML = html;
+  if (typeof translateDOM === "function") translateDOM(box);
+  patchChildren(root, box);
+}
+
+function patchChildren(oldParent, newParent) {
+  const oldKids = Array.from(oldParent.childNodes);
+  const newKids = Array.from(newParent.childNodes);
+  const max = Math.max(oldKids.length, newKids.length);
+
+  for (let i = 0; i < max; i++) {
+    const o = oldKids[i];
+    const n = newKids[i];
+    if (!n) { oldParent.removeChild(o); continue; }
+    if (!o) { oldParent.appendChild(n); continue; }
+    patchNode(o, n);
+  }
+}
+
+function patchNode(o, n) {
+  if (o.nodeType !== n.nodeType || o.nodeName !== n.nodeName) {
+    o.replaceWith(n);
+    return;
+  }
+
+  if (o.nodeType !== 1) {
+    if (o.nodeValue !== n.nodeValue) o.nodeValue = n.nodeValue;
+    return;
+  }
+
+  if (o.getAttribute("data-key") !== n.getAttribute("data-key")) {
+    o.replaceWith(n);
+    return;
+  }
+
+  if (
+    o.nodeName === "BUTTON" &&
+    n.hasAttribute("data-token") &&
+    (o.getAttribute("data-token") !== n.getAttribute("data-token") ||
+     o.getAttribute("data-color") !== n.getAttribute("data-color"))
+  ) {
+    o.replaceWith(n);
+    return;
+  }
+
+  Array.from(o.attributes).forEach(a => {
+    if (!n.hasAttribute(a.name)) o.removeAttribute(a.name);
+  });
+  Array.from(n.attributes).forEach(a => {
+    if (o.getAttribute(a.name) !== a.value) o.setAttribute(a.name, a.value);
+  });
+
+  if (o.nodeName === "INPUT") {
+    const v = n.getAttribute("value") || "";
+    if (o.value !== v) o.value = v;
+  }
+
+  patchChildren(o, n);
+}
 
 function render() {
 
-  app.innerHTML=`
+  const html = `
 
   <div class="shell">
 
     ${logoHeader()}
 
-    ${
-      state.phase==="setup"
-      ?
-      setupMarkup()
-      :
-      gameMarkup()
-    }
+    <div class="view" style="display:contents" data-key="${state.phase}-${state.setupStep}-${state.mode}">
+      ${
+        state.phase==="setup"
+        ?
+        setupMarkup()
+        :
+        gameMarkup()
+      }
+    </div>
 
     ${settingsMarkup()}
 
@@ -6014,17 +6089,21 @@ function render() {
   }
 
   `;
-  document.documentElement.lang = state.lang;
-  translateDOM(app);
+
+  morphInto(app, html);
+
+  if (state.lang) document.documentElement.lang = state.lang;
 
   bind();
   syncMusic();
-
 }
+
 function bind(root = app) {
 
   root.querySelectorAll("[data-action]")
     .forEach(button => {
+            if (button._bound) return;
+      button._bound = true;
 
       button.addEventListener("click", () => {
 
