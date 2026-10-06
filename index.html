@@ -3405,6 +3405,25 @@ button{touch-action:manipulation}
     filter:none;
   }
 }
+/* CUENTAS */
+.auth-field{position:relative;z-index:2;display:grid;gap:6px;margin-bottom:12px;text-align:left}
+.auth-field label{color:#9aa3b8;font:700 .62rem monospace;letter-spacing:.12em;text-transform:uppercase}
+.auth-input{display:flex;align-items:center;border:1px solid #ffffff14;border-radius:14px;background:#ffffff08;transition:border-color .2s}
+.auth-input:focus-within{border-color:#8c7cffaa}
+.auth-input input{flex:1;min-width:0;padding:15px 14px;border:0;outline:0;background:transparent;color:#fff;font-size:16px;font-weight:600;font-family:inherit}
+.auth-input input::placeholder{color:#596275}
+.auth-eye{border:0;background:transparent;color:#9aa3b8;font-size:18px;padding:0 14px;cursor:pointer}
+.auth-error,.auth-notice{position:relative;z-index:2;margin:0 0 12px;padding:10px 12px;border-radius:12px;font-size:.8rem;text-align:left}
+.auth-error{background:#e5393518;border:1px solid #e5393540;color:#ff9a9a}
+.auth-notice{background:#368f6020;border:1px solid #368f6050;color:#8be3b3}
+.auth-links{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:14px 0 4px}
+.auth-link{border:0;background:transparent;color:#a99dff;font-weight:700;font-size:.82rem;cursor:pointer;padding:6px 2px}
+.auth-guest{position:relative;z-index:2;width:100%;margin-top:12px}
+.account-box{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #ffffff12}
+.account-info{display:flex;align-items:center;gap:12px;padding:6px 8px 10px}
+.account-avatar{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#8c7cff26,#ffffff0a);border:1px solid #ffffff10;font-size:20px}
+.account-info strong{display:block;color:#fff;font-size:.86rem;word-break:break-all}
+.account-info small{color:#8e97aa;font-size:.68rem}
 
 </style>
 <div id="app" class="app"></div>
@@ -3976,6 +3995,19 @@ const state = {
   languageOpen:false,
   lang:loadLang(),
   confirmAction:null,
+  user:null,
+authReady:false,
+authOffline:false,
+introDone:false,
+showAuth:false,
+authMode:"login",
+authEmail:"",
+authPass:"",
+authPass2:"",
+showPass:false,
+authLoading:false,
+authError:"",
+authNotice:"",
   hop:null,
   arrived:null,
   celebrating:false,
@@ -4311,7 +4343,7 @@ function logoHeader() {
 
 
 function setupMarkup() {
-  
+  if (state.showAuth) return authMarkup();
   if (state.mainPlayOpen) {
 
   return `
@@ -5585,7 +5617,7 @@ function settingsMarkup() {
               ✕
             </button>
           </div>
-
+           ${accountMarkup()}
           <button class="settings-option" data-action="settings-sound">
             <span class="settings-option-icon sound-setting-icon">
               ${state.sound ? "🔊" : "🔇"}
@@ -5978,11 +6010,13 @@ translateDOM(intro);
   // termina y entra al juego
   setTimeout(() => intro.classList.add("hide"), 8900);
 
-  setTimeout(() => {
+    setTimeout(() => {
     intro.remove();
+    state.introDone = true;
+    decideAuthScreen();
     render();
   }, 9700);
-}
+
 function renderBoard() {
   const wrap = document.querySelector(".board-wrap");
   if (!wrap || state.phase !== "playing") {
@@ -6053,6 +6087,491 @@ function patchNode(o, n) {
 
   patchChildren(o, n);
 }
+/* ========== CUENTAS (Firebase Auth) ========== */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAsdhsSTdA8fFkDnP3CaQtunZ0VncO-W2Q",
+  authDomain: "ludo-greyx.firebaseapp.com",
+  projectId: "ludo-greyx",
+  storageBucket: "ludo-greyx.firebasestorage.app",
+  messagingSenderId: "277390646897",
+  appId: "1:277390646897:web:d6b5bb2569e71c8c2c05d0"
+};
+
+const FB_BASE = "https://www.gstatic.com/firebasejs/10.12.2/";
+let fb = null;
+
+const escHtml = s => String(s).replace(/[&<>"']/g, c => ({
+  "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+}[c]));
+
+const AUTH_MSG = {
+  email:"Escribe un correo válido.",
+  needPass:"Escribe tu contraseña.",
+  short:"La contraseña debe tener al menos 8 caracteres.",
+  match:"Las contraseñas no coinciden.",
+  exists:"Ese correo ya tiene una cuenta.",
+  bad:"Correo o contraseña incorrectos.",
+  many:"Demasiados intentos. Espera unos minutos.",
+  net:"Sin conexión. Revisa tu internet.",
+  weak:"La contraseña no cumple los requisitos de seguridad.",
+  generic:"No se pudo completar. Intenta de nuevo.",
+  resetSent:"Si el correo está registrado, te enviamos un enlace para cambiar tu contraseña."
+};
+
+function authErrorText(code) {
+  switch (code) {
+    case "auth/invalid-email": return AUTH_MSG.email;
+    case "auth/email-already-in-use": return AUTH_MSG.exists;
+    case "auth/weak-password":
+    case "auth/password-does-not-meet-requirements": return AUTH_MSG.weak;
+    case "auth/invalid-credential":
+    case "auth/user-not-found":
+    case "auth/wrong-password": return AUTH_MSG.bad;
+    case "auth/too-many-requests": return AUTH_MSG.many;
+    case "auth/network-request-failed": return AUTH_MSG.net;
+    default: return AUTH_MSG.generic;
+  }
+}
+
+async function initFirebase() {
+  try {
+    const [appMod, authMod] = await Promise.all([
+      import(FB_BASE + "firebase-app.js"),
+      import(FB_BASE + "firebase-auth.js")
+    ]);
+    const fbApp = appMod.initializeApp(firebaseConfig);
+    const auth = authMod.getAuth(fbApp);
+    fb = {
+      auth,
+      createUserWithEmailAndPassword: authMod.createUserWithEmailAndPassword,
+      signInWithEmailAndPassword: authMod.signInWithEmailAndPassword,
+      sendPasswordResetEmail: authMod.sendPasswordResetEmail,
+      sendEmailVerification: authMod.sendEmailVerification,
+      signOut: authMod.signOut
+    };
+    authMod.onAuthStateChanged(auth, onAuthChange);
+  } catch (e) {
+    console.warn("Firebase no disponible:", e);
+    state.authOffline = true;
+    state.authReady = true;
+    if (state.introDone) { decideAuthScreen(); render(); }
+  }
+}
+
+function onAuthChange(user) {
+  state.user = user
+    ? { uid: user.uid, email: user.email, emailVerified: user.emailVerified }
+    : null;
+  state.authReady = true;
+
+  if (user) {
+    state.showAuth = false;
+    state.authPass = "";
+    state.authPass2 = "";
+    state.authError = "";
+  } else if (state.introDone) {
+    decideAuthScreen();
+  }
+  if (state.introDone) render();
+}
+
+function decideAuthScreen() {
+  if (state.phase === "playing") return;
+  if (state.user) { state.showAuth = false; return; }
+  let guest = false;
+  try { guest = localStorage.getItem("gx-guest") === "1"; } catch (e) {}
+  state.showAuth = !guest && !state.authOffline;
+}
+
+function failAuth(msg) {
+  state.authError = msg;
+  state.authLoading = false;
+  render();
+}
+
+async function submitAuth() {
+  if (state.authLoading) return;
+  const mode = state.authMode;
+  const email = state.authEmail.trim();
+  const pass = state.authPass;
+
+  state.authError = "";
+  state.authNotice = "";
+
+  if (!fb) return failAuth(AUTH_MSG.net);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return failAuth(AUTH_MSG.email);
+
+  if (mode !== "reset") {
+    if (!pass) return failAuth(AUTH_MSG.needPass);
+    if (mode === "register") {
+      if (pass.length < 8) return failAuth(AUTH_MSG.short);
+      if (pass !== state.authPass2) return failAuth(AUTH_MSG.match);
+    }
+  }
+
+  state.authLoading = true;
+  render();
+
+  try {
+    if (mode === "register") {
+      const cred = await fb.createUserWithEmailAndPassword(fb.auth, email, pass);
+      try { await fb.sendEmailVerification(cred.user); } catch (e) {}
+    } else if (mode === "login") {
+      await fb.signInWithEmailAndPassword(fb.auth, email, pass);
+    } else {
+      await fb.sendPasswordResetEmail(fb.auth, email);
+    }
+
+    state.authLoading = false;
+    if (mode === "reset") {
+      state.authNotice = AUTH_MSG.resetSent;
+    } else {
+      state.showAuth = false;
+      state.authPass = "";
+      state.authPass2 = "";
+    }
+    render();
+
+  } catch (e) {
+    const code = e && e.code ? e.code : "";
+    state.authLoading = false;
+
+    const real = ["auth/network-request-failed", "auth/too-many-requests", "auth/invalid-email"];
+    if (mode === "reset" && !real.includes(code)) {
+      state.authNotice = AUTH_MSG.resetSent;
+    } else {
+      state.authError = authErrorText(code);
+    }
+    render();
+  }
+}
+
+function handleAuthAction(action) {
+  switch (action) {
+
+    case "auth-open":
+      state.settingsOpen = false;
+      state.confirmAction = null;
+      state.showAuth = true;
+      state.authMode = "login";
+      state.authError = "";
+      state.authNotice = "";
+      render();
+      return true;
+
+    case "auth-guest":
+      try { localStorage.setItem("gx-guest", "1"); } catch (e) {}
+      state.showAuth = false;
+      state.authError = "";
+      state.authNotice = "";
+      render();
+      return true;
+
+    case "auth-mode-login":
+    case "auth-mode-register":
+    case "auth-mode-reset":
+      state.authMode = action.replace("auth-mode-", "");
+      state.authError = "";
+      state.authNotice = "";
+      state.authPass2 = "";
+      render();
+      return true;
+
+    case "auth-toggle-pass":
+      state.showPass = !state.showPass;
+      render();
+      return true;
+
+    case "auth-submit":
+      submitAuth();
+      return true;
+
+    case "auth-logout":
+      if (state.confirmAction !== "auth-logout") {
+        state.confirmAction = "auth-logout";
+        render();
+        return true;
+      }
+      state.confirmAction = null;
+      state.settingsOpen = false;
+      try { localStorage.removeItem("gx-guest"); } catch (e) {}
+      if (fb) fb.signOut(fb.auth).catch(() => {});
+      state.authMode = "login";
+      state.authError = "";
+      state.showAuth = true;
+      render();
+      return true;
+  }
+  return false;
+}
+
+function authField(key, label, type, value, placeholder, autocomplete, extra) {
+  return `
+  <div class="auth-field">
+    <label>${label}</label>
+    <div class="auth-input">
+      <input
+        type="${type}"
+        data-auth-field="${key}"
+        value="${escHtml(value)}"
+        placeholder="${placeholder}"
+        autocomplete="${autocomplete}"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        maxlength="128"
+      >
+      ${extra || ""}
+    </div>
+  </div>`;
+}
+
+function authMarkup() {
+  const m = state.authMode;
+  const waiting = !state.authReady && !state.authOffline;
+
+  const C = {
+    login: {
+      t1:"ENTRA A", t2:"TU CUENTA.",
+      lead:"Guarda tu progreso, tus estadísticas y tus trofeos.",
+      kicker:"ACCESO", h2:"Iniciar sesión",
+      p:"Usa tu correo y tu contraseña.",
+      btn:"Entrar", busy:"Entrando…"
+    },
+    register: {
+      t1:"CREA TU", t2:"CUENTA.",
+      lead:"Es gratis, y puedes jugar sin cuenta cuando quieras.",
+      kicker:"REGISTRO", h2:"Crear cuenta",
+      p:"Solo necesitas un correo y una contraseña.",
+      btn:"Crear cuenta", busy:"Creando…"
+    },
+    reset: {
+      t1:"RECUPERA TU", t2:"ACCESO.",
+      lead:"Te ayudamos a volver a entrar a tu cuenta.",
+      kicker:"RECUPERAR", h2:"Recuperar contraseña",
+      p:"Te enviaremos un enlace a tu correo.",
+      btn:"Enviar enlace", busy:"Enviando…"
+    }
+  }[m];
+
+  const passType = state.showPass ? "text" : "password";
+  const eye = `<button type="button" class="auth-eye" data-action="auth-toggle-pass" aria-label="Mostrar u ocultar contraseña">${state.showPass ? "🙈" : "👁"}</button>`;
+
+  const form = `
+    ${authField("email", "Correo electrónico", "email", state.authEmail, "tu@correo.com", "email")}
+
+    ${m !== "reset" ? authField(
+      "pass", "Contraseña", passType, state.authPass,
+      m === "register" ? "Mínimo 8 caracteres" : "Tu contraseña",
+      m === "register" ? "new-password" : "current-password",
+      eye
+    ) : ""}
+
+    ${m === "register" ? authField(
+      "pass2", "Repite la contraseña", passType, state.authPass2,
+      "Repite tu contraseña", "new-password", ""
+    ) : ""}
+
+    ${state.authError ? `<p class="auth-error">${state.authError}</p>` : ""}
+    ${state.authNotice ? `<p class="auth-notice">${state.authNotice}</p>` : ""}
+
+    <button class="primary-button" data-action="auth-submit" ${state.authLoading ? "disabled" : ""}>
+      ${state.authLoading ? C.busy : C.btn}
+    </button>
+
+    <div class="auth-links">
+      ${m === "login" ? `
+        <button class="auth-link" data-action="auth-mode-register">Crear cuenta</button>
+        <button class="auth-link" data-action="auth-mode-reset">¿Olvidaste tu contraseña?</button>
+      ` : ""}
+      ${m === "register" ? `
+        <button class="auth-link" data-action="auth-mode-login">Ya tengo cuenta</button>
+      ` : ""}
+      ${m === "reset" ? `
+        <button class="auth-link" data-action="auth-mode-login">← Volver</button>
+      ` : ""}
+    </div>
+  `;
+
+  return `
+  <section class="setup setup-modern setup-step">
+
+    <div class="setup-copy">
+      <div class="eyebrow">CUENTA</div>
+      <h1 class="setup-title setup-title-small">${C.t1}<span>${C.t2}</span></h1>
+      <p class="setup-lead">${C.lead}</p>
+    </div>
+
+    <div class="setup-card setup-card-modern">
+
+      <div class="setup-card-header">
+        <span class="setup-card-kicker">${C.kicker}</span>
+        <h2>${waiting ? "Cargando…" : C.h2}</h2>
+        <p>${waiting ? "Un momento, estamos preparando tu sesión." : C.p}</p>
+      </div>
+
+      ${waiting ? "" : form}
+
+      <button class="secondary-button auth-guest" data-action="auth-guest">Jugar sin cuenta</button>
+
+    </div>
+  </section>`;
+}
+
+function accountMarkup() {
+  if (state.phase === "playing") return "";
+
+  if (state.user) {
+    const out = state.confirmAction === "auth-logout";
+    return `
+    <div class="account-box">
+      <div class="account-info">
+        <span class="account-avatar">👤</span>
+        <div>
+          <strong>${escHtml(state.user.email || "")}</strong>
+          <small>${state.user.emailVerified ? "Correo verificado ✓" : "Correo pendiente de verificar"}</small>
+        </div>
+      </div>
+      <button class="settings-option" data-action="auth-logout">
+        <span class="settings-option-icon">🚪</span>
+        <span class="settings-option-text">
+          <strong>${out ? "¿Seguro? Toca otra vez" : "Cerrar sesión"}</strong>
+          <small>${out ? "Volverás a la pantalla de acceso" : "Salir de tu cuenta en este dispositivo"}</small>
+        </span>
+      </button>
+    </div>`;
+  }
+
+  if (state.authOffline) {
+    return `
+    <div class="account-box">
+      <div class="account-info">
+        <span class="account-avatar">📡</span>
+        <div><small>Sin conexión: jugando sin cuenta</small></div>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <div class="account-box">
+    <button class="settings-option" data-action="auth-open">
+      <span class="settings-option-icon">👤</span>
+      <span class="settings-option-text">
+        <strong>Iniciar sesión o crear cuenta</strong>
+        <small>Guarda tu progreso y estadísticas</small>
+      </span>
+    </button>
+  </div>`;
+}
+
+function setupAuthInputs() {
+  app.addEventListener("input", e => {
+    const f = e.target && e.target.dataset && e.target.dataset.authField;
+    if (!f) return;
+    if (f === "email") state.authEmail = e.target.value;
+    if (f === "pass") state.authPass = e.target.value;
+    if (f === "pass2") state.authPass2 = e.target.value;
+  });
+
+  app.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target && e.target.dataset && e.target.dataset.authField) {
+      e.preventDefault();
+      submitAuth();
+    }
+  });
+}
+
+const AUTH_I18N = {
+  en: {
+    "CUENTA":"ACCOUNT","ENTRA A":"SIGN IN TO","TU CUENTA.":"YOUR ACCOUNT.",
+    "CREA TU":"CREATE YOUR","CUENTA.":"ACCOUNT.","RECUPERA TU":"RECOVER YOUR","ACCESO.":"ACCESS.",
+    "ACCESO":"LOGIN","REGISTRO":"SIGN UP","RECUPERAR":"RECOVERY",
+    "Guarda tu progreso, tus estadísticas y tus trofeos.":"Save your progress, stats and trophies.",
+    "Es gratis, y puedes jugar sin cuenta cuando quieras.":"It's free, and you can play without an account anytime.",
+    "Te ayudamos a volver a entrar a tu cuenta.":"We'll help you get back into your account.",
+    "Iniciar sesión":"Sign in","Crear cuenta":"Create account","Recuperar contraseña":"Recover password",
+    "Usa tu correo y tu contraseña.":"Use your email and password.",
+    "Solo necesitas un correo y una contraseña.":"You only need an email and a password.",
+    "Te enviaremos un enlace a tu correo.":"We'll send a link to your email.",
+    "Entrar":"Sign in","Entrando…":"Signing in…","Creando…":"Creating…",
+    "Enviar enlace":"Send link","Enviando…":"Sending…",
+    "Correo electrónico":"Email","Contraseña":"Password","Repite la contraseña":"Repeat password",
+    "Tu contraseña":"Your password","Mínimo 8 caracteres":"At least 8 characters",
+    "Repite tu contraseña":"Repeat your password","tu@correo.com":"you@email.com",
+    "Mostrar u ocultar contraseña":"Show or hide password",
+    "¿Olvidaste tu contraseña?":"Forgot your password?","Ya tengo cuenta":"I already have an account",
+    "Jugar sin cuenta":"Play without an account",
+    "Cargando…":"Loading…","Un momento, estamos preparando tu sesión.":"One moment, we're getting your session ready.",
+    "Escribe un correo válido.":"Enter a valid email.","Escribe tu contraseña.":"Enter your password.",
+    "La contraseña debe tener al menos 8 caracteres.":"The password must be at least 8 characters.",
+    "Las contraseñas no coinciden.":"Passwords don't match.",
+    "Ese correo ya tiene una cuenta.":"That email already has an account.",
+    "Correo o contraseña incorrectos.":"Wrong email or password.",
+    "Demasiados intentos. Espera unos minutos.":"Too many attempts. Wait a few minutes.",
+    "Sin conexión. Revisa tu internet.":"No connection. Check your internet.",
+    "La contraseña no cumple los requisitos de seguridad.":"The password doesn't meet the security requirements.",
+    "No se pudo completar. Intenta de nuevo.":"Couldn't complete it. Try again.",
+    "Si el correo está registrado, te enviamos un enlace para cambiar tu contraseña.":"If the email is registered, we sent you a link to change your password.",
+    "Cerrar sesión":"Sign out","Iniciar sesión o crear cuenta":"Sign in or create account",
+    "Guarda tu progreso y estadísticas":"Save your progress and stats",
+    "Correo verificado ✓":"Email verified ✓","Correo pendiente de verificar":"Email pending verification",
+    "Volverás a la pantalla de acceso":"You'll return to the sign-in screen",
+    "Salir de tu cuenta en este dispositivo":"Sign out of your account on this device",
+    "Sin conexión: jugando sin cuenta":"Offline: playing without an account"
+  },
+  pt: {
+    "CUENTA":"CONTA","ENTRA A":"ENTRE NA","TU CUENTA.":"SUA CONTA.",
+    "CREA TU":"CRIE SUA","CUENTA.":"CONTA.","RECUPERA TU":"RECUPERE SEU","ACCESO.":"ACESSO.",
+    "ACCESO":"ACESSO","REGISTRO":"CADASTRO","RECUPERAR":"RECUPERAÇÃO",
+    "Guarda tu progreso, tus estadísticas y tus trofeos.":"Salve seu progresso, suas estatísticas e seus troféus.",
+    "Es gratis, y puedes jugar sin cuenta cuando quieras.":"É grátis, e você pode jogar sem conta quando quiser.",
+    "Te ayudamos a volver a entrar a tu cuenta.":"Ajudamos você a voltar para a sua conta.",
+    "Iniciar sesión":"Entrar","Crear cuenta":"Criar conta","Recuperar contraseña":"Recuperar senha",
+    "Usa tu correo y tu contraseña.":"Use seu e-mail e sua senha.",
+    "Solo necesitas un correo y una contraseña.":"Você só precisa de um e-mail e uma senha.",
+    "Te enviaremos un enlace a tu correo.":"Enviaremos um link para o seu e-mail.",
+    "Entrar":"Entrar","Entrando…":"Entrando…","Creando…":"Criando…",
+    "Enviar enlace":"Enviar link","Enviando…":"Enviando…",
+    "Correo electrónico":"E-mail","Contraseña":"Senha","Repite la contraseña":"Repita a senha",
+    "Tu contraseña":"Sua senha","Mínimo 8 caracteres":"Mínimo de 8 caracteres",
+    "Repite tu contraseña":"Repita sua senha","tu@correo.com":"voce@email.com",
+    "Mostrar u ocultar contraseña":"Mostrar ou ocultar senha",
+    "¿Olvidaste tu contraseña?":"Esqueceu sua senha?","Ya tengo cuenta":"Já tenho conta",
+    "Jugar sin cuenta":"Jogar sem conta",
+    "Cargando…":"Carregando…","Un momento, estamos preparando tu sesión.":"Um momento, estamos preparando sua sessão.",
+    "Escribe un correo válido.":"Digite um e-mail válido.","Escribe tu contraseña.":"Digite sua senha.",
+    "La contraseña debe tener al menos 8 caracteres.":"A senha deve ter pelo menos 8 caracteres.",
+    "Las contraseñas no coinciden.":"As senhas não coincidem.",
+    "Ese correo ya tiene una cuenta.":"Esse e-mail já tem uma conta.",
+    "Correo o contraseña incorrectos.":"E-mail ou senha incorretos.",
+    "Demasiados intentos. Espera unos minutos.":"Muitas tentativas. Aguarde alguns minutos.",
+    "Sin conexión. Revisa tu internet.":"Sem conexão. Verifique sua internet.",
+    "La contraseña no cumple los requisitos de seguridad.":"A senha não atende aos requisitos de segurança.",
+    "No se pudo completar. Intenta de nuevo.":"Não foi possível concluir. Tente novamente.",
+    "Si el correo está registrado, te enviamos un enlace para cambiar tu contraseña.":"Se o e-mail estiver cadastrado, enviamos um link para alterar sua senha.",
+    "Cerrar sesión":"Sair da conta","Iniciar sesión o crear cuenta":"Entrar ou criar conta",
+    "Guarda tu progreso y estadísticas":"Salve seu progresso e estatísticas",
+    "Correo verificado ✓":"E-mail verificado ✓","Correo pendiente de verificar":"E-mail pendente de verificação",
+    "Volverás a la pantalla de acceso":"Você voltará à tela de acesso",
+    "Salir de tu cuenta en este dispositivo":"Sair da sua conta neste dispositivo",
+    "Sin conexión: jugando sin cuenta":"Sem conexão: jogando sem conta"
+  }
+};
+
+function mergeAuthI18n() {
+  try {
+    if (typeof DICT === "undefined") return;
+    Object.assign(DICT.en, AUTH_I18N.en);
+    Object.assign(DICT.pt, AUTH_I18N.pt);
+  } catch (e) {}
+}
+
+function startAuth() {
+  mergeAuthI18n();
+  setupAuthInputs();
+  initFirebase();
+}
 
 function render() {
 
@@ -6109,6 +6628,7 @@ function bind(root = app) {
 
         const action = button.dataset.action;
 playUiSound(action);
+if (handleAuthAction(action)) return;
 if (action === "settings-language") {
   state.languageOpen = true;
   render();
@@ -7083,6 +7603,7 @@ function showTapGate() {
 }
 
 showTapGate();
+startAuth();
 
 })();
 </script>
