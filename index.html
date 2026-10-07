@@ -3425,6 +3425,13 @@ button{touch-action:manipulation}
 .account-info strong{display:block;color:#fff;font-size:.86rem;word-break:break-all}
 .account-info small{color:#8e97aa;font-size:.68rem}
 
+/* PERFIL */
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.avatar-pick{aspect-ratio:1;display:grid;place-items:center;font-size:26px;border:1px solid #ffffff14;border-radius:14px;background:#ffffff08;cursor:pointer;transition:border-color .2s,transform .15s}
+.avatar-pick.selected{border-color:#8c7cffcc;background:#8c7cff26;transform:scale(1.04)}
+.profile-hint{position:relative;z-index:2;margin:-4px 0 14px;color:#8e97aa;font-size:.72rem;text-align:left}
+.profile-name{padding:14px;border:1px solid #ffffff14;border-radius:14px;background:#ffffff08;color:#fff;font-weight:700}
+
 </style>
 <div id="app" class="app"></div>
 
@@ -4008,6 +4015,15 @@ showPass:false,
 authLoading:false,
 authError:"",
 authNotice:"",
+profile:null,
+profileLoaded:false,
+profileSkipped:false,
+showProfile:null,
+profileName:"",
+profileAvatar:"a1",
+profileBusy:false,
+profileError:"",
+profileNotice:"",
   hop:null,
   arrived:null,
   celebrating:false,
@@ -4344,6 +4360,7 @@ function logoHeader() {
 
 function setupMarkup() {
   if (state.showAuth) return authMarkup();
+  if (state.showProfile) return profileMarkup();
   if (state.mainPlayOpen) {
 
   return `
@@ -6629,7 +6646,7 @@ function bind(root = app) {
 
         const action = button.dataset.action;
 playUiSound(action);
-if (handleAuthAction(action)) return;
+if (handleAuthAction(action) || handleProfileAction(action)) return;
 if (action === "settings-language") {
   state.languageOpen = true;
   render();
@@ -7601,6 +7618,478 @@ function showTapGate() {
     document.getElementById("gxGate").remove();
     startIntroWhenReady();
   }, { once: true });
+}
+/* ========== PERFIL ========== */
+
+const AVATARS = {
+  a1:"🎲", a2:"👑", a3:"🦊", a4:"🐼", a5:"🐯", a6:"🦁",
+  a7:"🐸", a8:"🐙", a9:"🦄", a10:"🐲", a11:"🚀", a12:"⚡",
+  a13:"🔥", a14:"🌙", a15:"🎯", a16:"💎"
+};
+
+const RESERVED_NAMES = [
+  "admin","administrador","greyx","ludogreyx","soporte","support",
+  "moderador","mod","root","sistema","system"
+];
+
+const PROFILE_MSG = {
+  short:"El nombre debe tener entre 3 y 16 caracteres.",
+  chars:"Usa solo letras, números y guion bajo (_).",
+  reserved:"Ese nombre no está disponible.",
+  taken:"Ese nombre ya está en uso. Prueba otro.",
+  net:"Sin conexión. Revisa tu internet.",
+  generic:"No se pudo guardar. Intenta de nuevo."
+};
+
+function validateUsername(n) {
+  if (n.length < 3 || n.length > 16) return "short";
+  if (!/^[A-Za-z0-9_]+$/.test(n)) return "chars";
+  if (RESERVED_NAMES.includes(n.toLowerCase())) return "reserved";
+  return null;
+}
+
+function avatarEmoji(id) {
+  return AVATARS[id] || "👤";
+}
+
+function profileErrText(e, permissionMeansTaken) {
+  const code = e && e.code ? e.code : "";
+  if (code === "unavailable" || code === "network-request-failed") return PROFILE_MSG.net;
+  if (permissionMeansTaken && code === "permission-denied") return PROFILE_MSG.taken;
+  return PROFILE_MSG.generic;
+}
+
+async function initFirebase() {
+  try {
+    const [appMod, authMod] = await Promise.all([
+      import(FB_BASE + "firebase-app.js"),
+      import(FB_BASE + "firebase-auth.js")
+    ]);
+    const fbApp = appMod.initializeApp(firebaseConfig);
+    const auth = authMod.getAuth(fbApp);
+    fb = {
+      auth,
+      createUserWithEmailAndPassword: authMod.createUserWithEmailAndPassword,
+      signInWithEmailAndPassword: authMod.signInWithEmailAndPassword,
+      sendPasswordResetEmail: authMod.sendPasswordResetEmail,
+      sendEmailVerification: authMod.sendEmailVerification,
+      signOut: authMod.signOut
+    };
+
+    try {
+      const fsMod = await import(FB_BASE + "firebase-firestore.js");
+      fb.db = fsMod.getFirestore(fbApp);
+      fb.doc = fsMod.doc;
+      fb.getDoc = fsMod.getDoc;
+      fb.writeBatch = fsMod.writeBatch;
+      fb.updateDoc = fsMod.updateDoc;
+      fb.serverTimestamp = fsMod.serverTimestamp;
+    } catch (e) {
+      console.warn("Firestore no disponible:", e);
+    }
+
+    authMod.onAuthStateChanged(auth, onAuthChange);
+  } catch (e) {
+    console.warn("Firebase no disponible:", e);
+    state.authOffline = true;
+    state.authReady = true;
+    if (state.introDone) { decideAuthScreen(); render(); }
+  }
+}
+
+function onAuthChange(user) {
+  state.user = user
+    ? { uid: user.uid, email: user.email, emailVerified: user.emailVerified }
+    : null;
+  state.authReady = true;
+
+  if (user) {
+    state.showAuth = false;
+    state.authPass = "";
+    state.authPass2 = "";
+    state.authError = "";
+    loadProfile();
+  } else {
+    state.profile = null;
+    state.profileLoaded = false;
+    state.profileSkipped = false;
+    state.showProfile = null;
+    if (state.introDone) decideAuthScreen();
+  }
+  if (state.introDone) render();
+}
+
+async function loadProfile() {
+  if (!fb || !fb.db || !state.user) return;
+  const uid = state.user.uid;
+  try {
+    const snap = await fb.getDoc(fb.doc(fb.db, "users", uid));
+    if (!state.user || state.user.uid !== uid) return;
+
+    state.profile = snap.exists() ? snap.data() : null;
+    state.profileLoaded = true;
+
+    if (!state.profile && !state.profileSkipped && state.phase !== "playing") {
+      state.showProfile = "create";
+      state.profileName = "";
+      state.profileAvatar = "a1";
+      state.profileError = "";
+      state.profileNotice = "";
+    }
+    if (state.introDone) render();
+  } catch (e) {
+    console.warn("No se pudo cargar el perfil:", e);
+  }
+}
+
+async function saveProfile() {
+  if (state.profileBusy || !fb || !fb.db || !state.user) return;
+
+  if (state.showProfile === "edit") { saveAvatar(); return; }
+
+  const name = state.profileName.trim();
+  const bad = validateUsername(name);
+  if (bad) {
+    state.profileError = PROFILE_MSG[bad];
+    render();
+    return;
+  }
+
+  const lower = name.toLowerCase();
+  const uid = state.user.uid;
+
+  state.profileBusy = true;
+  state.profileError = "";
+  state.profileNotice = "";
+  render();
+
+  try {
+    const taken = await fb.getDoc(fb.doc(fb.db, "usernames", lower));
+    if (taken.exists()) {
+      state.profileBusy = false;
+      state.profileError = PROFILE_MSG.taken;
+      render();
+      return;
+    }
+
+    const batch = fb.writeBatch(fb.db);
+    batch.set(fb.doc(fb.db, "usernames", lower), { uid: uid });
+    batch.set(fb.doc(fb.db, "users", uid), {
+      username: name,
+      usernameLower: lower,
+      avatar: state.profileAvatar,
+      createdAt: fb.serverTimestamp(),
+      updatedAt: fb.serverTimestamp()
+    });
+    await batch.commit();
+
+    state.profile = { username: name, usernameLower: lower, avatar: state.profileAvatar };
+    state.profileBusy = false;
+    state.showProfile = null;
+    render();
+
+  } catch (e) {
+    state.profileBusy = false;
+    state.profileError = profileErrText(e, true);
+    render();
+  }
+}
+
+async function saveAvatar() {
+  if (state.profileBusy || !fb || !fb.db || !state.user || !state.profile) return;
+
+  state.profileBusy = true;
+  state.profileError = "";
+  state.profileNotice = "";
+  render();
+
+  try {
+    await fb.updateDoc(fb.doc(fb.db, "users", state.user.uid), {
+      avatar: state.profileAvatar,
+      updatedAt: fb.serverTimestamp()
+    });
+    state.profile = Object.assign({}, state.profile, { avatar: state.profileAvatar });
+    state.profileNotice = "Avatar actualizado.";
+  } catch (e) {
+    state.profileError = profileErrText(e, false);
+  }
+
+  state.profileBusy = false;
+  render();
+}
+
+function handleProfileAction(action) {
+
+  if (action.startsWith("profile-avatar-")) {
+    const id = action.slice("profile-avatar-".length);
+    if (AVATARS[id]) state.profileAvatar = id;
+    state.profileNotice = "";
+    render();
+    return true;
+  }
+
+  if (action === "profile-open") {
+    state.settingsOpen = false;
+    state.confirmAction = null;
+    state.showProfile = "edit";
+    state.profileAvatar = state.profile ? state.profile.avatar : "a1";
+    state.profileError = "";
+    state.profileNotice = "";
+    render();
+    return true;
+  }
+
+  if (action === "profile-create") {
+    state.settingsOpen = false;
+    state.confirmAction = null;
+    state.showProfile = "create";
+    state.profileName = "";
+    state.profileAvatar = "a1";
+    state.profileError = "";
+    state.profileNotice = "";
+    render();
+    return true;
+  }
+
+  if (action === "profile-save") {
+    saveProfile();
+    return true;
+  }
+
+  if (action === "profile-skip") {
+    state.profileSkipped = true;
+    state.showProfile = null;
+    render();
+    return true;
+  }
+
+  if (action === "profile-close") {
+    state.showProfile = null;
+    render();
+    return true;
+  }
+
+  return false;
+}
+
+function profileMarkup() {
+  const create = state.showProfile === "create";
+
+  const avatars = Object.keys(AVATARS).map(id => `
+    <button type="button"
+      class="avatar-pick ${state.profileAvatar === id ? "selected" : ""}"
+      data-action="profile-avatar-${id}"
+      aria-label="Avatar">${AVATARS[id]}</button>
+  `).join("");
+
+  const nameBlock = create
+    ? `
+    <div class="auth-field">
+      <label>Nombre de usuario</label>
+      <div class="auth-input">
+        <input
+          type="text"
+          data-profile-field="name"
+          value="${escHtml(state.profileName)}"
+          placeholder="Ej: ReyDelLudo"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          maxlength="16"
+        >
+      </div>
+    </div>
+    <p class="profile-hint">3 a 16 caracteres: letras, números y _</p>`
+    : `
+    <div class="auth-field">
+      <label>Nombre de usuario</label>
+      <div class="profile-name">@${escHtml(state.profile ? state.profile.username : "")}</div>
+    </div>`;
+
+  return `
+  <section class="setup setup-modern setup-step">
+
+    <div class="setup-copy">
+      <div class="eyebrow">PERFIL</div>
+      <h1 class="setup-title setup-title-small">${create ? "ELIGE TU" : "TU"}<span>${create ? "NOMBRE." : "PERFIL."}</span></h1>
+      <p class="setup-lead">${create ? "Así te verán los demás jugadores." : "Cambia tu avatar cuando quieras."}</p>
+    </div>
+
+    <div class="setup-card setup-card-modern">
+
+      <div class="setup-card-header">
+        <span class="setup-card-kicker">PERFIL</span>
+        <h2>${create ? "Crea tu perfil" : "Tu perfil"}</h2>
+        <p>${create ? "Elige un nombre de usuario y un avatar." : "Tu nombre de usuario no se puede cambiar."}</p>
+      </div>
+
+      ${nameBlock}
+
+      <div class="auth-field">
+        <label>Avatar</label>
+        <div class="avatar-grid">${avatars}</div>
+      </div>
+
+      ${state.profileError ? `<p class="auth-error">${state.profileError}</p>` : ""}
+      ${state.profileNotice ? `<p class="auth-notice">${state.profileNotice}</p>` : ""}
+
+      <button class="primary-button" data-action="profile-save" ${state.profileBusy ? "disabled" : ""}>
+        ${state.profileBusy ? "Guardando…" : (create ? "Guardar perfil" : "Guardar avatar")}
+      </button>
+
+      <div class="auth-links">
+        ${create
+          ? `<button class="auth-link" data-action="profile-skip">Ahora no</button>`
+          : `<button class="auth-link" data-action="profile-close">← Volver</button>`}
+      </div>
+
+    </div>
+  </section>`;
+}
+
+function accountMarkup() {
+  if (state.phase === "playing") return "";
+
+  if (state.user) {
+    const out = state.confirmAction === "auth-logout";
+    const p = state.profile;
+    const avatar = p ? avatarEmoji(p.avatar) : "👤";
+    const title = p ? "@" + escHtml(p.username) : escHtml(state.user.email || "");
+    const status = state.user.emailVerified ? "Correo verificado ✓" : "Correo pendiente de verificar";
+
+    let profileBtn = "";
+    if (state.profileLoaded) {
+      profileBtn = p
+        ? `<button class="settings-option" data-action="profile-open">
+             <span class="settings-option-icon">🎨</span>
+             <span class="settings-option-text">
+               <strong>Mi perfil</strong>
+               <small>Ver y cambiar tu avatar</small>
+             </span>
+           </button>`
+        : `<button class="settings-option" data-action="profile-create">
+             <span class="settings-option-icon">✨</span>
+             <span class="settings-option-text">
+               <strong>Crear perfil</strong>
+               <small>Elige tu nombre de usuario y avatar</small>
+             </span>
+           </button>`;
+    }
+
+    return `
+    <div class="account-box">
+      <div class="account-info">
+        <span class="account-avatar">${avatar}</span>
+        <div>
+          <strong>${title}</strong>
+          <small>${status}</small>
+        </div>
+      </div>
+      ${profileBtn}
+      <button class="settings-option" data-action="auth-logout">
+        <span class="settings-option-icon">🚪</span>
+        <span class="settings-option-text">
+          <strong>${out ? "¿Seguro? Toca otra vez" : "Cerrar sesión"}</strong>
+          <small>${out ? "Volverás a la pantalla de acceso" : "Salir de tu cuenta en este dispositivo"}</small>
+        </span>
+      </button>
+    </div>`;
+  }
+
+  if (state.authOffline) {
+    return `
+    <div class="account-box">
+      <div class="account-info">
+        <span class="account-avatar">📡</span>
+        <div><small>Sin conexión: jugando sin cuenta</small></div>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <div class="account-box">
+    <button class="settings-option" data-action="auth-open">
+      <span class="settings-option-icon">👤</span>
+      <span class="settings-option-text">
+        <strong>Iniciar sesión o crear cuenta</strong>
+        <small>Guarda tu progreso y estadísticas</small>
+      </span>
+    </button>
+  </div>`;
+}
+
+function setupProfileInputs() {
+  app.addEventListener("input", e => {
+    const f = e.target && e.target.dataset && e.target.dataset.profileField;
+    if (f === "name") state.profileName = e.target.value;
+  });
+
+  app.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target && e.target.dataset && e.target.dataset.profileField) {
+      e.preventDefault();
+      saveProfile();
+    }
+  });
+}
+
+const PROFILE_I18N = {
+  en: {
+    "PERFIL":"PROFILE","NOMBRE.":"NAME.","TU":"YOUR","PERFIL.":"PROFILE.",
+    "Así te verán los demás jugadores.":"This is how other players will see you.",
+    "Cambia tu avatar cuando quieras.":"Change your avatar anytime.",
+    "Crea tu perfil":"Create your profile","Tu perfil":"Your profile",
+    "Elige un nombre de usuario y un avatar.":"Pick a username and an avatar.",
+    "Tu nombre de usuario no se puede cambiar.":"Your username can't be changed.",
+    "Nombre de usuario":"Username","Avatar":"Avatar",
+    "Ej: ReyDelLudo":"E.g. LudoKing",
+    "3 a 16 caracteres: letras, números y _":"3 to 16 characters: letters, numbers and _",
+    "Guardar perfil":"Save profile","Guardando…":"Saving…","Guardar avatar":"Save avatar",
+    "Ahora no":"Not now","Avatar actualizado.":"Avatar updated.",
+    "El nombre debe tener entre 3 y 16 caracteres.":"The name must be 3 to 16 characters long.",
+    "Usa solo letras, números y guion bajo (_).":"Use only letters, numbers and underscore (_).",
+    "Ese nombre no está disponible.":"That name isn't available.",
+    "Ese nombre ya está en uso. Prueba otro.":"That name is already taken. Try another.",
+    "No se pudo guardar. Intenta de nuevo.":"Couldn't save. Try again.",
+    "Mi perfil":"My profile","Ver y cambiar tu avatar":"View and change your avatar",
+    "Crear perfil":"Create profile","Elige tu nombre de usuario y avatar":"Pick your username and avatar"
+  },
+  pt: {
+    "PERFIL":"PERFIL","NOMBRES.":"NOMES.","NOMBRE.":"NOME.","TU":"SEU","PERFIL.":"PERFIL.",
+    "Así te verán los demás jugadores.":"Assim os outros jogadores vão ver você.",
+    "Cambia tu avatar cuando quieras.":"Mude seu avatar quando quiser.",
+    "Crea tu perfil":"Crie seu perfil","Tu perfil":"Seu perfil",
+    "Elige un nombre de usuario y un avatar.":"Escolha um nome de usuário e um avatar.",
+    "Tu nombre de usuario no se puede cambiar.":"Seu nome de usuário não pode ser alterado.",
+    "Nombre de usuario":"Nome de usuário","Avatar":"Avatar",
+    "Ej: ReyDelLudo":"Ex: ReiDoLudo",
+    "3 a 16 caracteres: letras, números y _":"3 a 16 caracteres: letras, números e _",
+    "Guardar perfil":"Salvar perfil","Guardando…":"Salvando…","Guardar avatar":"Salvar avatar",
+    "Ahora no":"Agora não","Avatar actualizado.":"Avatar atualizado.",
+    "El nombre debe tener entre 3 y 16 caracteres.":"O nome deve ter entre 3 e 16 caracteres.",
+    "Usa solo letras, números y guion bajo (_).":"Use apenas letras, números e sublinhado (_).",
+    "Ese nombre no está disponible.":"Esse nome não está disponível.",
+    "Ese nombre ya está en uso. Prueba otro.":"Esse nome já está em uso. Tente outro.",
+    "No se pudo guardar. Intenta de nuevo.":"Não foi possível salvar. Tente novamente.",
+    "Mi perfil":"Meu perfil","Ver y cambiar tu avatar":"Ver e mudar seu avatar",
+    "Crear perfil":"Criar perfil","Elige tu nombre de usuario y avatar":"Escolha seu nome de usuário e avatar"
+  }
+};
+
+function mergeProfileI18n() {
+  try {
+    if (typeof DICT === "undefined") return;
+    Object.assign(DICT.en, PROFILE_I18N.en);
+    Object.assign(DICT.pt, PROFILE_I18N.pt);
+  } catch (e) {}
+}
+
+function startAuth() {
+  mergeAuthI18n();
+  mergeProfileI18n();
+  setupAuthInputs();
+  setupProfileInputs();
+  initFirebase();
 }
 
 showTapGate();
