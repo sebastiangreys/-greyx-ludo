@@ -3431,6 +3431,17 @@ button{touch-action:manipulation}
 .avatar-pick.selected{border-color:#8c7cffcc;background:#8c7cff26;transform:scale(1.04)}
 .profile-hint{position:relative;z-index:2;margin:-4px 0 14px;color:#8e97aa;font-size:.72rem;text-align:left}
 .profile-name{padding:14px;border:1px solid #ffffff14;border-radius:14px;background:#ffffff08;color:#fff;font-weight:700}
+/* ESTADÍSTICAS */
+.trophy-big{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 12px;padding:16px;border:1px solid #ffd54f44;border-radius:18px;background:linear-gradient(145deg,#ffd54f1f,#ffffff08)}
+.trophy-big b{font-size:2rem;color:#ffd54f;line-height:1}
+.trophy-big span{color:#c9b36a;font:800 .64rem monospace;letter-spacing:.14em;text-transform:uppercase}
+.stats-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.stat{padding:12px;border:1px solid #ffffff12;border-radius:14px;background:#ffffff08;text-align:left}
+.stat b{display:block;color:#fff;font-size:1.15rem}
+.stat span{color:#8e97aa;font:700 .58rem monospace;letter-spacing:.1em;text-transform:uppercase}
+.trophy-line{margin:12px 0 0;font-weight:900;font-size:1.3rem}
+.trophy-line.up{color:#ffd54f}
+.trophy-line.down{color:#ff9a9a}
 
 </style>
 <div id="app" class="app"></div>
@@ -4024,6 +4035,12 @@ profileAvatar:"a1",
 profileBusy:false,
 profileError:"",
 profileNotice:"",
+stats:null,
+statsUid:null,
+statsBusy:false,
+gameStats:null,
+statsRecorded:false,
+gameResult:null,
   hop:null,
   arrived:null,
   celebrating:false,
@@ -5918,52 +5935,7 @@ function celebrationMarkup() {
     </div>
   `;
 }
-function winnerMarkup() {
 
-return `
-
-<div class="winner">
-
-<div class="winner-card">
-
-<div class="winner-seal">
-★
-</div>
-
-<h2>
-¡Gana ${playerLabel(state.winner)}!
-</h2>
-
-<p>
-Todas sus fichas llegaron a la meta.
-Una gran vuelta alrededor del tablero.
-</p>
-
-<div class="winner-actions">
-
-<button
-class="secondary"
-data-action="setup"
->
-Configurar
-</button>
-
-<button
-class="primary-button"
-data-action="again"
->
-Jugar otra vez
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}
 function greyxLogoMarkup(){
   return `
     <svg viewBox="40 90 630 460" class="intro-logo"
@@ -7011,7 +6983,7 @@ function start(count) {
   }
 
   state.tokens = freshTokens();
-
+  resetGameStats();
   state.active = 0;
 
   state.lastRoll = null;
@@ -7311,6 +7283,8 @@ state.hop = { color, id };
   }
 
   state.tokens = updated;
+  trackMoveStats(color, capturedTokens.length, finalProgress);
+
   state.moving = false;
 
   /*
@@ -7532,6 +7506,7 @@ playSound("goal");
   showArrivalConfetti(color, 180);
 
   state.winner = color;
+  recordGameResult();
   state.celebrating = true;
   state.roll = null;
 
@@ -7872,82 +7847,6 @@ function handleProfileAction(action) {
   return false;
 }
 
-function profileMarkup() {
-  const create = state.showProfile === "create";
-
-  const avatars = Object.keys(AVATARS).map(id => `
-    <button type="button"
-      class="avatar-pick ${state.profileAvatar === id ? "selected" : ""}"
-      data-action="profile-avatar-${id}"
-      aria-label="Avatar">${AVATARS[id]}</button>
-  `).join("");
-
-  const nameBlock = create
-    ? `
-    <div class="auth-field">
-      <label>Nombre de usuario</label>
-      <div class="auth-input">
-        <input
-          type="text"
-          data-profile-field="name"
-          value="${escHtml(state.profileName)}"
-          placeholder="Ej: ReyDelLudo"
-          autocomplete="off"
-          autocapitalize="off"
-          autocorrect="off"
-          spellcheck="false"
-          maxlength="16"
-        >
-      </div>
-    </div>
-    <p class="profile-hint">3 a 16 caracteres: letras, números y _</p>`
-    : `
-    <div class="auth-field">
-      <label>Nombre de usuario</label>
-      <div class="profile-name">@${escHtml(state.profile ? state.profile.username : "")}</div>
-    </div>`;
-
-  return `
-  <section class="setup setup-modern setup-step">
-
-    <div class="setup-copy">
-      <div class="eyebrow">PERFIL</div>
-      <h1 class="setup-title setup-title-small">${create ? "ELIGE TU" : "TU"}<span>${create ? "NOMBRE." : "PERFIL."}</span></h1>
-      <p class="setup-lead">${create ? "Así te verán los demás jugadores." : "Cambia tu avatar cuando quieras."}</p>
-    </div>
-
-    <div class="setup-card setup-card-modern">
-
-      <div class="setup-card-header">
-        <span class="setup-card-kicker">PERFIL</span>
-        <h2>${create ? "Crea tu perfil" : "Tu perfil"}</h2>
-        <p>${create ? "Elige un nombre de usuario y un avatar." : "Tu nombre de usuario no se puede cambiar."}</p>
-      </div>
-
-      ${nameBlock}
-
-      <div class="auth-field">
-        <label>Avatar</label>
-        <div class="avatar-grid">${avatars}</div>
-      </div>
-
-      ${state.profileError ? `<p class="auth-error">${state.profileError}</p>` : ""}
-      ${state.profileNotice ? `<p class="auth-notice">${state.profileNotice}</p>` : ""}
-
-      <button class="primary-button" data-action="profile-save" ${state.profileBusy ? "disabled" : ""}>
-        ${state.profileBusy ? "Guardando…" : (create ? "Guardar perfil" : "Guardar avatar")}
-      </button>
-
-      <div class="auth-links">
-        ${create
-          ? `<button class="auth-link" data-action="profile-skip">Ahora no</button>`
-          : `<button class="auth-link" data-action="profile-close">← Volver</button>`}
-      </div>
-
-    </div>
-  </section>`;
-}
-
 function accountMarkup() {
   if (state.phase === "playing") return "";
 
@@ -8091,6 +7990,291 @@ function startAuth() {
   setupProfileInputs();
   initFirebase();
 }
+/* ========== ESTADÍSTICAS Y TROFEOS ========== */
+
+const STATS_EMPTY = {
+  played:0, wins:0, losses:0, captures:0, goals:0,
+  trophies:0, streak:0, bestStreak:0
+};
+
+async function fsModule() {
+  if (!fsModule.m) fsModule.m = await import(FB_BASE + "firebase-firestore.js");
+  return fsModule.m;
+}
+
+function resetGameStats() {
+  state.gameStats = { captures:0, goals:0 };
+  state.statsRecorded = false;
+  state.gameResult = null;
+}
+
+function trackMoveStats(color, capturedCount, finalProgress) {
+  if (state.mode !== "solo" || color !== state.humanColor) return;
+  if (!state.gameStats) resetGameStats();
+  state.gameStats.captures += capturedCount;
+  if (finalProgress === 57) state.gameStats.goals += 1;
+}
+
+async function loadStats() {
+  if (!fb || !fb.db || !state.user) return;
+  const uid = state.user.uid;
+  state.statsBusy = true;
+
+  try {
+    const fs = await fsModule();
+    const snap = await fs.getDoc(fs.doc(fb.db, "stats", uid));
+    if (state.user && state.user.uid === uid) {
+      state.stats = snap.exists() ? snap.data() : Object.assign({}, STATS_EMPTY);
+    }
+  } catch (e) {
+    console.warn("No se pudieron cargar las estadísticas:", e);
+    state.stats = null;
+  }
+
+  state.statsBusy = false;
+  state.statsUid = uid;
+  if (state.introDone && state.showProfile) render();
+}
+
+async function recordGameResult() {
+  if (state.mode !== "solo" || state.statsRecorded) return;
+  state.statsRecorded = true;
+  if (!state.user || !fb || !fb.db) return;
+
+  const uid = state.user.uid;
+  const won = state.winner === state.humanColor;
+  const bots = Math.max(1, state.players.length - 1);
+  const gain = 4 + 4 * bots;
+  const g = state.gameStats || { captures:0, goals:0 };
+
+  let saved = null;
+  let before = 0;
+
+  try {
+    const fs = await fsModule();
+    const ref = fs.doc(fb.db, "stats", uid);
+
+    await fs.runTransaction(fb.db, async tx => {
+      const snap = await tx.get(ref);
+      const o = snap.exists() ? snap.data() : STATS_EMPTY;
+      const streak = won ? (o.streak || 0) + 1 : 0;
+
+      before = o.trophies || 0;
+
+      const n = {
+        played: o.played + 1,
+        wins: o.wins + (won ? 1 : 0),
+        losses: o.losses + (won ? 0 : 1),
+        captures: o.captures + Math.min(g.captures, 40),
+        goals: o.goals + Math.min(g.goals, 4),
+        trophies: won ? before + gain : (before > 3 ? before - 3 : 0),
+        streak: streak,
+        bestStreak: Math.max(o.bestStreak || 0, streak),
+        updatedAt: fs.serverTimestamp()
+      };
+
+      tx.set(ref, n);
+      saved = n;
+    });
+
+    if (saved && state.user && state.user.uid === uid) {
+      const copy = Object.assign({}, saved);
+      delete copy.updatedAt;
+      state.stats = copy;
+      state.statsUid = uid;
+      state.gameResult = { delta: saved.trophies - before };
+      if (state.phase === "winner") render();
+    }
+  } catch (e) {
+    console.warn("No se pudo guardar el resultado:", e);
+  }
+}
+
+function statsBlockMarkup() {
+  const s = state.stats;
+
+  if (!s) {
+    const loading = state.statsBusy || !state.user || state.statsUid !== state.user.uid;
+    return loading
+      ? `<p class="profile-hint">Cargando…</p>`
+      : `<p class="auth-error">No se pudieron cargar tus estadísticas.</p>`;
+  }
+
+  const rate = s.played ? Math.round(s.wins * 100 / s.played) + "%" : "0%";
+
+  const cells = [
+    ["Partidas", s.played],
+    ["Victorias", s.wins],
+    ["Derrotas", s.losses],
+    ["Victorias %", rate],
+    ["Capturas", s.captures],
+    ["Fichas en meta", s.goals],
+    ["Racha", s.streak],
+    ["Mejor racha", s.bestStreak]
+  ].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+
+  return `
+    <div class="trophy-big"><b>🏆 ${s.trophies}</b><span>Trofeos</span></div>
+    <div class="stats-grid">${cells}</div>
+    <p class="profile-hint">Solo cuentan las partidas contra bots con tu sesión iniciada.</p>
+  `;
+}
+
+function profileMarkup() {
+  const create = state.showProfile === "create";
+
+  if (!create && state.user && state.statsUid !== state.user.uid && !state.statsBusy) {
+    loadStats();
+  }
+
+  const avatars = Object.keys(AVATARS).map(id => `
+    <button type="button"
+      class="avatar-pick ${state.profileAvatar === id ? "selected" : ""}"
+      data-action="profile-avatar-${id}"
+      aria-label="Avatar">${AVATARS[id]}</button>
+  `).join("");
+
+  const nameBlock = create
+    ? `
+    <div class="auth-field">
+      <label>Nombre de usuario</label>
+      <div class="auth-input">
+        <input
+          type="text"
+          data-profile-field="name"
+          value="${escHtml(state.profileName)}"
+          placeholder="Ej: ReyDelLudo"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          maxlength="16"
+        >
+      </div>
+    </div>
+    <p class="profile-hint">3 a 16 caracteres: letras, números y _</p>`
+    : `
+    <div class="auth-field">
+      <label>Nombre de usuario</label>
+      <div class="profile-name">@${escHtml(state.profile ? state.profile.username : "")}</div>
+    </div>`;
+
+  return `
+  <section class="setup setup-modern setup-step">
+
+    <div class="setup-copy">
+      <div class="eyebrow">PERFIL</div>
+      <h1 class="setup-title setup-title-small">${create ? "ELIGE TU" : "TU"}<span>${create ? "NOMBRE." : "PERFIL."}</span></h1>
+      <p class="setup-lead">${create ? "Así te verán los demás jugadores." : "Cambia tu avatar cuando quieras."}</p>
+    </div>
+
+    <div class="setup-card setup-card-modern">
+
+      <div class="setup-card-header">
+        <span class="setup-card-kicker">PERFIL</span>
+        <h2>${create ? "Crea tu perfil" : "Tu perfil"}</h2>
+        <p>${create ? "Elige un nombre de usuario y un avatar." : "Tu nombre de usuario no se puede cambiar."}</p>
+      </div>
+
+      ${create ? "" : statsBlockMarkup()}
+
+      ${nameBlock}
+
+      <div class="auth-field">
+        <label>Avatar</label>
+        <div class="avatar-grid">${avatars}</div>
+      </div>
+
+      ${state.profileError ? `<p class="auth-error">${state.profileError}</p>` : ""}
+      ${state.profileNotice ? `<p class="auth-notice">${state.profileNotice}</p>` : ""}
+
+      <button class="primary-button" data-action="profile-save" ${state.profileBusy ? "disabled" : ""}>
+        ${state.profileBusy ? "Guardando…" : (create ? "Guardar perfil" : "Guardar avatar")}
+      </button>
+
+      <div class="auth-links">
+        ${create
+          ? `<button class="auth-link" data-action="profile-skip">Ahora no</button>`
+          : `<button class="auth-link" data-action="profile-close">← Volver</button>`}
+      </div>
+
+    </div>
+  </section>`;
+}
+
+function winnerMarkup() {
+  const r = state.gameResult;
+  const trophyLine = r
+    ? `<p class="trophy-line ${r.delta >= 0 ? "up" : "down"}">🏆 ${r.delta >= 0 ? "+" : ""}${r.delta}</p>`
+    : "";
+
+  return `
+
+<div class="winner">
+
+<div class="winner-card">
+
+<div class="winner-seal">
+★
+</div>
+
+<h2>
+¡Gana ${playerLabel(state.winner)}!
+</h2>
+
+<p>
+Todas sus fichas llegaron a la meta.
+Una gran vuelta alrededor del tablero.
+</p>
+
+${trophyLine}
+
+<div class="winner-actions">
+
+<button
+class="secondary"
+data-action="setup"
+>
+Configurar
+</button>
+
+<button
+class="primary-button"
+data-action="again"
+>
+Jugar otra vez
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+}
+
+const STATS_I18N = {
+  en: {
+    "Trofeos":"Trophies","Partidas":"Games","Victorias":"Wins","Derrotas":"Losses",
+    "Victorias %":"Win rate","Capturas":"Captures","Fichas en meta":"Pieces home",
+    "Racha":"Streak","Mejor racha":"Best streak",
+    "Solo cuentan las partidas contra bots con tu sesión iniciada.":"Only games against bots while signed in count.",
+    "No se pudieron cargar tus estadísticas.":"Couldn't load your stats."
+  },
+  pt: {
+    "Trofeos":"Troféus","Partidas":"Partidas","Victorias":"Vitórias","Derrotas":"Derrotas",
+    "Victorias %":"% de vitórias","Capturas":"Capturas","Fichas en meta":"Peças na meta",
+    "Racha":"Sequência","Mejor racha":"Melhor sequência",
+    "Solo cuentan las partidas contra bots con tu sesión iniciada.":"Só contam as partidas contra bots com a sessão iniciada.",
+    "No se pudieron cargar tus estadísticas.":"Não foi possível carregar suas estatísticas."
+  }
+};
+
+try {
+  Object.assign(DICT.en, STATS_I18N.en);
+  Object.assign(DICT.pt, STATS_I18N.pt);
+} catch (e) {}
 
 showTapGate();
 startAuth();
