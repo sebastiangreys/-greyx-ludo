@@ -28,10 +28,12 @@ body {
   margin:0;
   min-width:320px;
   min-height:100vh;
-  background:
-    radial-gradient(circle at 15% 15%, #5141a833 0, transparent 28%),
-    radial-gradient(circle at 85% 80%, #d64e4330 0, transparent 30%),
-    linear-gradient(145deg,#0b0d17,#141827 55%,#0d101b);
+background:
+  radial-gradient(ellipse at 50% 0%, rgba(40, 65, 255, .24), transparent 42%),
+  radial-gradient(ellipse at 15% 55%, rgba(92, 34, 255, .18), transparent 38%),
+  radial-gradient(ellipse at 90% 70%, rgba(20, 75, 255, .16), transparent 38%),
+  linear-gradient(160deg, #030615 0%, #080b20 52%, #050817 100%);
+
   color:#f7f1e6;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   overflow-x:hidden;
@@ -3443,6 +3445,362 @@ button{touch-action:manipulation}
 .trophy-line.up{color:#ffd54f}
 .trophy-line.down{color:#ff9a9a}
 
+/* ===== GREYX HOME REDESIGN ===== */
+.gx-home {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  color: #f5f5ff;
+}
+
+.gx-hero {
+  text-align: center;
+  position: relative;
+  padding: 12px 0 24px;
+}
+
+.gx-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: #a49aff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 5px;
+}
+
+.gx-eyebrow span {
+  width: 42px;
+  height: 2px;
+  background: linear-gradient(90deg, #348cff, #9b54ff);
+  box-shadow: 0 0 12px #624dff;
+}
+
+.gx-title {
+  margin: 24px 0 0;
+  font-size: clamp(58px, 12vw, 104px);
+  line-height: .83;
+  font-weight: 1000;
+  letter-spacing: -4px;
+  text-shadow: 0 0 28px #5b42ff55;
+}
+
+.gx-title span {
+  display: block;
+  margin-top: 10px;
+  color: #8851ff;
+  background: linear-gradient(100deg, #66c9ff, #9c62ff 48%, #ed6cff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 14px #7040ff66);
+}
+
+.gx-tagline {
+  margin: 22px 0 0;
+  color: #d9e0ff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 5px;
+}
+
+.gx-board-art {
+  display: grid;
+  place-items: center;
+  min-height: 225px;
+  margin: 12px auto 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse, #3545ff26, transparent 65%);
+}
+
+.gx-board {
+  width: min(310px, 78vw);
+  aspect-ratio: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform: rotate(-8deg) scale(.86);
+  border: 2px solid #5a70ff;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
+    linear-gradient(transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
+    repeating-linear-gradient(0deg, #e8edff 0 23px, #c7d3ff 24px 25px),
+    repeating-linear-gradient(90deg, #fff 0 23px, #c7d3ff 24px 25px);
+  box-shadow:
+    0 0 22px #4a47ff99,
+    0 0 60px #4a47ff44,
+    inset 0 0 22px #283eff55;
+}
+
+.gx-board-center {
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #a58aff;
+  border-radius: 16px;
+  color: white;
+  font-size: 25px;
+  font-weight: 1000;
+  background: linear-gradient(135deg, #1a2d7d, #742eff);
+  box-shadow: 0 0 28px #793dff;
+  transform: rotate(8deg);
+}
+
+.gx-token {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border: 3px solid #ffffffaa;
+  border-radius: 50%;
+  color: white;
+  font-size: 27px;
+  box-shadow: 0 0 20px currentColor, inset 0 -5px 8px #0005;
+  transform: rotate(8deg);
+}
+
+.gx-red { top: 8%; left: 8%; background: #f33450; }
+.gx-green { bottom: 8%; left: 8%; background: #12cf85; }
+.gx-yellow { bottom: 8%; right: 8%; background: #ffbd25; }
+.gx-blue { top: 8%; right: 8%; background: #299dff; }
+
+.gx-dice {
+  position: absolute;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: #18234d;
+  font-size: 65px;
+  background: linear-gradient(135deg, #fff, #cbd8ff);
+  box-shadow: 0 8px 25px #05081788;
+  transform: rotate(8deg);
+}
+
+.gx-ready {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border: 1px solid #526cff;
+  border-radius: 999px;
+  color: #8eeaff;
+  background: #09142c;
+  box-shadow: 0 0 18px #254eff44, inset 0 0 15px #234bff22;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.gx-ready-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #16f5b1;
+  box-shadow: 0 0 12px #16f5b1;
+}
+
+.gx-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 22px 0 18px;
+}
+
+.gx-section-title h2 {
+  margin: 0;
+  font-size: clamp(16px, 4vw, 24px);
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.gx-section-title span {
+  width: 34px;
+  height: 2px;
+  background: #654cff;
+  box-shadow: 0 0 10px #654cff;
+}
+
+.gx-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gx-mode {
+  min-width: 0;
+  min-height: 235px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 22px 13px 36px;
+  overflow: hidden;
+  border: 1px solid #384b99;
+  border-radius: 24px;
+  color: #f8f8ff;
+  text-align: center;
+  background: linear-gradient(155deg, #111d48, #0a0e28 75%);
+  box-shadow: inset 0 0 22px #1c2d6c33;
+}
+
+button.gx-mode {
+  cursor: pointer;
+  font: inherit;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+button.gx-mode:active {
+  transform: scale(.97);
+}
+
+.gx-mode-local {
+  border-color: #24cfff;
+  box-shadow: 0 0 18px #12cfff66, inset 0 0 25px #174dff55;
+}
+
+.gx-mode-ai {
+  border-color: #a347ff;
+  box-shadow: 0 0 18px #8c36ff66, inset 0 0 25px #6a22ff44;
+}
+
+.gx-mode-icon {
+  display: block;
+  color: #72d9ff;
+  font-size: 48px;
+  line-height: 1.2;
+  filter: drop-shadow(0 0 12px #4b5cff);
+}
+
+.gx-mode strong {
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.gx-mode small {
+  max-width: 210px;
+  color: #c2cbed;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gx-mode-arrow {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #6755ff;
+  border-radius: 50%;
+  color: white;
+  background: #3524a866;
+  font-size: 25px;
+}
+
+.gx-disabled {
+  opacity: .76;
+  border-color: #455078;
+}
+
+.gx-coming {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  padding: 5px 9px;
+  border: 1px solid #785bff;
+  border-radius: 999px;
+  color: #d8ceff;
+  background: #332078;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.gx-home-note {
+  margin: 24px 0 0;
+  color: #6979bd;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .gx-home {
+    padding-top: 8px;
+    padding-bottom: 28px;
+  }
+
+  .gx-title {
+    letter-spacing: -2px;
+  }
+
+  .gx-tagline {
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+
+  .gx-board-art {
+    min-height: 190px;
+  }
+
+  .gx-board {
+    width: min(270px, 75vw);
+  }
+
+  .gx-modes {
+    gap: 8px;
+  }
+
+  .gx-mode {
+    min-height: 205px;
+    padding: 20px 7px 34px;
+    gap: 10px;
+    border-radius: 18px;
+  }
+
+  .gx-mode-icon {
+    font-size: 35px;
+  }
+
+  .gx-mode strong {
+    font-size: 13px;
+  }
+
+  .gx-mode small {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .gx-coming {
+    position: static;
+    padding: 4px 5px;
+    font-size: 7px;
+  }
+
+  .gx-section-title {
+    gap: 8px;
+  }
+
+  .gx-section-title h2 {
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+}
+
 </style>
 <div id="app" class="app"></div>
 
@@ -4500,98 +4858,72 @@ function setupMarkup() {
 
   if (state.setupStep === 1) {
 
+
+if (state.setupStep === 1) {
   return `
-    <section class="setup setup-modern">
+    <section class="gx-home">
 
-      <div class="setup-copy">
-
-        <div class="eyebrow">
-          GREYX STUDIOS
+      <div class="gx-hero">
+        <div class="gx-eyebrow">
+          <span></span> GREYX STUDIOS <span></span>
         </div>
 
-        <h1 class="setup-title">
+        <h1 class="gx-title">
           LUDO
           <span>GREYX</span>
         </h1>
 
-        <p class="setup-lead">
-          El clásico juego de mesa,
-          llevado a una experiencia moderna
-          para compartir y competir.
-        </p>
+        <p class="gx-tagline">LA PARTIDA ES TUYA.</p>
 
-        <div class="setup-status">
-          <span class="status-dot"></span>
-          SIN CUENTAS · JUEGO LOCAL
+        <div class="gx-board-art" aria-label="Ilustración de Ludo">
+          <div class="gx-board">
+            <div class="gx-board-center">GX</div>
+            <div class="gx-token gx-red">●</div>
+            <div class="gx-token gx-green">●</div>
+            <div class="gx-token gx-yellow">●</div>
+            <div class="gx-token gx-blue">●</div>
+            <div class="gx-dice">⚄</div>
+          </div>
+        </div>
+
+        <div class="gx-ready">
+          <span class="gx-ready-dot"></span>
+          TODO LISTO PARA JUGAR
+        </div>
+      </div>
+
+      <div class="gx-section-title">
+        <span></span>
+        <h2>ELIGE TU DESAFÍO</h2>
+        <span></span>
+      </div>
+
+      <div class="gx-modes">
+
+        <button class="gx-mode gx-mode-local" data-action="local">
+          <span class="gx-mode-icon">👥</span>
+          <strong>PARTIDA<br>LOCAL</strong>
+          <small>Juega con amigos en el mismo dispositivo.</small>
+          <span class="gx-mode-arrow">›</span>
+        </button>
+
+        <button class="gx-mode gx-mode-ai" data-action="mode">
+          <span class="gx-mode-icon">🤖</span>
+          <strong>RETO IA</strong>
+          <small>Pon a prueba tu estrategia.</small>
+          <span class="gx-mode-arrow">›</span>
+        </button>
+
+        <div class="gx-mode gx-mode-online gx-disabled">
+          <span class="gx-coming">PRÓXIMAMENTE</span>
+          <span class="gx-mode-icon">◎</span>
+          <strong>MODO ONLINE</strong>
+          <small>Compite con jugadores de todo el mundo.</small>
         </div>
 
       </div>
 
-
-      <div class="setup-card setup-card-modern">
-
-        <div class="setup-card-glow"></div>
-
-        <div class="setup-card-header">
-          <span class="setup-card-kicker">
-            NUEVA PARTIDA
-          </span>
-
-          <h2>
-            ¿Cómo quieres jugar?
-          </h2>
-
-          <p>
-            Elige una modalidad para comenzar.
-          </p>
-        </div>
-
-
-        <div class="mode-grid">
-
-          <button
-            class="mode-card ${state.mode === "local" ? "selected" : ""}"
-            data-action="local"
-          >
-
-            <span class="mode-icon">👥</span>
-
-            <span class="mode-info">
-              <strong>Jugar local</strong>
-
-              <small>
-                Comparte el dispositivo con tus amigos.
-              </small>
-            </span>
-
-            <span class="mode-arrow">›</span>
-
-          </button>
-
-
-          <button
-            class="mode-card ${state.mode === "solo" ? "selected" : ""}"
-            data-action="mode"
-          >
-
-            <span class="mode-icon">🤖</span>
-
-            <span class="mode-info">
-              <strong>Contra bot</strong>
-
-              <small>
-                Juega contra rivales automáticos.
-              </small>
-            </span>
-
-            <span class="mode-arrow">›</span>
-
-          </button>
-
-        </div>
-
-      </div>
-
+      <p class="gx-home-note">GREYX · JUEGA A TU MANERA</p>
     </section>
   `;
 }
