@@ -3480,24 +3480,36 @@ button{touch-action:manipulation}
   box-shadow: 0 0 12px #624dff;
 }
 
+
 .gx-title {
-  margin: 24px 0 0;
-  font-size: clamp(58px, 12vw, 104px);
-  line-height: .83;
+  margin: 18px 0 0;
+  font-size: clamp(76px, 15vw, 124px);
+  line-height: .86;
   font-weight: 1000;
   letter-spacing: -4px;
-  text-shadow: 0 0 28px #5b42ff55;
+  text-shadow: 0 0 28px #5b42ff66;
 }
 
 .gx-title span {
   display: block;
-  margin-top: 10px;
-  color: #8851ff;
-  background: linear-gradient(100deg, #66c9ff, #9c62ff 48%, #ed6cff);
+  margin-top: 8px;
+  background: linear-gradient(
+    100deg,
+    #8b83ff 0%,
+    #a05bff 52%,
+    #ed6cff 100%
+  );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 14px #7040ff66);
+  filter: drop-shadow(0 0 16px #7040ff88);
+}
+
+@media (max-width: 560px) {
+  .gx-title {
+    font-size: clamp(66px, 17vw, 100px);
+    letter-spacing: -3px;
+  }
 }
 
 .gx-tagline {
@@ -4863,16 +4875,11 @@ if (state.setupStep === 1) {
     <section class="gx-home">
 
       <div class="gx-hero">
-        <div class="gx-eyebrow">
-          <span></span> GREYX STUDIOS <span></span>
-        </div>
 
         <h1 class="gx-title">
           LUDO
           <span>GREYX</span>
         </h1>
-
-        <p class="gx-tagline">LA PARTIDA ES TUYA.</p>
 
         <div class="gx-board-art" aria-label="Ilustración de Ludo">
           <div class="gx-board">
@@ -4921,8 +4928,6 @@ if (state.setupStep === 1) {
         </div>
 
       </div>
-
-      <p class="gx-home-note">GREYX · JUEGA A TU MANERA</p>
     </section>
   `;
 }
