@@ -3540,43 +3540,24 @@ button{touch-action:manipulation}
 }
 
 .gx-board {
-  
-<div class="gx-board gx-board-custom">
-  <div class="gx-home-zone gx-home-red">
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-  </div>
-
-  <div class="gx-home-zone gx-home-blue">
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-  </div>
-
-  <div class="gx-home-zone gx-home-green">
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-  </div>
-
-  <div class="gx-home-zone gx-home-yellow">
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-    <span class="gx-home-piece"></span>
-  </div>
-
-  <div class="gx-path gx-path-horizontal"></div>
-  <div class="gx-path gx-path-vertical"></div>
-
-  <div class="gx-board-center gx-board-logo">GX</div>
-  <div class="gx-board-dice">⚄</div>
-</div>
-
+  width: min(310px, 78vw);
+  aspect-ratio: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform: rotate(-8deg) scale(.86);
+  border: 2px solid #5a70ff;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
+    linear-gradient(transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
+    repeating-linear-gradient(0deg, #e8edff 0 23px, #c7d3ff 24px 25px),
+    repeating-linear-gradient(90deg, #fff 0 23px, #c7d3ff 24px 25px);
+  box-shadow:
+    0 0 22px #4a47ff99,
+    0 0 60px #4a47ff44,
+    inset 0 0 22px #283eff55;
+}
 
 .gx-board-center {
   position: absolute;
