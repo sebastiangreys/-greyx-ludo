@@ -3161,6 +3161,15 @@ text-rendering:geometricPrecision;
   color:#6d21ff;
   text-shadow:0 0 10px #6d21ff88;
 }
+.brand-word > span {
+  color: #a855ff;
+  display: inline-block;
+  font-weight: 1000;
+  text-shadow:
+    0 0 7px #8b35ff,
+    0 0 16px #642cffaa;
+}
+
 /* =========================================
    CONFIGURACIÓN — TEMA OSCURO
    ========================================= */
@@ -3531,24 +3540,43 @@ button{touch-action:manipulation}
 }
 
 .gx-board {
-  width: min(310px, 78vw);
-  aspect-ratio: 1;
-  position: relative;
-  display: grid;
-  place-items: center;
-  transform: rotate(-8deg) scale(.86);
-  border: 2px solid #5a70ff;
-  border-radius: 18px;
-  background:
-    linear-gradient(90deg, transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
-    linear-gradient(transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
-    repeating-linear-gradient(0deg, #e8edff 0 23px, #c7d3ff 24px 25px),
-    repeating-linear-gradient(90deg, #fff 0 23px, #c7d3ff 24px 25px);
-  box-shadow:
-    0 0 22px #4a47ff99,
-    0 0 60px #4a47ff44,
-    inset 0 0 22px #283eff55;
-}
+  
+<div class="gx-board gx-board-custom">
+  <div class="gx-home-zone gx-home-red">
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+  </div>
+
+  <div class="gx-home-zone gx-home-blue">
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+  </div>
+
+  <div class="gx-home-zone gx-home-green">
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+  </div>
+
+  <div class="gx-home-zone gx-home-yellow">
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+    <span class="gx-home-piece"></span>
+  </div>
+
+  <div class="gx-path gx-path-horizontal"></div>
+  <div class="gx-path gx-path-vertical"></div>
+
+  <div class="gx-board-center gx-board-logo">GX</div>
+  <div class="gx-board-dice">⚄</div>
+</div>
+
 
 .gx-board-center {
   position: absolute;
@@ -3813,6 +3841,98 @@ button.gx-mode:active {
     font-size: 15px;
     letter-spacing: 1px;
   }
+}
+
+.gx-board-custom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px;
+  padding: 10px;
+  border: 2px solid #7868ff;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0a1232;
+  box-shadow: 0 0 30px #574bff88, inset 0 0 25px #574bff33;
+  transform: rotate(-5deg);
+}
+
+.gx-home-zone {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  place-items: center;
+  gap: 8px;
+  padding: 18%;
+  border: 1px solid #ffffff55;
+  border-radius: 12px;
+}
+
+.gx-home-red { background: linear-gradient(135deg, #5e183c, #ed315b); }
+.gx-home-blue { background: linear-gradient(135deg, #102b65, #278fff); }
+.gx-home-green { background: linear-gradient(135deg, #075b4c, #18d59a); }
+.gx-home-yellow { background: linear-gradient(135deg, #795017, #ffca35); }
+
+.gx-home-piece {
+  width: clamp(14px, 4vw, 25px);
+  aspect-ratio: 1;
+  border: 3px solid #ffffffdd;
+  border-radius: 50%;
+  background: #ffffff35;
+  box-shadow: 0 0 10px #ffffff55;
+}
+
+.gx-path {
+  position: absolute;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    90deg,
+    #dbe5ff 0 14px,
+    #899dff 14px 16px
+  );
+  border: 1px solid #647dff;
+  box-shadow: 0 0 12px #5268ff66;
+}
+
+.gx-path-horizontal {
+  left: 5%;
+  right: 5%;
+  top: calc(50% - 9px);
+  height: 18px;
+}
+
+.gx-path-vertical {
+  top: 5%;
+  bottom: 5%;
+  left: calc(50% - 9px);
+  width: 18px;
+  background: repeating-linear-gradient(
+    0deg,
+    #dbe5ff 0 14px,
+    #899dff 14px 16px
+  );
+}
+
+.gx-board-logo {
+  z-index: 3;
+  width: 65px;
+  height: 65px;
+  border-radius: 18px;
+  font-size: 24px;
+  transform: none;
+}
+
+.gx-board-dice {
+  position: absolute;
+  z-index: 4;
+  right: 12%;
+  bottom: 12%;
+  padding: 4px 9px;
+  border-radius: 10px;
+  color: #19234b;
+  background: #fff;
+  font-size: 32px;
+  box-shadow: 0 4px 16px #0007;
+  transform: rotate(5deg);
 }
 
 </style>
