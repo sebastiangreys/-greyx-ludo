@@ -3459,229 +3459,213 @@ button{touch-action:manipulation}
 /* ===== GREYX HOME REDESIGN ===== */
 .gx-home {
   width: 100%;
-  max-width: 900px;
+  max-width: 440px;
   margin: 0 auto;
-  padding: 24px 0 40px;
+  padding: 8px 0 36px;
   color: #f5f5ff;
 }
 
 .gx-hero {
   text-align: center;
   position: relative;
-  padding: 12px 0 24px;
-}
-
-.gx-eyebrow {
+  padding: 4px 0 12px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  color: #a49aff;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 5px;
 }
-
-.gx-eyebrow span {
-  width: 42px;
-  height: 2px;
-  background: linear-gradient(90deg, #348cff, #9b54ff);
-  box-shadow: 0 0 12px #624dff;
-}
-
 
 .gx-title {
-  margin: 18px 0 0;
-  font-size: clamp(76px, 15vw, 124px);
-  line-height: .86;
-  font-weight: 1000;
-  letter-spacing: -4px;
-  text-shadow: 0 0 28px #5b42ff66;
+  margin: 6px 0 0;
+  font-size: clamp(3.2rem, 14vw, 4.4rem);
+  line-height: .88;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  color: #e8eaf2;
+  text-shadow: 0 6px 24px #00000099;
 }
 
 .gx-title span {
   display: block;
-  margin-top: 8px;
-  background: linear-gradient(
-    100deg,
-    #8b83ff 0%,
-    #a05bff 52%,
-    #ed6cff 100%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 16px #7040ff88);
+  margin-top: 2px;
+  color: #7c3aed;
+  text-shadow: 0 4px 18px #00000088;
 }
 
 @media (max-width: 560px) {
   .gx-title {
-    font-size: clamp(66px, 17vw, 100px);
-    letter-spacing: -3px;
+    font-size: clamp(2.9rem, 15vw, 3.8rem);
   }
-}
-
-.gx-tagline {
-  margin: 22px 0 0;
-  color: #d9e0ff;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 5px;
 }
 
 .gx-board-art {
   display: grid;
   place-items: center;
-  min-height: 225px;
-  margin: 12px auto 0;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse, #3545ff26, transparent 65%);
+  width: 100%;
+  margin: 10px auto 0;
+  padding: 8px 0;
 }
 
 .gx-board {
-  width: min(310px, 78vw);
+  width: min(260px, 72vw);
   aspect-ratio: 1;
   position: relative;
   display: grid;
-  place-items: center;
-  transform: rotate(-8deg) scale(.86);
-  border: 2px solid #5a70ff;
-  border-radius: 18px;
-  background:
-    linear-gradient(90deg, transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
-    linear-gradient(transparent 48%, #647cff 49%, #647cff 51%, transparent 52%),
-    repeating-linear-gradient(0deg, #e8edff 0 23px, #c7d3ff 24px 25px),
-    repeating-linear-gradient(90deg, #fff 0 23px, #c7d3ff 24px 25px);
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  padding: 10px;
+  transform: rotate(-7deg);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #f0f4ff, #dce6ff);
   box-shadow:
-    0 0 22px #4a47ff99,
-    0 0 60px #4a47ff44,
-    inset 0 0 22px #283eff55;
+    0 0 0 3px #5a70ff88,
+    0 0 40px #4a47ff66,
+    0 20px 50px #00000066;
 }
 
-.gx-board-center {
-  position: absolute;
-  width: 76px;
-  height: 76px;
+.gx-home-zone {
+  border-radius: 14px;
   display: grid;
-  place-items: center;
-  border: 2px solid #a58aff;
-  border-radius: 16px;
-  color: white;
-  font-size: 25px;
-  font-weight: 1000;
-  background: linear-gradient(135deg, #1a2d7d, #742eff);
-  box-shadow: 0 0 28px #793dff;
-  transform: rotate(8deg);
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px;
+  padding: 8px;
 }
+.gx-home-zone i {
+  border-radius: 50%;
+  background: #ffffff55;
+  box-shadow: inset 0 1px 2px #00000022;
+}
+.gx-home-red { background: linear-gradient(135deg, #c9183a, #ff4d6d); }
+.gx-home-blue { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+.gx-home-green { background: linear-gradient(135deg, #047857, #10b981); }
+.gx-home-yellow { background: linear-gradient(135deg, #b45309, #fbbf24); }
 
 .gx-token {
   position: absolute;
   z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 45px;
-  height: 45px;
-  border: 3px solid #ffffffaa;
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #fff;
   border-radius: 50%;
-  color: white;
-  font-size: 27px;
-  box-shadow: 0 0 20px currentColor, inset 0 -5px 8px #0005;
-  transform: rotate(8deg);
+  box-shadow: 0 0 14px currentColor, 0 4px 10px #00000055;
+  transform: rotate(7deg);
 }
-
-.gx-red { top: 8%; left: 8%; background: #f33450; }
-.gx-green { bottom: 8%; left: 8%; background: #12cf85; }
-.gx-yellow { bottom: 8%; right: 8%; background: #ffbd25; }
-.gx-blue { top: 8%; right: 8%; background: #299dff; }
+.gx-red { top: 14%; left: 14%; background: #ef4444; color: #ef4444; }
+.gx-blue { top: 14%; right: 14%; background: #3b82f6; color: #3b82f6; }
+.gx-green { bottom: 14%; left: 14%; background: #10b981; color: #10b981; }
+.gx-yellow { bottom: 14%; right: 14%; background: #f59e0b; color: #f59e0b; }
 
 .gx-dice {
   position: absolute;
   z-index: 3;
-  padding: 4px 10px;
-  border-radius: 12px;
-  color: #18234d;
-  font-size: 65px;
-  background: linear-gradient(135deg, #fff, #cbd8ff);
-  box-shadow: 0 8px 25px #05081788;
-  transform: rotate(8deg);
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #ffffff, #e2e8f0);
+  border: 2px solid #6366f1;
+  box-shadow: 0 8px 22px #00000066, 0 0 18px #6366f155;
+  transform: rotate(7deg);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
+  padding: 8px;
+  gap: 2px;
 }
+.gx-dice span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1e1b4b;
+}
+.gx-dice span:nth-child(1) { grid-column: 1; grid-row: 1; }
+.gx-dice span:nth-child(2) { grid-column: 3; grid-row: 1; }
+.gx-dice span:nth-child(3) { grid-column: 2; grid-row: 2; }
+.gx-dice span:nth-child(4) { grid-column: 1; grid-row: 3; }
+.gx-dice span:nth-child(5) { grid-column: 3; grid-row: 3; }
 
 .gx-ready {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 12px 24px;
-  border: 1px solid #526cff;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 11px 22px;
+  border: 1px solid #526cff88;
   border-radius: 999px;
-  color: #8eeaff;
-  background: #09142c;
-  box-shadow: 0 0 18px #254eff44, inset 0 0 15px #234bff22;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 2px;
+  color: #c4e8ff;
+  background: linear-gradient(135deg, #0b1630ee, #0a1024ee);
+  box-shadow: 0 0 20px #254eff44, inset 0 1px 0 #ffffff12;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .14em;
 }
 
 .gx-ready-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #16f5b1;
-  box-shadow: 0 0 12px #16f5b1;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
 }
 
 .gx-section-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin: 22px 0 18px;
+  gap: 12px;
+  margin: 22px 0 14px;
 }
 
 .gx-section-title h2 {
   margin: 0;
-  font-size: clamp(16px, 4vw, 24px);
-  letter-spacing: 2px;
+  font-size: .78rem;
+  letter-spacing: .16em;
   text-align: center;
+  font-weight: 800;
+  color: #e2e8f0;
 }
 
 .gx-section-title span {
-  width: 34px;
+  width: 28px;
   height: 2px;
-  background: #654cff;
-  box-shadow: 0 0 10px #654cff;
+  background: #7c3aed;
+  box-shadow: 0 0 10px #7c3aed;
 }
 
 .gx-modes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .gx-mode {
   min-width: 0;
-  min-height: 235px;
+  min-height: 150px;
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  gap: 12px;
-  padding: 22px 13px 36px;
+  gap: 6px;
+  padding: 14px 12px 28px;
   overflow: hidden;
-  border: 1px solid #384b99;
-  border-radius: 24px;
+  border: 1.5px solid #334155;
+  border-radius: 18px;
   color: #f8f8ff;
-  text-align: center;
-  background: linear-gradient(155deg, #111d48, #0a0e28 75%);
-  box-shadow: inset 0 0 22px #1c2d6c33;
+  text-align: left;
+  background: linear-gradient(160deg, #1a2238, #0d1224 80%);
+  box-shadow: 0 8px 24px #00000044, inset 0 1px 0 #ffffff10;
 }
 
 button.gx-mode {
   cursor: pointer;
   font: inherit;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
 button.gx-mode:active {
@@ -3689,99 +3673,151 @@ button.gx-mode:active {
 }
 
 .gx-mode-local {
-  border-color: #24cfff;
-  box-shadow: 0 0 18px #12cfff66, inset 0 0 25px #174dff55;
+  border-color: #22d3eeaa;
+  box-shadow: 0 0 18px #06b6d433, inset 0 1px 0 #ffffff14;
 }
 
 .gx-mode-ai {
-  border-color: #a347ff;
-  box-shadow: 0 0 18px #8c36ff66, inset 0 0 25px #6a22ff44;
+  border-color: #a78bfaaa;
+  box-shadow: 0 0 18px #8b5cf633, inset 0 1px 0 #ffffff14;
 }
 
 .gx-mode-icon {
-  display: block;
-  color: #72d9ff;
-  font-size: 48px;
-  line-height: 1.2;
-  filter: drop-shadow(0 0 12px #4b5cff);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #67e8f9;
+  margin-bottom: 2px;
 }
+.gx-mode-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+.gx-mode-ai .gx-mode-icon { color: #c4b5fd; }
+.gx-mode-online .gx-mode-icon { color: #94a3b8; }
 
 .gx-mode strong {
-  font-size: 17px;
-  line-height: 1.25;
+  font-size: .72rem;
+  line-height: 1.2;
   font-weight: 900;
+  letter-spacing: .02em;
 }
 
 .gx-mode small {
-  max-width: 210px;
-  color: #c2cbed;
-  font-size: 13px;
-  line-height: 1.5;
+  color: #94a3b8;
+  font-size: .58rem;
+  line-height: 1.35;
+  flex: 1;
 }
 
 .gx-mode-arrow {
   position: absolute;
-  right: 12px;
-  bottom: 10px;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #6755ff;
-  border-radius: 50%;
-  color: white;
-  background: #3524a866;
-  font-size: 25px;
+  right: 10px;
+  bottom: 8px;
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 300;
 }
+.gx-mode-local .gx-mode-arrow { color: #22d3ee; }
+.gx-mode-ai .gx-mode-arrow { color: #a78bfa; }
 
 .gx-disabled {
-  opacity: .76;
-  border-color: #455078;
+  opacity: .7;
+  border-color: #475569;
+  cursor: not-allowed;
 }
 
 .gx-coming {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 8px;
-  padding: 5px 9px;
-  border: 1px solid #785bff;
+  padding: 3px 7px;
   border-radius: 999px;
-  color: #d8ceff;
-  background: #332078;
-  font-size: 9px;
-  font-weight: 900;
+  color: #fff;
+  background: #6366f1;
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .06em;
 }
 
-.gx-home-note {
-  margin: 24px 0 0;
-  color: #6979bd;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 3px;
+.gx-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid #334155;
+  background: linear-gradient(145deg, #1a2238cc, #0d1224cc);
+  box-shadow: 0 8px 24px #00000044;
+}
+.gx-level {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #7c3aed, #5b21b6);
+  box-shadow: 0 0 16px #7c3aed55, inset 0 1px 0 #ffffff33;
   text-align: center;
+  line-height: 1;
+}
+.gx-level span {
+  display: block;
+  font: 800 .45rem/1 monospace;
+  letter-spacing: .08em;
+  color: #ddd6fe;
+}
+.gx-level strong {
+  font-size: 1.1rem;
+  color: #fff;
+}
+.gx-progress-body { flex: 1; min-width: 0; }
+.gx-progress-title {
+  font: 800 .58rem/1 monospace;
+  letter-spacing: .12em;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+}
+.gx-progress-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: .58rem;
+}
+.gx-progress-stats b { color: #fff; font-weight: 800; }
+.gx-xp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gx-xp-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 99px;
+  background: #1e293b;
+  overflow: hidden;
+}
+.gx-xp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa);
+}
+.gx-xp span {
+  font: 700 .52rem monospace;
+  color: #64748b;
+  white-space: nowrap;
 }
 
 @media (max-width: 560px) {
   .gx-home {
-    padding-top: 8px;
-    padding-bottom: 28px;
-  }
-
-  .gx-title {
-    letter-spacing: -2px;
-  }
-
-  .gx-tagline {
-    font-size: 10px;
-    letter-spacing: 3px;
-  }
-
-  .gx-board-art {
-    min-height: 190px;
-  }
-
-  .gx-board {
-    width: min(270px, 75vw);
+    padding-top: 4px;
+    padding-bottom: 24px;
   }
 
   .gx-modes {
@@ -3789,110 +3825,22 @@ button.gx-mode:active {
   }
 
   .gx-mode {
-    min-height: 205px;
-    padding: 20px 7px 34px;
-    gap: 10px;
-    border-radius: 18px;
-  }
-
-  .gx-mode-icon {
-    font-size: 35px;
+    min-height: 138px;
+    padding: 12px 10px 26px;
   }
 
   .gx-mode strong {
-    font-size: 13px;
+    font-size: .65rem;
   }
 
   .gx-mode small {
-    font-size: 11px;
-    overflow-wrap: anywhere;
-  }
-
-  .gx-coming {
-    position: static;
-    padding: 4px 5px;
-    font-size: 7px;
-  }
-
-  .gx-section-title {
-    gap: 8px;
+    font-size: .52rem;
   }
 
   .gx-section-title h2 {
-    font-size: 15px;
-    letter-spacing: 1px;
+    font-size: .7rem;
   }
 }
-
-.gx-board-custom {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 5px;
-  padding: 10px;
-  border: 2px solid #7868ff;
-  border-radius: 24px;
-  overflow: hidden;
-  background: #0a1232;
-  box-shadow: 0 0 30px #574bff88, inset 0 0 25px #574bff33;
-  transform: rotate(-5deg);
-}
-
-.gx-home-zone {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  place-items: center;
-  gap: 8px;
-  padding: 18%;
-  border: 1px solid #ffffff55;
-  border-radius: 12px;
-}
-
-.gx-home-red { background: linear-gradient(135deg, #5e183c, #ed315b); }
-.gx-home-blue { background: linear-gradient(135deg, #102b65, #278fff); }
-.gx-home-green { background: linear-gradient(135deg, #075b4c, #18d59a); }
-.gx-home-yellow { background: linear-gradient(135deg, #795017, #ffca35); }
-
-.gx-home-piece {
-  width: clamp(14px, 4vw, 25px);
-  aspect-ratio: 1;
-  border: 3px solid #ffffffdd;
-  border-radius: 50%;
-  background: #ffffff35;
-  box-shadow: 0 0 10px #ffffff55;
-}
-
-.gx-path {
-  position: absolute;
-  z-index: 2;
-  background: repeating-linear-gradient(
-    90deg,
-    #dbe5ff 0 14px,
-    #899dff 14px 16px
-  );
-  border: 1px solid #647dff;
-  box-shadow: 0 0 12px #5268ff66;
-}
-
-.gx-path-horizontal {
-  left: 5%;
-  right: 5%;
-  top: calc(50% - 9px);
-  height: 18px;
-}
-
-.gx-path-vertical {
-  top: 5%;
-  bottom: 5%;
-  left: calc(50% - 9px);
-  width: 18px;
-  background: repeating-linear-gradient(
-    0deg,
-    #dbe5ff 0 14px,
-    #899dff 14px 16px
-  );
-}
-
 
 </style>
 <div id="app" class="app"></div>
@@ -4950,24 +4898,29 @@ function setupMarkup() {
 }
 
 if (state.setupStep === 1) {
+  const st = state.stats || { played: 0, wins: 0, trophies: 0 };
+  const level = Math.max(1, Math.floor((st.trophies || 0) / 100) + 1);
+  const xp = (st.trophies || 0) % 100;
+
   return `
     <section class="gx-home">
 
       <div class="gx-hero">
+        <h1 class="gx-title">LUDO<span>GREYX</span></h1>
 
-        <h1 class="gx-title">
-          LUDO
-          <span>GREYX</span>
-        </h1>
-
-        <div class="gx-board-art" aria-label="Ilustración de Ludo">
+        <div class="gx-board-art" aria-hidden="true">
           <div class="gx-board">
-            <div class="gx-board-center">GX</div>
-            <div class="gx-token gx-red">●</div>
-            <div class="gx-token gx-green">●</div>
-            <div class="gx-token gx-yellow">●</div>
-            <div class="gx-token gx-blue">●</div>
-            <div class="gx-dice">⚄</div>
+            <div class="gx-home-zone gx-home-red"><i></i><i></i><i></i><i></i></div>
+            <div class="gx-home-zone gx-home-blue"><i></i><i></i><i></i><i></i></div>
+            <div class="gx-home-zone gx-home-green"><i></i><i></i><i></i><i></i></div>
+            <div class="gx-home-zone gx-home-yellow"><i></i><i></i><i></i><i></i></div>
+            <div class="gx-token gx-red"></div>
+            <div class="gx-token gx-blue"></div>
+            <div class="gx-token gx-green"></div>
+            <div class="gx-token gx-yellow"></div>
+            <div class="gx-dice" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
           </div>
         </div>
 
@@ -4985,28 +4938,68 @@ if (state.setupStep === 1) {
 
       <div class="gx-modes">
 
-        <button class="gx-mode gx-mode-local" data-action="local">
-          <span class="gx-mode-icon">👥</span>
-          <strong>PARTIDA<br>LOCAL</strong>
+        <button class="gx-mode gx-mode-local" data-action="local" type="button">
+          <span class="gx-mode-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="9" cy="8" r="3.2" fill="currentColor"/>
+              <circle cx="16.5" cy="9" r="2.6" fill="currentColor" opacity=".9"/>
+              <path d="M3.5 18.5c.8-3.2 2.9-5 5.5-5s4.7 1.8 5.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M13.2 17.8c.6-2.2 2-3.5 3.8-3.5 1.5 0 2.7.9 3.4 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+            </svg>
+          </span>
+          <strong>PARTIDA LOCAL</strong>
           <small>Juega con amigos en el mismo dispositivo.</small>
           <span class="gx-mode-arrow">›</span>
         </button>
 
-        <button class="gx-mode gx-mode-ai" data-action="mode">
-          <span class="gx-mode-icon">🤖</span>
+        <button class="gx-mode gx-mode-ai" data-action="mode" type="button">
+          <span class="gx-mode-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="6" y="8" width="12" height="10" rx="3" fill="currentColor"/>
+              <circle cx="10" cy="13" r="1.4" fill="#0b0e1a"/>
+              <circle cx="14" cy="13" r="1.4" fill="#0b0e1a"/>
+              <path d="M10 16.2h4" stroke="#0b0e1a" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 4.5v3.5M9 5.5l1.5 2M15 5.5l-1.5 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M6 12H4.5M19.5 12H18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
           <strong>RETO IA</strong>
           <small>Pon a prueba tu estrategia.</small>
           <span class="gx-mode-arrow">›</span>
         </button>
 
-        <div class="gx-mode gx-mode-online gx-disabled">
+        <div class="gx-mode gx-mode-online gx-disabled" aria-disabled="true">
           <span class="gx-coming">PRÓXIMAMENTE</span>
-          <span class="gx-mode-icon">◎</span>
+          <span class="gx-mode-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9s1.3-6.2 3.8-9z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+          </span>
           <strong>MODO ONLINE</strong>
           <small>Compite con jugadores de todo el mundo.</small>
         </div>
 
       </div>
+
+      <div class="gx-progress">
+        <div class="gx-level">
+          <span>NV.</span>
+          <strong>${String(level).padStart(2,"0")}</strong>
+        </div>
+        <div class="gx-progress-body">
+          <div class="gx-progress-title">TU PROGRESO</div>
+          <div class="gx-progress-stats">
+            <span>🎮 <b>${st.played || 0}</b> partidas</span>
+            <span>🏆 <b>${st.wins || 0}</b> victorias</span>
+          </div>
+          <div class="gx-xp">
+            <div class="gx-xp-bar"><i style="width:${xp}%"></i></div>
+            <span>${xp}/100</span>
+          </div>
+        </div>
+      </div>
+
     </section>
   `;
 }
