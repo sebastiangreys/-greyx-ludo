@@ -3123,57 +3123,6 @@ text-rendering:geometricPrecision;
   box-shadow:0 0 0 1px #8c7cff33, 0 10px 28px #00000033;
 }
 
-/* Botón de ajustes tipo cristal oscuro */
-.top-actions {
-  position: fixed;
-  top: calc(14px + env(safe-area-inset-top, 0px));
-  right: 14px;
-  z-index: 90;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.top-action-btn {
-  position: static !important;
-  top: auto !important;
-  right: auto !important;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  border: 1px solid #a78bfa55;
-  background: linear-gradient(145deg, #2a2155ee, #14122aee);
-  color: #e9d5ff;
-  cursor: pointer;
-  box-shadow:
-    0 0 0 1px #ffffff10,
-    0 0 16px #7c3aed44,
-    0 6px 18px #00000055;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.top-action-friends {
-  color: #c4b5fd;
-  border-color: #8b5cf6aa;
-  box-shadow:
-    0 0 0 1px #ffffff12,
-    0 0 20px #8b5cf666,
-    0 6px 18px #00000055;
-}
-
-.top-action-btn:active {
-  transform: scale(.96);
-}
-
-/* El engranaje ya no se posiciona solo en la esquina */
-.settings-button.top-action-btn {
-  position: static;
-  font-size: 18px;
-}
-
 .settings-button{
   top:calc(14px + env(safe-area-inset-top, 0px));
   right:14px;
@@ -3988,6 +3937,54 @@ button.gx-mode:active {
   max-width: 260px;
   margin-left: auto;
   margin-right: auto;
+}
+.top-actions {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: 14px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-action-btn {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid #a78bfa55;
+  background: linear-gradient(145deg, #2a2155ee, #14122aee);
+  color: #e9d5ff;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px #ffffff10,
+    0 0 16px #7c3aed44,
+    0 6px 18px #00000055;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.top-action-friends {
+  color: #c4b5fd;
+  border-color: #8b5cf6aa;
+  box-shadow:
+    0 0 0 1px #ffffff12,
+    0 0 20px #8b5cf666,
+    0 6px 18px #00000055;
+}
+
+.top-action-btn:active {
+  transform: scale(.96);
+}
+
+.settings-button.top-action-btn {
+  position: static;
+  font-size: 18px;
 }
 </style>
 <div id="app" class="app"></div>
