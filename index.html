@@ -4960,6 +4960,9 @@ friendsList:[],
 friendsRequests:[],
 friendMenuUid:null,
 friendConfirmDelete:null,
+friendsIncoming: [],
+friendsOutgoing: [],
+friendsReqBusy: false,
 authMode:"login",
 authEmail:"",
 authPass:"",
@@ -7624,12 +7627,25 @@ if (action === "friends-back") {
   render();
   return;
 }
-
 if (action === "friend-request") {
-  state.friendsSearchNote = "Las solicitudes se activan en la siguiente etapa.";
-  render();
+  const uid = button.dataset.uid;
+  const name = button.dataset.username || "";
+  if (uid) sendFriendRequest(uid, name);
   return;
 }
+
+if (action === "friend-accept") {
+  const id = button.dataset.id;
+  if (id) acceptFriendRequest(id);
+  return;
+}
+
+if (action === "friend-reject") {
+  const id = button.dataset.id;
+  if (id) rejectFriendRequest(id);
+  return;
+}
+
 if (action === "settings-language") {
   state.languageOpen = true;
   render();
@@ -7718,6 +7734,7 @@ if (action === "settings-music") {
   state.friendMenuUid = null;
   state.friendConfirmDelete = null;
   render();
+  loadFriendRequests();
   return;
 }
 
@@ -8683,6 +8700,7 @@ async function initFirebase() {
       fb.doc = fsMod.doc;
       fb.getDoc = fsMod.getDoc;
       fb.writeBatch = fsMod.writeBatch;
+      fb.setDoc = fsMod.setDoc;
       fb.updateDoc = fsMod.updateDoc;
       fb.serverTimestamp = fsMod.serverTimestamp;
     } catch (e) {
@@ -8828,7 +8846,180 @@ async function searchFriends(raw) {
   state.friendsSearchBusy = false;
   render();
 }
+function friendRequestId(fromUid, toUid) {
+  return fromUid + "_" + toUid;
+}
 
+async function sendFriendRequest(toUid, toUsername) {
+  if (!fb || !fb.db || !state.user || !state.profile) return;
+  if (toUid === state.user.uid) {
+    state.friendsSearchNote = "No puedes enviarte una solicitud a ti mismo.";
+    render();
+    return;
+  }
+
+  const fromUid = state.user.uid;
+  const id = friendRequestId(fromUid, toUid);
+  const reverseId = friendRequestId(toUid, fromUid);
+
+  state.friendsReqBusy = true;
+  state.friendsSearchNote = "";
+  render();
+
+  try {
+    const existing = await fb.getDoc(fb.doc(fb.db, "friendRequests", id));
+    if (existing.exists()) {
+      const st = existing.data().status;
+      state.friendsSearchNote = st === "pending"
+        ? "Ya enviaste una solicitud a este jugador."
+        : st === "accepted"
+          ? "Ya son amigos."
+          : "Solicitud anterior rechazada. (Podrás reenviar más adelante.)";
+      state.friendsReqBusy = false;
+      render();
+      return;
+    }
+
+    const reverse = await fb.getDoc(fb.doc(fb.db, "friendRequests", reverseId));
+    if (reverse.exists() && reverse.data().status === "pending") {
+      state.friendsSearchNote = "Este jugador ya te envió una solicitud. Revísala abajo.";
+      state.friendsReqBusy = false;
+      await loadFriendRequests();
+      return;
+    }
+    if (reverse.exists() && reverse.data().status === "accepted") {
+      state.friendsSearchNote = "Ya son amigos.";
+      state.friendsReqBusy = false;
+      render();
+      return;
+    }
+
+    await fb.setDoc(fb.doc(fb.db, "friendRequests", id), {
+      from: fromUid,
+      to: toUid,
+      fromUsername: state.profile.username,
+      fromAvatar: state.profile.avatar || "a1",
+      toUsername: toUsername || "",
+      status: "pending",
+      createdAt: fb.serverTimestamp()
+    });
+
+    state.friendsSearchNote = "Solicitud enviada.";
+    state.friendsResults = [];
+    await loadFriendRequests();
+  } catch (e) {
+    console.warn("sendFriendRequest", e);
+    state.friendsSearchNote = "No se pudo enviar. Revisa reglas de Firebase.";
+  }
+
+  state.friendsReqBusy = false;
+  render();
+}
+
+async function loadFriendRequests() {
+  if (!fb || !fb.db || !state.user) return;
+
+  try {
+    const fs = await fsModule();
+    const uid = state.user.uid;
+
+    const incomingQ = fs.query(
+      fs.collection(fb.db, "friendRequests"),
+      fs.where("to", "==", uid),
+      fs.where("status", "==", "pending")
+    );
+    const outgoingQ = fs.query(
+      fs.collection(fb.db, "friendRequests"),
+      fs.where("from", "==", uid),
+      fs.where("status", "==", "pending")
+    );
+
+    const [inSnap, outSnap] = await Promise.all([
+      fs.getDocs(incomingQ),
+      fs.getDocs(outgoingQ)
+    ]);
+
+    state.friendsIncoming = inSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    state.friendsOutgoing = outSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch (e) {
+    console.warn("loadFriendRequests", e);
+    state.friendsIncoming = [];
+    state.friendsOutgoing = [];
+  }
+
+  if (state.showFriends) render();
+}
+
+async function acceptFriendRequest(reqId) {
+  if (!fb || !fb.db || !state.user) return;
+  state.friendsReqBusy = true;
+  render();
+
+  try {
+    const ref = fb.doc(fb.db, "friendRequests", reqId);
+    const snap = await fb.getDoc(ref);
+    if (!snap.exists()) throw new Error("missing");
+    const data = snap.data();
+    if (data.to !== state.user.uid || data.status !== "pending") throw new Error("forbidden");
+
+    await fb.updateDoc(ref, { status: "accepted" });
+
+    // Amistad en ambos lados (Etapa 4 base)
+    const batch = fb.writeBatch(fb.db);
+    const a = data.from;
+    const b = data.to;
+    batch.set(fb.doc(fb.db, "users", b, "friends", a), {
+      uid: a,
+      username: data.fromUsername || "",
+      avatar: data.fromAvatar || "a1",
+      starred: false,
+      nickname: null,
+      since: fb.serverTimestamp()
+    });
+    batch.set(fb.doc(fb.db, "users", a, "friends", b), {
+      uid: b,
+      username: state.profile ? state.profile.username : "",
+      avatar: state.profile ? state.profile.avatar : "a1",
+      starred: false,
+      nickname: null,
+      since: fb.serverTimestamp()
+    });
+    await batch.commit();
+
+    await loadFriendRequests();
+    state.friendsSearchNote = "Solicitud aceptada.";
+  } catch (e) {
+    console.warn("acceptFriendRequest", e);
+    state.friendsSearchNote = "No se pudo aceptar.";
+  }
+
+  state.friendsReqBusy = false;
+  render();
+}
+
+async function rejectFriendRequest(reqId) {
+  if (!fb || !fb.db || !state.user) return;
+  state.friendsReqBusy = true;
+  render();
+
+  try {
+    const ref = fb.doc(fb.db, "friendRequests", reqId);
+    const snap = await fb.getDoc(ref);
+    if (!snap.exists()) throw new Error("missing");
+    const data = snap.data();
+    if (data.to !== state.user.uid || data.status !== "pending") throw new Error("forbidden");
+
+    await fb.updateDoc(ref, { status: "rejected" });
+    await loadFriendRequests();
+    state.friendsSearchNote = "Solicitud rechazada.";
+  } catch (e) {
+    console.warn("rejectFriendRequest", e);
+    state.friendsSearchNote = "No se pudo rechazar.";
+  }
+
+  state.friendsReqBusy = false;
+  render();
+}
 function queueFriendsSearch(value) {
   state.friendsSearch = value;
   clearTimeout(friendsSearchTimer);
