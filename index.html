@@ -4374,6 +4374,13 @@ button.gx-mode:active {
   text-align: left !important;
 }
 
+.friend-result-btn-ghost {
+  background: transparent !important;
+  border-color: #64748b !important;
+  box-shadow: none !important;
+  color: #cbd5e1 !important;
+}
+
 </style>
 <div id="app" class="app"></div>
 
@@ -7442,6 +7449,46 @@ function startAuth() {
 function friendsMarkup() {
   const logged = !!(state.user && state.profile);
   const results = state.friendsResults || [];
+    const incoming = state.friendsIncoming || [];
+  const outgoing = state.friendsOutgoing || [];
+
+  const requestsHtml = `
+    <section class="fx-panel">
+      <div class="fx-panel-head">
+        <h2>Solicitudes recibidas ${incoming.length ? "(" + incoming.length + ")" : ""}</h2>
+      </div>
+      ${incoming.length === 0
+        ? `<p class="friends-hint fx-empty-inline">No tienes solicitudes pendientes.</p>`
+        : incoming.map(r => `
+          <div class="friend-result-card">
+            <span class="friend-result-avatar">${avatarEmoji(r.fromAvatar || "a1")}</span>
+            <div class="friend-result-info">
+              <strong>@${escHtml(r.fromUsername || "jugador")}</strong>
+              <small>Quiere ser tu amigo</small>
+            </div>
+            <button class="friend-result-btn" data-action="friend-accept" data-id="${escHtml(r.id)}" type="button">Aceptar</button>
+            <button class="friend-result-btn friend-result-btn-ghost" data-action="friend-reject" data-id="${escHtml(r.id)}" type="button">Rechazar</button>
+          </div>
+        `).join("")}
+    </section>
+
+    <section class="fx-panel">
+      <div class="fx-panel-head">
+        <h2>Solicitudes enviadas ${outgoing.length ? "(" + outgoing.length + ")" : ""}</h2>
+      </div>
+      ${outgoing.length === 0
+        ? `<p class="friends-hint fx-empty-inline">No has enviado solicitudes.</p>`
+        : outgoing.map(r => `
+          <div class="friend-result-card">
+            <span class="friend-result-avatar">⏳</span>
+            <div class="friend-result-info">
+              <strong>@${escHtml(r.toUsername || "jugador")}</strong>
+              <small>Pendiente</small>
+            </div>
+          </div>
+        `).join("")}
+    </section>
+  `;
   const list = state.friendsList || [];
   const starred = list.filter(f => f.starred);
   const onlineCount = list.filter(f => f.online).length;
@@ -7460,11 +7507,13 @@ function friendsMarkup() {
             <small>ID: ${escHtml(r.uid.slice(0, 8))}…</small>
           </div>
           <button
-            class="friend-result-btn"
-            data-action="friend-request"
-            data-uid="${escHtml(r.uid)}"
-            type="button"
-          >Agregar</button>
+  class="friend-result-btn"
+  data-action="friend-request"
+  data-uid="${escHtml(r.uid)}"
+  data-username="${escHtml(r.username)}"
+  type="button"
+  ${state.friendsReqBusy ? "disabled" : ""}
+>Agregar</button>
         </div>
       `).join("")}
     </div>
@@ -7518,6 +7567,8 @@ function friendsMarkup() {
       </div>
 
       ${resultsHtml}
+      ${resultsHtml}
+${requestsHtml}
 
       <div class="fx-stats">
         <div class="fx-stat fx-stat-friends">
