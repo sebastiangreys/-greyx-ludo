@@ -3841,7 +3841,104 @@ button.gx-mode:active {
     font-size: .7rem;
   }
 }
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ffffff18;
+  border-radius: 12px;
+  background: #ffffff0c;
+  color: #e2e8f0;
+  cursor: pointer;
+  box-shadow: 0 4px 14px #00000040;
+}
+.topbar-btn:active { transform: scale(.96); }
 
+.friends-screen {
+  width: min(480px, 100%);
+  margin: 0 auto;
+  min-height: calc(100vh - 40px);
+  padding: 8px 4px 40px;
+  color: #f1f5f9;
+}
+.friends-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.friends-header h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  letter-spacing: -.02em;
+}
+.friends-back {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #ffffff16;
+  border-radius: 12px;
+  background: #ffffff0c;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.friends-header-spacer { width: 42px; }
+
+.friends-search-wrap { margin-bottom: 18px; }
+.friends-search {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #ffffff16;
+  border-radius: 14px;
+  background: #0b1220cc;
+  color: #f8fafc;
+  font: inherit;
+  outline: none;
+}
+.friends-search::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+.friends-section {
+  margin-bottom: 20px;
+  padding: 14px 14px 12px;
+  border: 1px solid #ffffff12;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #1a2238cc, #0d1224cc);
+}
+.friends-section h2 {
+  margin: 0 0 8px;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+.friends-hint {
+  margin: 0;
+  color: #94a3b8;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+.friends-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: #94a3b8;
+}
+.friends-empty .primary-button {
+  margin-top: 16px;
+  max-width: 260px;
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>
 <div id="app" class="app"></div>
 
@@ -4417,6 +4514,14 @@ authReady:false,
 authOffline:false,
 introDone:false,
 showAuth:false,
+showFriends:false,
+friendsSearch:"",
+friendsBusy:false,
+friendsError:"",
+friendsList:[],
+friendsRequests:[],
+friendMenuUid:null,
+friendConfirmDelete:null,
 authMode:"login",
 authEmail:"",
 authPass:"",
@@ -4779,25 +4884,35 @@ function translateDOM(root) {
 }
 
 function logoHeader() {
+  if (state.showFriends || state.showAuth || state.showProfile) return "";
+
   return `
   <header class="topbar">
     <div class="brand">
-
       <svg class="brand-mark" viewBox="40 90 630 460"
         xmlns="http://www.w3.org/2000/svg" aria-label="GREYX">
         <path fill="#f0f0f2" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
         <path fill="#f0f0f2" d="M255 295H440L385 365H275L237 318Z"/>
         <path fill="#5b35f0" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
       </svg>
-
       <span class="brand-word">GREY<span>X</span></span>
+    </div>
 
+    <div class="topbar-actions">
+      <button class="topbar-btn" data-action="friends-open" type="button" aria-label="Amigos" title="Amigos">
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
+          <circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="16.5" cy="9" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M3.5 18.5c.8-3.2 2.9-5 5.5-5s4.7 1.8 5.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M13.5 17.8c.6-2 1.9-3.2 3.5-3.2 1.4 0 2.5.8 3.2 2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </header>`;
 }
 
-
 function setupMarkup() {
+  if (state.showFriends) return friendsMarkup();
   if (state.showAuth) return authMarkup();
   if (state.showProfile) return profileMarkup();
   if (state.mainPlayOpen) {
@@ -6993,7 +7108,55 @@ function startAuth() {
   setupAuthInputs();
   initFirebase();
 }
+function friendsMarkup() {
+  const logged = !!(state.user && state.profile);
 
+  return `
+  <section class="friends-screen">
+    <header class="friends-header">
+      <button class="friends-back" data-action="friends-back" type="button" aria-label="Volver">←</button>
+      <h1>Amigos</h1>
+      <span class="friends-header-spacer"></span>
+    </header>
+
+    ${!logged ? `
+      <div class="friends-empty">
+        <p>Inicia sesión y crea tu perfil para usar el sistema de amigos.</p>
+        <button class="primary-button" data-action="auth-open" type="button">Iniciar sesión</button>
+      </div>
+    ` : `
+      <div class="friends-search-wrap">
+        <input
+          class="friends-search"
+          type="search"
+          data-friends-search="1"
+          placeholder="🔍 Buscar Amigos"
+          value="${escHtml(state.friendsSearch || "")}"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="friends-body">
+        <div class="friends-section">
+          <h2>⭐ Amigos destacados</h2>
+          <p class="friends-hint">Aquí aparecerán tus amigos destacados.</p>
+        </div>
+
+        <div class="friends-section">
+          <h2>👥 Otros amigos</h2>
+          <p class="friends-hint">Cuando agregues amigos, se mostrarán aquí.</p>
+        </div>
+
+        <div class="friends-section">
+          <h2>Solicitudes</h2>
+          <p class="friends-hint">Las solicitudes pendientes aparecerán en la siguiente etapa.</p>
+        </div>
+      </div>
+    `}
+  </section>`;
+}
 function render() {
 
   const html = `
@@ -7132,6 +7295,23 @@ if (action === "settings-music") {
 
           return;
         }
+  if (action === "friends-open") {
+  state.showFriends = true;
+  state.settingsOpen = false;
+  state.friendMenuUid = null;
+  state.friendConfirmDelete = null;
+  render();
+  return;
+}
+
+if (action === "friends-back") {
+  state.showFriends = false;
+  state.friendsSearch = "";
+  state.friendMenuUid = null;
+  state.friendConfirmDelete = null;
+  render();
+  return;
+}
         /* =========================
            LOCAL
            ========================= */
