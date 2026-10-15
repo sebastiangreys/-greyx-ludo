@@ -3986,6 +3986,51 @@ button.gx-mode:active {
   position: static;
   font-size: 18px;
 }
+
+.friends-results {
+  margin-bottom: 16px;
+  display: grid;
+  gap: 8px;
+}
+.friend-result-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #ffffff14;
+  background: linear-gradient(160deg, #1a2238ee, #0d1224ee);
+}
+.friend-result-avatar {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+.friend-result-info {
+  flex: 1;
+  min-width: 0;
+}
+.friend-result-info strong {
+  display: block;
+  font-size: .9rem;
+}
+.friend-result-info small {
+  color: #94a3b8;
+  font-size: .68rem;
+}
+.friend-result-btn {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #8b5cf6aa;
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 800;
+  font-size: .72rem;
+  cursor: pointer;
+}
+.friend-result-btn:active { transform: scale(.97); }
 </style>
 <div id="app" class="app"></div>
 
@@ -4562,6 +4607,9 @@ authOffline:false,
 introDone:false,
 showAuth:false,
 showFriends:false,
+friendsResults: [],
+friendsSearchBusy: false,
+friendsSearchNote: "",
 friendsSearch:"",
 friendsBusy:false,
 friendsError:"",
@@ -7161,6 +7209,29 @@ function startAuth() {
 }
 function friendsMarkup() {
   const logged = !!(state.user && state.profile);
+  const results = state.friendsResults || [];
+
+  const resultsHtml = !logged ? "" : `
+    <div class="friends-results">
+      ${state.friendsSearchBusy ? `<p class="friends-hint">Buscando…</p>` : ""}
+      ${state.friendsSearchNote ? `<p class="friends-hint">${escHtml(state.friendsSearchNote)}</p>` : ""}
+      ${results.map(r => `
+        <div class="friend-result-card">
+          <span class="friend-result-avatar">${avatarEmoji(r.avatar)}</span>
+          <div class="friend-result-info">
+            <strong>@${escHtml(r.username)}</strong>
+            <small>ID: ${escHtml(r.uid.slice(0, 8))}…</small>
+          </div>
+          <button
+            class="friend-result-btn"
+            data-action="friend-request"
+            data-uid="${escHtml(r.uid)}"
+            type="button"
+          >Agregar</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
 
   return `
   <section class="friends-screen">
@@ -7189,6 +7260,8 @@ function friendsMarkup() {
         >
       </div>
 
+      ${resultsHtml}
+
       <div class="friends-body">
         <div class="friends-section">
           <h2>⭐ Amigos destacados</h2>
@@ -7198,11 +7271,6 @@ function friendsMarkup() {
         <div class="friends-section">
           <h2>👥 Otros amigos</h2>
           <p class="friends-hint">Cuando agregues amigos, se mostrarán aquí.</p>
-        </div>
-
-        <div class="friends-section">
-          <h2>Solicitudes</h2>
-          <p class="friends-hint">Las solicitudes pendientes aparecerán en la siguiente etapa.</p>
         </div>
       </div>
     `}
@@ -7356,10 +7424,8 @@ if (action === "settings-music") {
 }
 
 if (action === "friends-back") {
-  state.showFriends = false;
-  state.friendsSearch = "";
-  state.friendMenuUid = null;
-  state.friendConfirmDelete = null;
+
+  state.friendsSearchNote = "Las solicitudes se activan en la siguiente etapa.";
   render();
   return;
 }
@@ -8378,7 +8444,100 @@ async function loadProfile() {
     console.warn("No se pudo cargar el perfil:", e);
   }
 }
+let friendsSearchTimer = null;
 
+async function searchFriends(raw) {
+  const q = String(raw || "").trim().replace(/^@+/, "");
+  state.friendsSearch = q;
+
+  if (!q) {
+    state.friendsResults = [];
+    state.friendsSearchNote = "";
+    state.friendsSearchBusy = false;
+    render();
+    return;
+  }
+
+  if (!state.user || !state.profile) {
+    state.friendsResults = [];
+    state.friendsSearchNote = "Inicia sesión para buscar jugadores.";
+    render();
+    return;
+  }
+
+  if (!fb || !fb.db) {
+    state.friendsResults = [];
+    state.friendsSearchNote = "Sin conexión con Firebase.";
+    render();
+    return;
+  }
+
+  const lower = q.toLowerCase();
+
+  if (state.profile.usernameLower === lower || state.user.uid === q) {
+    state.friendsResults = [];
+    state.friendsSearchNote = "Ese eres tú.";
+    state.friendsSearchBusy = false;
+    render();
+    return;
+  }
+
+  state.friendsSearchBusy = true;
+  state.friendsSearchNote = "";
+  render();
+
+  try {
+    let uid = null;
+
+    const nameSnap = await fb.getDoc(fb.doc(fb.db, "usernames", lower));
+    if (nameSnap.exists()) {
+      uid = nameSnap.data().uid;
+    } else if (q.length >= 20) {
+      const userSnap = await fb.getDoc(fb.doc(fb.db, "users", q));
+      if (userSnap.exists()) uid = q;
+    }
+
+    if (!uid || uid === state.user.uid) {
+      state.friendsResults = [];
+      state.friendsSearchNote = "No se encontró ese jugador.";
+      state.friendsSearchBusy = false;
+      render();
+      return;
+    }
+
+    const userSnap = await fb.getDoc(fb.doc(fb.db, "users", uid));
+    if (!userSnap.exists()) {
+      state.friendsResults = [];
+      state.friendsSearchNote = "No se encontró ese jugador.";
+      state.friendsSearchBusy = false;
+      render();
+      return;
+    }
+
+    const data = userSnap.data() || {};
+    state.friendsResults = [{
+      uid: uid,
+      username: data.username || q,
+      avatar: data.avatar || "a1"
+    }];
+    state.friendsSearchNote = "";
+  } catch (e) {
+    console.warn("searchFriends", e);
+    state.friendsResults = [];
+    state.friendsSearchNote = "No se pudo buscar. Intenta de nuevo.";
+  }
+
+  state.friendsSearchBusy = false;
+  render();
+}
+
+function queueFriendsSearch(value) {
+  state.friendsSearch = value;
+  clearTimeout(friendsSearchTimer);
+  friendsSearchTimer = setTimeout(() => {
+    searchFriends(value);
+  }, 400);
+}
 async function saveProfile() {
   if (state.profileBusy || !fb || !fb.db || !state.user) return;
 
@@ -8582,6 +8741,9 @@ function accountMarkup() {
 
 function setupProfileInputs() {
   app.addEventListener("input", e => {
+    if (e.target && e.target.dataset && e.target.dataset.friendsSearch) {
+  queueFriendsSearch(e.target.value);
+}
     const f = e.target && e.target.dataset && e.target.dataset.profileField;
     if (f === "name") state.profileName = e.target.value;
   });
