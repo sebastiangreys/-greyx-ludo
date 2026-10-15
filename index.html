@@ -4170,6 +4170,207 @@ button.gx-mode:active {
   margin: 18px auto 0;
   max-width: 240px;
 }
+.fx-screen {
+  width: min(440px, 100%);
+  margin: 0 auto;
+  padding: 4px 8px 48px;
+  color: #f8fafc;
+}
+
+.fx-top {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.fx-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid #ffffff22;
+  background: linear-gradient(145deg, #1e1b4bcc, #0f172acc);
+  color: #fff;
+  font-size: 1.15rem;
+  cursor: pointer;
+  box-shadow: 0 6px 16px #00000055;
+}
+.fx-title-wrap {
+  text-align: center;
+}
+.fx-title-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px #a78bfa88);
+}
+.fx-title-wrap h1 {
+  margin: 2px 0 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+.fx-top-spacer { width: 42px; height: 42px; }
+
+.fx-search-row {
+  margin: 14px 0 12px;
+}
+.fx-search-wrap {
+  position: relative;
+}
+.fx-search-ico {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .95rem;
+  opacity: .7;
+  pointer-events: none;
+}
+.fx-search {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px 0 42px !important;
+  border-radius: 16px !important;
+  border: 1px solid #4c1d9588 !important;
+  background: #0b1020ee !important;
+  color: #f8fafc !important;
+  box-shadow: inset 0 1px 0 #ffffff10, 0 8px 22px #00000044;
+}
+
+.fx-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.fx-stat {
+  padding: 12px 10px;
+  border-radius: 16px;
+  text-align: center;
+  background: #0f172aee;
+  border: 1.5px solid #334155;
+  box-shadow: 0 8px 20px #00000044;
+}
+.fx-stat-friends { border-color: #8b5cf6aa; box-shadow: 0 0 18px #7c3aed33; }
+.fx-stat-online  { border-color: #22c55eaa; box-shadow: 0 0 18px #22c55e33; }
+.fx-stat-fav     { border-color: #eab308aa; box-shadow: 0 0 18px #eab30833; }
+
+.fx-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+.fx-stat small {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.fx-dot-green {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+
+.fx-panel {
+  margin-bottom: 14px;
+  padding: 14px 14px 12px;
+  border-radius: 20px;
+  border: 1px solid #7c3aed55;
+  background: linear-gradient(160deg, #1a1035cc, #0b1220ee);
+  box-shadow: 0 10px 28px #00000055, inset 0 1px 0 #ffffff10;
+}
+.fx-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.fx-panel-head h2 {
+  margin: 0;
+  font-size: .82rem;
+  font-weight: 900;
+  color: #e9d5ff;
+  letter-spacing: .02em;
+}
+
+.fx-avatar-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.fx-avatar-card {
+  flex: 0 0 auto;
+  width: 76px;
+  border: 0;
+  background: transparent;
+  color: #f8fafc;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+}
+.fx-avatar-ring {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 40% 30%, #4c1d95, #1e1b4b);
+  border: 2px solid #a78bfa88;
+  box-shadow: 0 0 16px #7c3aed55;
+}
+.fx-avatar-emoji { font-size: 1.5rem; }
+.fx-star {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: .7rem;
+}
+.fx-online-dot {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #64748b;
+  border: 2px solid #0f172a;
+}
+.fx-online-dot.on {
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+.fx-avatar-card strong {
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fx-avatar-card small {
+  font-size: .58rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+.fx-avatar-card small.on { color: #4ade80; }
+
+.fx-empty-inline {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  text-align: left !important;
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -7354,8 +7555,13 @@ function startAuth() {
 function friendsMarkup() {
   const logged = !!(state.user && state.profile);
   const results = state.friendsResults || [];
+  const list = state.friendsList || [];
+  const starred = list.filter(f => f.starred);
+  const onlineCount = list.filter(f => f.online).length;
+  const total = list.length;
+  const favs = starred.length;
 
-  const resultsHtml = !logged ? "" : `
+  const resultsHtml = `
     <div class="friends-results">
       ${state.friendsSearchBusy ? `<p class="friends-hint">Buscando…</p>` : ""}
       ${state.friendsSearchNote ? `<p class="friends-hint">${escHtml(state.friendsSearchNote)}</p>` : ""}
@@ -7377,12 +7583,29 @@ function friendsMarkup() {
     </div>
   `;
 
+  const starredHtml = starred.length
+    ? starred.map(f => `
+        <button class="fx-avatar-card" data-action="friend-open" data-uid="${escHtml(f.uid)}" type="button">
+          <span class="fx-avatar-ring">
+            <span class="fx-avatar-emoji">${avatarEmoji(f.avatar)}</span>
+            ${f.starred ? `<span class="fx-star">⭐</span>` : ""}
+            <span class="fx-online-dot ${f.online ? "on" : ""}"></span>
+          </span>
+          <strong>${escHtml(f.nickname || f.username)}</strong>
+          <small class="${f.online ? "on" : ""}">${f.online ? "En línea" : "Desconectado"}</small>
+        </button>
+      `).join("")
+    : `<p class="friends-hint fx-empty-inline">Aún no tienes amigos destacados.</p>`;
+
   return `
-  <section class="friends-screen">
-    <header class="friends-header">
-      <button class="friends-back" data-action="friends-back" type="button" aria-label="Volver">←</button>
-      <h1>Amigos</h1>
-      <span class="friends-header-spacer"></span>
+  <section class="friends-screen fx-screen">
+    <header class="fx-top">
+      <button class="fx-icon-btn" data-action="friends-back" type="button" aria-label="Volver">←</button>
+      <div class="fx-title-wrap">
+        <div class="fx-title-icon" aria-hidden="true">👥</div>
+        <h1>Amigos</h1>
+      </div>
+      <span class="fx-top-spacer"></span>
     </header>
 
     ${!logged ? `
@@ -7391,32 +7614,54 @@ function friendsMarkup() {
         <button class="primary-button" data-action="auth-open" type="button">Iniciar sesión</button>
       </div>
     ` : `
-      <div class="friends-search-wrap">
-        <input
-          class="friends-search"
-          type="search"
-          data-friends-search="1"
-          placeholder="🔍 Buscar Amigos"
-          value="${escHtml(state.friendsSearch || "")}"
-          autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-        >
+      <div class="fx-search-row">
+        <div class="fx-search-wrap">
+          <span class="fx-search-ico" aria-hidden="true">🔍</span>
+          <input
+            class="friends-search fx-search"
+            type="search"
+            data-friends-search="1"
+            placeholder="Buscar amigos..."
+            value="${escHtml(state.friendsSearch || "")}"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+        </div>
       </div>
 
       ${resultsHtml}
 
-      <div class="friends-body">
-        <div class="friends-section">
-          <h2>⭐ Amigos destacados</h2>
-          <p class="friends-hint">Aquí aparecerán tus amigos destacados.</p>
+      <div class="fx-stats">
+        <div class="fx-stat fx-stat-friends">
+          <div class="fx-stat-top"><span>👥</span><strong>${total}</strong></div>
+          <small>Amigos</small>
         </div>
-
-        <div class="friends-section">
-          <h2>👥 Otros amigos</h2>
-          <p class="friends-hint">Cuando agregues amigos, se mostrarán aquí.</p>
+        <div class="fx-stat fx-stat-online">
+          <div class="fx-stat-top"><span class="fx-dot-green"></span><strong>${onlineCount}</strong></div>
+          <small>En línea</small>
+        </div>
+        <div class="fx-stat fx-stat-fav">
+          <div class="fx-stat-top"><span>⭐</span><strong>${favs}</strong></div>
+          <small>Favoritos</small>
         </div>
       </div>
+
+      <section class="fx-panel">
+        <div class="fx-panel-head">
+          <h2>⭐ Amigos destacados</h2>
+        </div>
+        <div class="fx-avatar-row">
+          ${starredHtml}
+        </div>
+      </section>
+
+      <section class="fx-panel">
+        <div class="fx-panel-head">
+          <h2>👥 Otros amigos</h2>
+        </div>
+        <p class="friends-hint fx-empty-inline">Cuando agregues amigos, se mostrarán aquí.</p>
+      </section>
     `}
   </section>`;
 }
