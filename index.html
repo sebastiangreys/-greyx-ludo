@@ -7102,6 +7102,9 @@ function accountMarkup() {
 
 function setupAuthInputs() {
   app.addEventListener("input", e => {
+    if (e.target && e.target.dataset && e.target.dataset.friendsSearch) {
+  queueFriendsSearch(e.target.value);
+}
     const f = e.target && e.target.dataset && e.target.dataset.authField;
     if (!f) return;
     if (f === "email") state.authEmail = e.target.value;
@@ -8740,13 +8743,14 @@ function accountMarkup() {
 }
 
 function setupProfileInputs() {
-  app.addEventListener("input", e => {
-    if (e.target && e.target.dataset && e.target.dataset.friendsSearch) {
-  queueFriendsSearch(e.target.value);
-}
-    const f = e.target && e.target.dataset && e.target.dataset.profileField;
-    if (f === "name") state.profileName = e.target.value;
-  });
+app.addEventListener("input", e => {
+  const f = e.target && e.target.dataset && e.target.dataset.profileField;
+  if (f === "name") state.profileName = e.target.value;
+
+  if (e.target && e.target.dataset && e.target.dataset.friendsSearch) {
+    queueFriendsSearch(e.target.value);
+  }
+});
 
   app.addEventListener("keydown", e => {
     if (e.key === "Enter" && e.target && e.target.dataset && e.target.dataset.profileField) {
