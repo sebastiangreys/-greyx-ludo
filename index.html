@@ -5339,10 +5339,9 @@ function logoHeader() {
 }
 
 function setupMarkup() {
-  if (state.showFriends) return friendsMarkup();
   if (state.showAuth) return authMarkup();
   if (state.showProfile) return profileMarkup();
-  if (state.mainPlayOpen) {
+  if (state.showFriends) return friendsMarkup();
 
   return `
     <section class="setup setup-modern setup-step">
@@ -7230,14 +7229,15 @@ function handleAuthAction(action) {
   switch (action) {
 
     case "auth-open":
-      state.settingsOpen = false;
-      state.confirmAction = null;
-      state.showAuth = true;
-      state.authMode = "login";
-      state.authError = "";
-      state.authNotice = "";
-      render();
-      return true;
+  state.settingsOpen = false;
+  state.confirmAction = null;
+  state.showFriends = false;
+  state.showAuth = true;
+  state.authMode = "login";
+  state.authError = "";
+  state.authNotice = "";
+  render();
+  return true;
 
     case "auth-guest":
       try { localStorage.setItem("gx-guest", "1"); } catch (e) {}
@@ -7723,6 +7723,31 @@ function bind(root = app) {
         const action = button.dataset.action;
 playUiSound(action);
 if (handleAuthAction(action) || handleProfileAction(action)) return;
+if (action === "friends-open") {
+  state.showFriends = true;
+  state.settingsOpen = false;
+  state.friendMenuUid = null;
+  state.friendConfirmDelete = null;
+  render();
+  return;
+}
+
+if (action === "friends-back") {
+  state.showFriends = false;
+  state.friendsSearch = "";
+  state.friendsResults = [];
+  state.friendsSearchNote = "";
+  state.friendMenuUid = null;
+  state.friendConfirmDelete = null;
+  render();
+  return;
+}
+
+if (action === "friend-request") {
+  state.friendsSearchNote = "Las solicitudes se activan en la siguiente etapa.";
+  render();
+  return;
+}
 if (action === "settings-language") {
   state.languageOpen = true;
   render();
