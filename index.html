@@ -4380,6 +4380,282 @@ button.gx-mode:active {
   box-shadow: none !important;
   color: #cbd5e1 !important;
 }
+/* ===== MODO ONLINE ===== */
+.online-screen {
+  width: min(440px, 100%);
+  margin: 0 auto;
+  padding: 4px 8px 48px;
+  color: #f8fafc;
+}
+.online-top {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.online-top h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
+}
+.online-back {
+  width: 42px; height: 42px;
+  border: 1px solid #ffffff18;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #1e1b4bcc, #0f172acc);
+  color: #fff; font-size: 1.15rem;
+  cursor: pointer;
+  box-shadow: 0 6px 16px #00000055;
+}
+.online-top-spacer { width: 42px; height: 42px; }
+
+.online-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 16px;
+  margin-bottom: 12px;
+  border-radius: 22px;
+  border: 1.5px solid #334155;
+  background: linear-gradient(160deg, #1a2238cc, #0b1220cc);
+  box-shadow: 0 8px 24px #00000044, inset 0 1px 0 #ffffff0c;
+  color: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.online-option:active { transform: scale(.98); }
+.online-option.world { border-color: #22d3ee66; box-shadow: 0 0 20px #06b6d422, 0 8px 24px #00000044; }
+.online-option.friends { border-color: #a78bfa66; box-shadow: 0 0 20px #8b5cf622, 0 8px 24px #00000044; }
+.online-option.private { border-color: #f59e0b44; box-shadow: 0 8px 24px #00000044; }
+
+.online-option-icon {
+  width: 52px; height: 52px;
+  flex: 0 0 52px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  font-size: 1.6rem;
+  background: #ffffff0c;
+}
+.online-option.world .online-option-icon { background: #0891b233; }
+.online-option.friends .online-option-icon { background: #7c3aed33; }
+.online-option.private .online-option-icon { background: #d9770633; }
+
+.online-option-body { flex: 1; min-width: 0; }
+.online-option-body strong {
+  display: block;
+  font-size: .92rem;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.online-option-body small {
+  color: #94a3b8;
+  font-size: .72rem;
+  line-height: 1.35;
+}
+.online-option-arrow {
+  color: #475569;
+  font-size: 1.3rem;
+}
+.online-option.world .online-option-arrow { color: #22d3ee; }
+.online-option.friends .online-option-arrow { color: #a78bfa; }
+
+/* MATCHMAKING */
+.mm-screen {
+  width: min(440px, 100%);
+  margin: 0 auto;
+  padding: 4px 8px 48px;
+  color: #f8fafc;
+  text-align: center;
+}
+.mm-top {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.mm-top h1 { margin: 0; font-size: 1.1rem; font-weight: 900; }
+.mm-timer {
+  font-size: 3.8rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  color: #e2e8f0;
+  margin: 24px 0 8px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 40px #7c3aed55;
+}
+.mm-status {
+  color: #94a3b8;
+  font-size: .82rem;
+  margin-bottom: 18px;
+  min-height: 22px;
+}
+.mm-globe {
+  font-size: 4.5rem;
+  margin: 8px auto 0;
+  display: block;
+  animation: mmSpin 12s linear infinite;
+}
+@keyframes mmSpin {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
+.mm-bar-wrap {
+  margin: 18px 0 10px;
+  height: 6px;
+  border-radius: 99px;
+  background: #1e293b;
+  overflow: hidden;
+}
+.mm-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa);
+  transition: width .5s linear;
+}
+.mm-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+  color: #22c55e;
+  font: 800 .78rem monospace;
+  letter-spacing: .08em;
+}
+.mm-found-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+.mm-count-pills {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 14px 0;
+}
+.mm-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #334155;
+  background: #0f172a;
+  color: #94a3b8;
+  font: 700 .72rem monospace;
+  cursor: pointer;
+  transition: border-color .18s, color .18s;
+}
+.mm-pill.selected {
+  border-color: #7c3aed;
+  color: #c4b5fd;
+  background: #1e1b4b;
+}
+
+/* SALA CON AMIGOS */
+.room-screen {
+  width: min(440px, 100%);
+  margin: 0 auto;
+  padding: 4px 8px 48px;
+  color: #f8fafc;
+}
+.room-top {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.room-top h1 { margin: 0; text-align: center; font-size: 1.1rem; font-weight: 900; }
+.room-name-edit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-radius: 16px;
+  border: 1.5px solid #7c3aed66;
+  background: #0b1020ee;
+  margin-bottom: 14px;
+}
+.room-name-input {
+  flex: 1;
+  border: 0; outline: 0;
+  background: transparent;
+  color: #f8fafc;
+  font: 700 .95rem inherit;
+}
+.room-name-input::placeholder { color: #64748b; }
+
+.room-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.room-slot {
+  min-height: 120px;
+  border-radius: 18px;
+  border: 2px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 10px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: opacity .2s;
+}
+.room-slot.red { border-color: #ef444488; background: #ef44440f; color: #fca5a5; }
+.room-slot.green { border-color: #10b98188; background: #10b9810f; color: #6ee7b7; }
+.room-slot.yellow { border-color: #f59e0b88; background: #f59e0b0f; color: #fcd34d; }
+.room-slot.blue { border-color: #3b82f688; background: #3b82f60f; color: #93c5fd; }
+.room-slot.taken { opacity: 1; }
+.room-slot.empty { opacity: .55; }
+.room-slot-avatar { font-size: 1.8rem; }
+.room-slot-name { font-size: .72rem; font-weight: 800; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.room-slot-plus { font-size: 1.5rem; opacity: .5; }
+
+.room-invite-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1.5px dashed #7c3aed66;
+  background: transparent;
+  color: #a78bfa;
+  font: 800 .85rem inherit;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: border-color .18s, background .18s;
+}
+.room-invite-btn:active { background: #7c3aed11; }
+
+.room-start-btn {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 18px;
+  border: 0;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #fff;
+  font: 900 1rem inherit;
+  letter-spacing: .04em;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #4c1d95, 0 12px 28px #7c3aed44;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.room-start-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 3px 0 #4c1d95;
+}
+.room-start-btn:not(:disabled):active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #4c1d95;
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -4993,6 +5269,16 @@ statsBusy:false,
 gameStats:null,
 statsRecorded:false,
 gameResult:null,
+showOnline:false,
+onlineStep:"menu",
+onlinePlayerCount:4,
+mmActive:false,
+mmSeconds:0,
+mmFound:0,
+mmTimer:null,
+roomName:"Mi sala",
+roomPlayers:[],
+roomMyColor:"red",
   hop:null,
   arrived:null,
   celebrating:false,
@@ -5352,6 +5638,11 @@ function setupMarkup() {
   if (state.showAuth) return authMarkup();
   if (state.showProfile) return profileMarkup();
   if (state.showFriends) return friendsMarkup();
+  if (state.showOnline) {
+  if (state.onlineStep === "matchmaking") return matchmakingMarkup();
+  if (state.onlineStep === "room") return roomMarkup();
+  return onlineMenuMarkup();
+}
 
 if (state.setupStep === 1) {
   const st = state.stats || { played: 0, wins: 0, trophies: 0 };
@@ -5424,17 +5715,17 @@ if (state.setupStep === 1) {
           <span class="gx-mode-arrow">›</span>
         </button>
 
-        <div class="gx-mode gx-mode-online gx-disabled" aria-disabled="true">
-          <span class="gx-coming">PRÓXIMAMENTE</span>
-          <span class="gx-mode-icon">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9s1.3-6.2 3.8-9z" stroke="currentColor" stroke-width="1.6"/>
-            </svg>
-          </span>
-          <strong>MODO ONLINE</strong>
-          <small>Compite con jugadores de todo el mundo.</small>
-        </div>
+          <button class="gx-mode gx-mode-online" data-action="online-open" type="button">
+  <span class="gx-mode-icon">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9s1.3-6.2 3.8-9z" stroke="currentColor" stroke-width="1.6"/>
+    </svg>
+  </span>
+  <strong>MODO ONLINE</strong>
+  <small>Compite con jugadores de todo el mundo.</small>
+  <span class="gx-mode-arrow" style="color:#94a3b8">›</span>
+</button>
 
       </div>
 
@@ -7346,6 +7637,10 @@ function setupAuthInputs() {
     if (f === "email") state.authEmail = e.target.value;
     if (f === "pass") state.authPass = e.target.value;
     if (f === "pass2") state.authPass2 = e.target.value;
+    if (e.target && e.target.dataset && e.target.dataset.roomName) {
+  state.roomName = e.target.value;
+}
+
   });
 
   app.addEventListener("keydown", e => {
@@ -7658,7 +7953,7 @@ function bind(root = app) {
 
         const action = button.dataset.action;
 playUiSound(action);
-if (handleAuthAction(action) || handleProfileAction(action)) return;
+if (handleAuthAction(action) || handleProfileAction(action) || handleOnlineAction(action, button)) return;
 if (action === "friends-open") {
   state.showFriends = true;
   state.settingsOpen = false;
@@ -9640,6 +9935,320 @@ try {
   Object.assign(DICT.en, STATS_I18N.en);
   Object.assign(DICT.pt, STATS_I18N.pt);
 } catch (e) {}
+/* ========== MODO ONLINE ========== */
+
+const ONLINE_COLORS = [
+  { key:"red",   label:"CORAL",   hex:"#ef4444" },
+  { key:"green", label:"PRADERA", hex:"#10b981" },
+  { key:"yellow",label:"SOL",     hex:"#f59e0b" },
+  { key:"blue",  label:"PUERTO",  hex:"#3b82f6" }
+];
+
+function onlineMenuMarkup() {
+  return `
+  <section class="online-screen">
+    <div class="online-top">
+      <button class="online-back" data-action="online-back" type="button">←</button>
+      <h1>Modo online</h1>
+      <span class="online-top-spacer"></span>
+    </div>
+
+    <button class="online-option world" data-action="online-world" type="button">
+      <span class="online-option-icon">🌍</span>
+      <span class="online-option-body">
+        <strong>Jugar con el mundo</strong>
+        <small>Encuentra rivales de cualquier parte del planeta.</small>
+      </span>
+      <span class="online-option-arrow">›</span>
+    </button>
+
+    <button class="online-option friends" data-action="online-friends" type="button">
+      <span class="online-option-icon">👥</span>
+      <span class="online-option-body">
+        <strong>Jugar con amigos</strong>
+        <small>Crea una sala e invita a tus amigos.</small>
+      </span>
+      <span class="online-option-arrow">›</span>
+    </button>
+
+    <div class="online-option private" style="cursor:not-allowed;opacity:.6">
+      <span class="online-option-icon">🔒</span>
+      <span class="online-option-body">
+        <strong>Salas privadas</strong>
+        <small>Juega con un código de sala. Próximamente.</small>
+      </span>
+      <span class="online-option-arrow" style="color:#475569">›</span>
+    </div>
+  </section>`;
+}
+
+function matchmakingMarkup() {
+  const pct = Math.min(100, Math.round((state.mmSeconds / 30) * 100));
+  const mm = String(Math.floor(state.mmSeconds / 60)).padStart(2,"0");
+  const ss = String(state.mmSeconds % 60).padStart(2,"0");
+
+  return `
+  <section class="mm-screen">
+    <div class="mm-top">
+      <button class="online-back" data-action="mm-cancel" type="button">←</button>
+      <h1>Jugar con el mundo</h1>
+      <span class="online-top-spacer"></span>
+    </div>
+    <p style="color:#94a3b8;font-size:.8rem;margin:0 0 4px">Encuentra rivales y demuestra tu habilidad.</p>
+
+    <div class="mm-globe">🌍</div>
+
+    <div class="mm-timer">${mm}:${ss}</div>
+
+    ${state.mmActive
+      ? `<p class="mm-status">Buscando partida…</p>`
+      : `<p class="mm-status">Elige cuántos jugadores</p>`}
+
+    <div class="mm-count-pills">
+      ${[2,3,4].map(n => `
+        <button class="mm-pill ${state.onlinePlayerCount===n?"selected":""}"
+          data-action="mm-count" data-count="${n}" type="button">
+          ${n} jugadores
+        </button>
+      `).join("")}
+    </div>
+
+    <div class="mm-bar-wrap">
+      <div class="mm-bar" style="width:${pct}%"></div>
+    </div>
+
+    ${state.mmFound > 0 ? `
+      <div class="mm-found">
+        <span class="mm-found-dot"></span>
+        Jugadores encontrados: ${state.mmFound}/${state.onlinePlayerCount}
+      </div>
+    ` : ""}
+
+    ${state.mmActive
+      ? `<button class="primary-button" data-action="mm-cancel" type="button" style="margin-top:18px;background:#1e293b;box-shadow:0 4px 0 #0f172a">CANCELAR</button>`
+      : `<button class="primary-button" data-action="mm-start" type="button" style="margin-top:18px">BUSCAR PARTIDA</button>`}
+  </section>`;
+}
+
+function roomMarkup() {
+  const slots = ONLINE_COLORS.map(c => {
+    const player = state.roomPlayers.find(p => p.color === c.key);
+    const isMe = c.key === state.roomMyColor;
+    return `
+      <div class="room-slot ${c.key} ${player ? "taken" : "empty"}">
+        <span style="font-size:.6rem;letter-spacing:.14em;opacity:.8">${c.label}</span>
+        ${player
+          ? `<span class="room-slot-avatar">${avatarEmoji(player.avatar || "a1")}</span>
+             <span class="room-slot-name">${escHtml(player.username || (isMe ? (state.profile ? state.profile.username : "Tú") : "Jugador"))}</span>`
+          : `<span class="room-slot-plus">+</span>
+             <span style="opacity:.5">Disponible</span>`}
+      </div>`;
+  }).join("");
+
+  const playerCount = state.roomPlayers.length;
+  const canStart = playerCount >= 2;
+
+  return `
+  <section class="room-screen">
+    <div class="room-top">
+      <button class="online-back" data-action="room-back" type="button">←</button>
+      <h1>${escHtml(state.roomName)}</h1>
+      <span class="online-top-spacer"></span>
+    </div>
+    <p style="text-align:center;color:#94a3b8;font-size:.75rem;margin:0 0 14px">
+      Sala privada · ${playerCount}/4 jugadores
+    </p>
+
+    <div class="room-name-edit">
+      <input
+        class="room-name-input"
+        type="text"
+        placeholder="Nombre de la sala"
+        value="${escHtml(state.roomName)}"
+        data-room-name="1"
+        maxlength="30"
+        autocomplete="off"
+      >
+      <span style="font-size:1rem;opacity:.5">✏️</span>
+    </div>
+
+    <div class="room-slots">${slots}</div>
+
+    <button class="room-invite-btn" data-action="room-invite" type="button">
+      + Invitar a otro amigo
+    </button>
+
+    <button class="room-start-btn" data-action="room-start" type="button" ${canStart?"":"disabled"}>
+      INICIAR PARTIDA
+    </button>
+    ${!canStart ? `<p style="text-align:center;color:#64748b;font-size:.7rem;margin-top:8px">Necesitas al menos 2 jugadores</p>` : ""}
+  </section>`;
+}
+
+function handleOnlineAction(action, button) {
+
+  if (action === "online-open") {
+    if (!state.user) {
+      state.settingsOpen = false;
+      state.showAuth = true;
+      state.authMode = "login";
+      state.authError = "";
+      render();
+      return true;
+    }
+    state.showOnline = true;
+    state.onlineStep = "menu";
+    render();
+    return true;
+  }
+
+  if (action === "online-back") {
+    state.showOnline = false;
+    render();
+    return true;
+  }
+
+  if (action === "online-world") {
+    state.onlineStep = "matchmaking";
+    state.mmActive = false;
+    state.mmSeconds = 0;
+    state.mmFound = 0;
+    render();
+    return true;
+  }
+
+  if (action === "online-friends") {
+    state.onlineStep = "room";
+    state.roomName = "Mi sala";
+    state.roomMyColor = "red";
+    state.roomPlayers = [{
+      color: "red",
+      username: state.profile ? state.profile.username : "Tú",
+      avatar: state.profile ? state.profile.avatar : "a1",
+      isMe: true
+    }];
+    render();
+    return true;
+  }
+
+  if (action === "mm-count") {
+    state.onlinePlayerCount = Number(button.dataset.count);
+    render();
+    return true;
+  }
+
+  if (action === "mm-start") {
+    startMatchmaking();
+    return true;
+  }
+
+  if (action === "mm-cancel") {
+    stopMatchmaking();
+    state.onlineStep = "menu";
+    render();
+    return true;
+  }
+
+  if (action === "room-back") {
+    state.onlineStep = "menu";
+    render();
+    return true;
+  }
+
+  if (action === "room-invite") {
+    state.showFriends = true;
+    state.showOnline = false;
+    render();
+    return true;
+  }
+
+  if (action === "room-start") {
+    if (state.roomPlayers.length >= 2) {
+      const players = state.roomPlayers.map(p => p.color);
+      state.showOnline = false;
+      state.mode = "local";
+      state.players = players;
+      state.count = players.length;
+      state.tokens = freshTokens();
+      resetGameStats();
+      state.active = 0;
+      state.lastRoll = null;
+      state.roll = null;
+      state.rolling = false;
+      state.moving = false;
+      state.valid = new Set();
+      state.winner = null;
+      state.message = "Lanza el dado para comenzar. Un seis saca una ficha de casa.";
+      state.phase = "playing";
+      render();
+    }
+    return true;
+  }
+
+  return false;
+}
+
+let mmInterval = null;
+
+function startMatchmaking() {
+  if (state.mmActive) return;
+  state.mmActive = true;
+  state.mmSeconds = 0;
+  state.mmFound = 1;
+  render();
+
+  mmInterval = setInterval(() => {
+    state.mmSeconds++;
+
+    // Simula ir encontrando jugadores reales
+    if (state.mmSeconds === 6 && state.onlinePlayerCount >= 3) state.mmFound = 2;
+    if (state.mmSeconds === 14 && state.onlinePlayerCount >= 4) state.mmFound = 3;
+
+    // Si encontramos todos los jugadores reales, arranca
+    if (state.mmFound >= state.onlinePlayerCount) {
+      stopMatchmaking();
+      enterOnlineGame();
+      return;
+    }
+
+    // Al llegar a 30s completa con bots y arranca
+    if (state.mmSeconds >= 30) {
+      state.mmFound = state.onlinePlayerCount;
+      stopMatchmaking();
+      setTimeout(() => enterOnlineGame(), 500);
+      return;
+    }
+
+    render();
+  }, 1000);
+}
+
+function stopMatchmaking() {
+  if (mmInterval) { clearInterval(mmInterval); mmInterval = null; }
+  state.mmActive = false;
+}
+
+function enterOnlineGame() {
+  const count = state.onlinePlayerCount;
+  state.showOnline = false;
+  state.mode = "solo";
+  state.humanColor = "red";
+  state.botCount = count - 1;
+  state.players = ["red", "green", "yellow", "blue"].slice(0, count);
+  state.count = count;
+  state.tokens = freshTokens();
+  resetGameStats();
+  state.active = 0;
+  state.lastRoll = null;
+  state.roll = null;
+  state.rolling = false;
+  state.moving = false;
+  state.valid = new Set();
+  state.winner = null;
+  state.message = "Tu turno. Lanza el dado para comenzar.";
+  state.phase = "playing";
+  render();
+}
 
 showTapGate();
 startAuth();
