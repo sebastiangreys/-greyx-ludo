@@ -7402,7 +7402,8 @@ async function submitAuth() {
     if (mode === "reset" && !real.includes(code)) {
       state.authNotice = AUTH_MSG.resetSent;
     } else {
-      state.authError = authErrorText(code) + " [" + code + "]";
+state.authError = authErrorText(code);
+
     }
     render();
   }
