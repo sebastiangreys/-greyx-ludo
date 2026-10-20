@@ -7894,11 +7894,21 @@ ${requestsHtml}
         <div class="fx-panel-head">
           <h2>👥 Otros amigos</h2>
         </div>
-        <p class="friends-hint fx-empty-inline">Cuando agregues amigos, se mostrarán aquí.</p>
+        ${
+          list.filter(f => !f.starred).length === 0
+            ? `<p class="friends-hint fx-empty-inline">Cuando agregues amigos, se mostrarán aquí.</p>`
+            : list.filter(f => !f.starred).map(f => `
+              <div class="friend-result-card" data-action="friend-open" data-uid="${escHtml(f.uid)}">
+                <span class="friend-result-avatar">${avatarEmoji(f.avatar)}</span>
+                <div class="friend-result-info">
+                  <strong>${escHtml(f.nickname || ("@" + f.username))}</strong>
+                  <small class="${f.online ? "on" : ""}">${f.online ? "🟢 En línea" : "⚪ Desconectado"}</small>
+                </div>
+              </div>
+            `).join("")
+        }
       </section>
-    `}
-  </section>`;
-}
+      }
 function render() {
 
   const html = `
@@ -8082,6 +8092,7 @@ if (action === "settings-music") {
   state.friendConfirmDelete = null;
   render();
   loadFriendRequests();
+  loadFriendsList();
   return;
 }
 
@@ -9263,6 +9274,8 @@ async function sendFriendRequest(toUid, toUsername) {
   render();
 }
 
+
+
 async function loadFriendRequests() {
   if (!fb || !fb.db || !state.user) return;
 
@@ -9296,7 +9309,36 @@ async function loadFriendRequests() {
 
   if (state.showFriends) render();
 }
+async function loadFriendsList() {
+  if (!fb || !fb.db || !state.user) {
+    state.friendsList = [];
+    return;
+  }
 
+  try {
+    const fs = await fsModule();
+    const snap = await fs.getDocs(
+      fs.collection(fb.db, "users", state.user.uid, "friends")
+    );
+
+    state.friendsList = snap.docs.map(d => {
+      const data = d.data() || {};
+      return {
+        uid: d.id,
+        username: data.username || "jugador",
+        avatar: data.avatar || "a1",
+        starred: !!data.starred,
+        nickname: data.nickname || null,
+        online: !!data.online
+      };
+    });
+  } catch (e) {
+    console.warn("loadFriendsList", e);
+    state.friendsList = [];
+  }
+
+  if (state.showFriends) render();
+}
 async function acceptFriendRequest(reqId) {
   if (!fb || !fb.db || !state.user) return;
   state.friendsReqBusy = true;
@@ -9334,6 +9376,7 @@ async function acceptFriendRequest(reqId) {
     await batch.commit();
 
     await loadFriendRequests();
+    await loadFriendsList();
     state.friendsSearchNote = "Solicitud aceptada.";
   } catch (e) {
     console.warn("acceptFriendRequest", e);
