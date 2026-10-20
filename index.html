@@ -4656,6 +4656,112 @@ button.gx-mode:active {
   transform: translateY(4px);
   box-shadow: 0 2px 0 #4c1d95;
 }
+/* ===== XP Y NIVELES ===== */
+.xp-popup {
+  position: fixed;
+  z-index: 99998;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: xpFloat 2.8s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.xp-popup-badge {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  border: 2px solid #a78bfa;
+  color: #fff;
+  font: 900 1.1rem monospace;
+  letter-spacing: .04em;
+  box-shadow: 0 0 24px #7c3aed88, 0 8px 20px #00000055;
+}
+.xp-popup-label {
+  color: #c4b5fd;
+  font: 700 .65rem monospace;
+  letter-spacing: .14em;
+}
+@keyframes xpFloat {
+  0%   { opacity:0; transform:translateY(0) scale(.7); }
+  15%  { opacity:1; transform:translateY(-10px) scale(1.08); }
+  40%  { opacity:1; transform:translateY(-32px) scale(1); }
+  80%  { opacity:1; transform:translateY(-60px) scale(1); }
+  100% { opacity:0; transform:translateY(-90px) scale(.9); }
+}
+
+.levelup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  background: #00000088;
+  animation: fadeInOut 3.2s ease forwards;
+}
+@keyframes fadeInOut {
+  0%   { opacity:0; }
+  12%  { opacity:1; }
+  75%  { opacity:1; }
+  100% { opacity:0; }
+}
+.levelup-card {
+  text-align: center;
+  padding: 32px 28px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #1e1b4b, #0f172a);
+  border: 2px solid #a78bfa;
+  box-shadow: 0 0 60px #7c3aed66, 0 30px 60px #00000077;
+  animation: levelupPop 3.2s cubic-bezier(.2,.85,.3,1.2) forwards;
+}
+@keyframes levelupPop {
+  0%   { transform:scale(.5) rotate(-4deg); opacity:0; }
+  18%  { transform:scale(1.08) rotate(1deg); opacity:1; }
+  30%  { transform:scale(1) rotate(0); }
+  75%  { transform:scale(1); opacity:1; }
+  100% { transform:scale(.9); opacity:0; }
+}
+.levelup-star { font-size: 3rem; margin-bottom: 8px; }
+.levelup-title {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  color: #a78bfa;
+  margin-bottom: 6px;
+}
+.levelup-num {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 0 30px #a78bfa;
+}
+.levelup-sub {
+  color: #94a3b8;
+  font-size: .8rem;
+  margin-top: 8px;
+}
+
+.xp-bar-wrap {
+  margin: 6px 0 0;
+  height: 5px;
+  border-radius: 99px;
+  background: #1e293b;
+  overflow: hidden;
+}
+.xp-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #22d3ee);
+  transition: width .6s ease;
+}
+.xp-next-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font: 700 .58rem monospace;
+  color: #64748b;
+}
 
 </style>
 <div id="app" class="app"></div>
@@ -5269,6 +5375,10 @@ statsBusy:false,
 gameStats:null,
 statsRecorded:false,
 gameResult:null,
+xp:0,
+xpLevel:1,
+xpLoaded:false,
+xpResult:null,
 showOnline:false,
 onlineStep:"menu",
 onlinePlayerCount:4,
@@ -5646,8 +5756,13 @@ function setupMarkup() {
 
 if (state.setupStep === 1) {
   const st = state.stats || { played: 0, wins: 0, trophies: 0 };
-  const level = Math.max(1, Math.floor((st.trophies || 0) / 100) + 1);
-  const xp = (st.trophies || 0) % 100;
+  const level = state.xpLoaded ? state.xpLevel : Math.max(1, Math.floor((st.trophies || 0) / 100) + 1);
+const xpTotal = state.xpLoaded ? state.xp : 0;
+const xp = state.xpLoaded ? xpBarPct(xpTotal) : (st.trophies || 0) % 100;
+const xpLabel = state.xpLoaded && level < XP_MAX_LEVEL
+  ? xpToNext(xpTotal) + " XP"
+  : state.xpLoaded && level >= XP_MAX_LEVEL ? "MÁXIMO" : "";
+
 
   return `
     <section class="gx-home">
@@ -5741,9 +5856,9 @@ if (state.setupStep === 1) {
             <span>🏆 <b>${st.wins || 0}</b> victorias</span>
           </div>
           <div class="gx-xp">
-            <div class="gx-xp-bar"><i style="width:${xp}%"></i></div>
-            <span>${xp}/100</span>
-          </div>
+  <div class="gx-xp-bar"><i style="width:${xp}%"></i></div>
+  <span>${xpLabel}</span>
+</div>
         </div>
       </div>
 
@@ -8907,6 +9022,7 @@ playSound("goal");
   showArrivalConfetti(color, 180);
 
   state.winner = color;
+  grantXP(color === state.humanColor);
   recordGameResult();
   state.celebrating = true;
   state.roll = null;
@@ -9086,6 +9202,7 @@ function onAuthChange(user) {
     state.authPass2 = "";
     state.authError = "";
     loadProfile();
+    loadXP();
   } else {
     state.profile = null;
     state.profileLoaded = false;
@@ -9821,7 +9938,8 @@ function statsBlockMarkup() {
     <div class="trophy-big"><b>🏆 ${s.trophies}</b><span>Trofeos</span></div>
     <div class="stats-grid">${cells}</div>
     <p class="profile-hint">Solo cuentan las partidas contra bots con tu sesión iniciada.</p>
-  `;
+ ${state.xpLoaded ? xpBarMarkup() : ""}
+   `;
 }
 
 function profileMarkup() {
@@ -9932,7 +10050,7 @@ Una gran vuelta alrededor del tablero.
 </p>
 
 ${trophyLine}
-
+${state.xpResult ? `<p style="text-align:center;color:#c4b5fd;font-weight:900;font-size:1.1rem;margin:6px 0 0">+${state.xpResult.granted} XP</p>` : ""}
 <div class="winner-actions">
 
 <button
@@ -10292,6 +10410,177 @@ function enterOnlineGame() {
   state.message = "Tu turno. Lanza el dado para comenzar.";
   state.phase = "playing";
   render();
+}
+/* ========== SISTEMA DE XP Y NIVELES ========== */
+
+const XP_TABLE = [
+  0,50,100,152,210,278,360,460,582,730,
+  908,1120,1370,1662,2000,2388,2830,3330,3892,4520,
+  5218,5990,6840,7772,8790,9898,11100,12400,13802,15310,
+  16928,18660,20510,22482,24580,26808,29170,31670,34312,37100,
+  40038,43130,46380,49792,53370,57118,61040,65140,69422,73890,
+  78548,83400,88450,93702,99160,104828,110710,116810,123132,129680,
+  136458,143470,150720,158212,165950,173938,182180,190680,199442,208470,
+  217768,227340,237190,247322,257740,268448,279450,290750,302352,314260,
+  326478,339010,351860,365032,378530,392358,406520,421020,435862,451050,
+  466588,482480,498730,515342,532320,549668,567390,585490,603972,622840
+];
+
+const XP_MAX_LEVEL = 100;
+const XP_DAILY_CAP = 300;
+const XP_WIN  = 60;
+const XP_LOSE = 20;
+const XP_REDUCED = 5;
+const XP_TZ = "America/Santo_Domingo";
+
+function xpLevelFromTotal(total) {
+  let lv = 1;
+  for (let i = 1; i < XP_TABLE.length; i++) {
+    if (total >= XP_TABLE[i]) lv = i + 1;
+    else break;
+  }
+  return Math.min(lv, XP_MAX_LEVEL);
+}
+
+function xpForLevel(lv) {
+  return XP_TABLE[Math.min(lv - 1, XP_TABLE.length - 1)];
+}
+
+function xpToNext(total) {
+  const lv = xpLevelFromTotal(total);
+  if (lv >= XP_MAX_LEVEL) return 0;
+  return xpForLevel(lv + 1) - total;
+}
+
+function xpBarPct(total) {
+  const lv = xpLevelFromTotal(total);
+  if (lv >= XP_MAX_LEVEL) return 100;
+  const base = xpForLevel(lv);
+  const next = xpForLevel(lv + 1);
+  return Math.round((total - base) / (next - base) * 100);
+}
+
+function todayRD() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: XP_TZ });
+}
+
+async function loadXP() {
+  if (!fb || !fb.db || !state.user) return;
+  const uid = state.user.uid;
+  try {
+    const fs = await fsModule();
+    const snap = await fs.getDoc(fs.doc(fb.db, "stats", uid));
+    const d = snap.exists() ? snap.data() : {};
+    state.xp = d.xp || 0;
+    state.xpLevel = xpLevelFromTotal(state.xp);
+    state.xpLoaded = true;
+    if (state.introDone) render();
+  } catch (e) {
+    console.warn("loadXP", e);
+  }
+}
+
+async function grantXP(won) {
+  if (!state.user || !fb || !fb.db) return;
+  if (state.mode !== "solo") return;
+
+  const uid = state.user.uid;
+  let granted = 0;
+  let leveledUp = false;
+  let newLevel = 0;
+
+  try {
+    const fs = await fsModule();
+    const ref = fs.doc(fb.db, "stats", uid);
+
+    await fs.runTransaction(fb.db, async tx => {
+      const snap = await tx.get(ref);
+      const d = snap.exists() ? snap.data() : {};
+
+      const today = todayRD();
+      const dailyDate  = d.xpDailyDate  || "";
+      const dailyEarned = dailyDate === today ? (d.xpDailyEarned || 0) : 0;
+
+      const base = dailyEarned >= XP_DAILY_CAP
+        ? XP_REDUCED
+        : won ? XP_WIN : XP_LOSE;
+
+      granted = base;
+
+      const prevXP = d.xp || 0;
+      const newXP  = prevXP + granted;
+      const prevLv = xpLevelFromTotal(prevXP);
+      const newLv  = xpLevelFromTotal(newXP);
+
+      if (newLv > prevLv) { leveledUp = true; newLevel = newLv; }
+
+      const update = {
+        xp: newXP,
+        xpDailyDate:   today,
+        xpDailyEarned: dailyDate === today ? dailyEarned + (base === XP_REDUCED ? 0 : base) : (base === XP_REDUCED ? 0 : base),
+        updatedAt: fs.serverTimestamp()
+      };
+
+      if (snap.exists()) tx.update(ref, update);
+      else tx.set(ref, { ...update, played:0, wins:0, losses:0, captures:0, goals:0,
+        trophies:0, streak:0, bestStreak:0 });
+
+      state.xp = newXP;
+      state.xpLevel = newLv;
+    });
+
+    state.xpResult = { granted, leveledUp, newLevel };
+    if (state.phase === "winner") render();
+
+    showXPPopup(granted);
+    if (leveledUp) setTimeout(() => showLevelUp(newLevel), 1200);
+
+  } catch (e) {
+    console.warn("grantXP", e);
+  }
+}
+
+function showXPPopup(amount) {
+  const pop = document.createElement("div");
+  pop.className = "xp-popup";
+  pop.style.cssText = "left:50%;top:55%;transform:translateX(-50%)";
+  pop.innerHTML = `
+    <div class="xp-popup-badge">+${amount} XP</div>
+    <div class="xp-popup-label">EXPERIENCIA</div>
+  `;
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 3000);
+}
+
+function showLevelUp(lv) {
+  const ov = document.createElement("div");
+  ov.className = "levelup-overlay";
+  ov.innerHTML = `
+    <div class="levelup-card">
+      <div class="levelup-star">⭐</div>
+      <div class="levelup-title">¡SUBISTE DE NIVEL!</div>
+      <div class="levelup-num">${lv}</div>
+      <div class="levelup-sub">${lv >= XP_MAX_LEVEL ? "¡Has llegado al nivel máximo!" : "Sigue jugando para subir más."}</div>
+    </div>
+  `;
+  document.body.appendChild(ov);
+  setTimeout(() => ov.remove(), 3300);
+}
+
+function xpBarMarkup() {
+  if (!state.xpLoaded || !state.user) return "";
+  const lv  = state.xpLevel;
+  const pct = xpBarPct(state.xp);
+  const toNext = xpToNext(state.xp);
+  return `
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-fill" style="width:${pct}%"></div>
+    </div>
+    <div class="xp-next-label">
+      <span>NV. ${lv}</span>
+      <span>${lv >= XP_MAX_LEVEL ? "MÁXIMO" : toNext + " XP para NV. " + (lv+1)}</span>
+    </div>
+  `;
 }
 
 showTapGate();
