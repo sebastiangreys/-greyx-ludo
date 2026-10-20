@@ -5397,7 +5397,7 @@ players:[],
   moving:false,
   valid:new Set(),
   message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
-  winner:null
+  winner:null,
   finishedOrder: [],
 ranking: null,
 };
@@ -7471,7 +7471,7 @@ async function submitAuth() {
 
   if (mode !== "reset") {
     if (!pass) return failAuth(AUTH_MSG.needPass);
-    if (mode === "register") {q
+    if (mode === "register") {
       if (pass.length < 8) return failAuth(AUTH_MSG.short);
       if (pass !== state.authPass2) return failAuth(AUTH_MSG.match);
     }
@@ -8613,7 +8613,7 @@ function nextTurn() {
     : "Tu turno. Lanza el dado.";
 
   render();
-  maybeBotTurn();
+  maybeBotTurn();  // ← cámbiala por queueBotTurn();
 }
 
 function rollDice(fromBot = false) {
@@ -10510,8 +10510,6 @@ const XP_TABLE = [
 const XP_MAX_LEVEL = 100;
 const XP_DAILY_CAP = 300;
 const XP_WIN  = 60;
-const XP_LOSE = 20;
-const XP_WIN  = 60;   // se mantiene por compatibilidad
 const XP_LOSE = 20;
 const XP_BY_PLACE = { 1: 60, 2: 40, 3: 20 }; // 4º o peor = 0
 const XP_REDUCED = 5;
