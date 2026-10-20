@@ -5398,6 +5398,8 @@ players:[],
   valid:new Set(),
   message:"Lanza el dado para comenzar. Un seis saca una ficha de casa.",
   winner:null
+  finishedOrder: [],
+ranking: null,
 };
 /* ========== IDIOMAS ========== */
 
@@ -8444,6 +8446,9 @@ function setup() {
 
   state.phase = "setup";
   state.winner = null;
+  state.finishedOrder = [];
+state.ranking = null;
+state.xpResult = null;
   state.valid = new Set();
   state.roll = null;
 
@@ -8592,7 +8597,14 @@ function queueBotTurn(delay = 800) {
 }
 
 function nextTurn() {
-  state.active = (state.active + 1) % state.players.length;
+  const n = state.players.length;
+  const done = state.finishedOrder || [];
+
+  for (let i = 0; i < n; i++) {
+    state.active = (state.active + 1) % n;
+    if (!done.includes(state.players[state.active])) break;
+  }
+
   state.roll = null;
   state.valid = new Set();
 
@@ -8601,7 +8613,7 @@ function nextTurn() {
     : "Tu turno. Lanza el dado.";
 
   render();
-  queueBotTurn();
+  maybeBotTurn();
 }
 
 function rollDice(fromBot = false) {
@@ -9008,24 +9020,43 @@ playSound("goal");
 
   state.arrived = null;
 }
-    if (state.tokens[color].every(token => token.progress === 57)) {
+if (state.tokens[color].every(token => token.progress === 57)) {
+  if (!state.finishedOrder) state.finishedOrder = [];
+
+  // Ya estaba en el podio (evitar doble registro)
+  if (state.finishedOrder.includes(color)) {
+    state.roll = null;
+    nextTurn();
+    return;
+  }
+
+  state.finishedOrder.push(color);
+  const place = state.finishedOrder.length;
+  const placeLabel = place === 1 ? "1º" : place === 2 ? "2º" : place === 3 ? "3º" : place + "º";
+
   playSound("winner");
-  showArrivalConfetti(color, 180);
-
-  state.winner = color;
-  grantXP(color === state.humanColor);
-  recordGameResult();
-  state.celebrating = true;
+  showArrivalConfetti(color, 120);
   state.roll = null;
+  state.message = `🏆 ${playerLabel(color)} queda en ${placeLabel} lugar!`;
 
+  // ¿Ya hay podio completo? (solo queda 1 o 0 jugando)
+  const stillPlaying = state.players.filter(c => !state.finishedOrder.includes(c));
+
+  if (stillPlaying.length <= 1) {
+    if (stillPlaying.length === 1) {
+      state.finishedOrder.push(stillPlaying[0]);
+    }
+    await endGameWithRanking();
+    return;
+  }
+
+  // Sigue la partida por los puestos restantes
+  state.celebrating = true;
   render();
-
-  await new Promise(resolve => setTimeout(resolve, 2200));
-
+  await new Promise(r => setTimeout(r, 1600));
   state.celebrating = false;
-  state.phase = "winner";
 
-  render();
+  nextTurn();
   return;
 }
 
@@ -9847,14 +9878,101 @@ async function loadStats() {
   state.statsUid = uid;
   if (state.introDone && state.showProfile) render();
 }
+async function grantXPByPlace(place) {
+  if (!state.user || !fb || !fb.db) return;
+  if (state.mode !== "solo") return;
 
+  const amount = XP_BY_PLACE[place] || 0;
+  if (amount <= 0) {
+    state.xpResult = { granted: 0, leveledUp: false, newLevel: state.xpLevel || 1, place };
+    return;
+  }
+
+  // Reutiliza la lógica de grantXP pero con "amount" fijo:
+  // Copia grantXP y cambia:
+  //   const base = dailyEarned >= XP_DAILY_CAP ? XP_REDUCED : amount;
+  // en lugar de won ? XP_WIN : XP_LOSE
+
+  const uid = state.user.uid;
+  let granted = 0;
+  let leveledUp = false;
+  let newLevel = 0;
+
+  try {
+    const fs = await fsModule();
+    const ref = fs.doc(fb.db, "stats", uid);
+
+    await fs.runTransaction(fb.db, async tx => {
+      const snap = await tx.get(ref);
+      const d = snap.exists() ? snap.data() : {};
+      const today = todayRD();
+      const dailyDate = d.xpDailyDate || "";
+      const dailyEarned = dailyDate === today ? (d.xpDailyEarned || 0) : 0;
+
+      const base = dailyEarned >= XP_DAILY_CAP ? XP_REDUCED : amount;
+      granted = base;
+
+      const prevXP = d.xp || 0;
+      const newXP = prevXP + granted;
+      const prevLv = xpLevelFromTotal(prevXP);
+      const newLv = xpLevelFromTotal(newXP);
+      if (newLv > prevLv) { leveledUp = true; newLevel = newLv; }
+
+      const update = {
+        xp: newXP,
+        xpDailyDate: today,
+        xpDailyEarned: dailyDate === today
+          ? dailyEarned + (base === XP_REDUCED ? 0 : base)
+          : (base === XP_REDUCED ? 0 : base),
+        updatedAt: fs.serverTimestamp()
+      };
+
+      if (snap.exists()) tx.update(ref, update);
+      else tx.set(ref, Object.assign({
+        played: 0, wins: 0, losses: 0, captures: 0, goals: 0,
+        trophies: 0, streak: 0, bestStreak: 0
+      }, update));
+
+      state.xp = newXP;
+      state.xpLevel = newLv;
+    });
+
+    state.xpResult = { granted, leveledUp, newLevel, place };
+    showXPPopup(granted);
+    if (leveledUp) setTimeout(() => showLevelUp(newLevel), 1200);
+  } catch (e) {
+    console.warn("grantXPByPlace", e);
+  }
+}
+async function endGameWithRanking() {
+  state.ranking = state.finishedOrder.slice();
+  state.winner = state.ranking[0] || null;
+
+  const humanIdx = state.ranking.indexOf(state.humanColor);
+  const humanPlace = humanIdx >= 0 ? humanIdx + 1 : 0;
+
+  if (state.mode === "solo" && humanPlace > 0) {
+    await grantXPByPlace(humanPlace);
+  }
+
+  await recordGameResult();
+
+  state.celebrating = true;
+  state.roll = null;
+  render();
+  await new Promise(r => setTimeout(r, 2200));
+  state.celebrating = false;
+  state.phase = "winner";
+  render();
+}
 async function recordGameResult() {
   if (state.mode !== "solo" || state.statsRecorded) return;
   state.statsRecorded = true;
   if (!state.user || !fb || !fb.db) return;
 
   const uid = state.user.uid;
-  const won = state.winner === state.humanColor;
+const place = (state.ranking || state.finishedOrder || []).indexOf(state.humanColor);
+const won = place === 0; // 1º lugar
   const bots = Math.max(1, state.players.length - 1);
   const gain = 4 + 4 * bots;
   const g = state.gameStats || { captures:0, goals:0 };
@@ -10016,55 +10134,27 @@ function profileMarkup() {
 }
 
 function winnerMarkup() {
-  const r = state.gameResult;
-  const trophyLine = r
-    ? `<p class="trophy-line ${r.delta >= 0 ? "up" : "down"}">🏆 ${r.delta >= 0 ? "+" : ""}${r.delta}</p>`
-    : "";
+  const rank = state.ranking || state.finishedOrder || [];
+  const lines = rank.map((c, i) => {
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "4️⃣";
+    const xp = XP_BY_PLACE[i + 1] || 0;
+    const you = c === state.humanColor ? " (tú)" : "";
+    return `<p style="margin:4px 0">${medal} ${i + 1}º — ${playerLabel(c)}${you}${state.mode === "solo" && c === state.humanColor ? ` · +${(state.xpResult && state.xpResult.granted) || xp} XP` : ""}</p>`;
+  }).join("");
 
   return `
-
-<div class="winner">
-
-<div class="winner-card">
-
-<div class="winner-seal">
-★
-</div>
-
-<h2>
-¡Gana ${playerLabel(state.winner)}!
-</h2>
-
-<p>
-Todas sus fichas llegaron a la meta.
-Una gran vuelta alrededor del tablero.
-</p>
-
-${trophyLine}
-${state.xpResult ? `<p style="text-align:center;color:#c4b5fd;font-weight:900;font-size:1.1rem;margin:6px 0 0">+${state.xpResult.granted} XP</p>` : ""}
-<div class="winner-actions">
-
-<button
-class="secondary"
-data-action="setup"
->
-Configurar
-</button>
-
-<button
-class="primary-button"
-data-action="again"
->
-Jugar otra vez
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
+  <div class="winner">
+    <div class="winner-card">
+      <div class="winner-seal">★</div>
+      <h2>¡Podio final!</h2>
+      <p>La partida terminó. Estos son los puestos:</p>
+      ${lines}
+      <div class="winner-actions">
+        <button class="secondary" data-action="setup">Configurar</button>
+        <button class="primary-button" data-action="again">Jugar otra vez</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 const STATS_I18N = {
@@ -10421,6 +10511,9 @@ const XP_MAX_LEVEL = 100;
 const XP_DAILY_CAP = 300;
 const XP_WIN  = 60;
 const XP_LOSE = 20;
+const XP_WIN  = 60;   // se mantiene por compatibilidad
+const XP_LOSE = 20;
+const XP_BY_PLACE = { 1: 60, 2: 40, 3: 20 }; // 4º o peor = 0
 const XP_REDUCED = 5;
 const XP_TZ = "America/Santo_Domingo";
 
