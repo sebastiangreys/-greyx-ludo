@@ -933,7 +933,7 @@ p {
   50% {
     transform:scale(1.18);
     box-shadow:
-      0 0 0 7px ##e5393512;
+      0 0 0 7px #e5393512;
   }
 }
 .game-layout {
@@ -1262,19 +1262,6 @@ p {
 
 .token.valid:active {
   transform:translateY(0) scale(.92);
-}
-
-  box-shadow:
-    0 0 0 5px #fff9dc66,
-    inset 0 2px 3px #ffffff80,
-    inset 0 -4px 5px #00000030,
-    0 6px 0 #4d321f55,
-    0 9px 13px #4d321f40;
-}
-
-.token.valid:hover {
-  transform:translateY(-5px) scale(1.13);
-  filter:brightness(1.18);
 }
 
 .token.valid:active {
@@ -2256,9 +2243,6 @@ p {
   position: absolute;
   top: 18px;
   right: 18px;
-
-  width: 46px;
-  height: 46px;
 
   border: 1px solid #202b3e22;
   border-radius: 50%;
@@ -7979,7 +7963,6 @@ function friendsMarkup() {
 
       ${resultsHtml}
       ${resultsHtml}
-${requestsHtml}
 
       <div class="fx-stats">
         <div class="fx-stat fx-stat-friends">
@@ -8023,7 +8006,11 @@ ${requestsHtml}
             `).join("")
         }
       </section>
-  
+    `}
+  </section>
+  `;
+}
+
 function render() {
 
   const html = `
