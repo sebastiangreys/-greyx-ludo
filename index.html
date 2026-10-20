@@ -7410,6 +7410,11 @@ async function initFirebase() {
       sendEmailVerification: authMod.sendEmailVerification,
       signOut: authMod.signOut
     };
+        try {
+      await authMod.setPersistence(auth, authMod.browserLocalPersistence);
+    } catch (e) {
+      console.warn("No se pudo fijar la persistencia:", e);
+    }
     authMod.onAuthStateChanged(auth, onAuthChange);
   } catch (e) {
     console.warn("Firebase no disponible:", e);
