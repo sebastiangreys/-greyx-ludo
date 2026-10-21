@@ -10840,7 +10840,7 @@ startAuth();
 </script>
 
 <script>
-/* GREYX LUDO — CAPA v6 (deja SOLO este script extra; borra v2, v3, v4 y v5) */
+/* GREYX LUDO — CAPA v7 (deja SOLO este script extra; reemplaza al v6) */
 (() => {
   const $ = s => document.querySelector(s);
   const click = a => { const b = $('[data-action="' + a + '"]'); if (b) b.click(); };
@@ -10860,6 +10860,39 @@ ${crown ? `<g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 4
   const LOGO_URI = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(logo(true, "u")) + '")';
 
   /* ---------- CSS ---------- */
+  /* ---------- Fichas peón (SVG) y fondo del tablero ---------- */
+  const uri = svg => 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+  const pawn = (a, b, c) => uri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="b" x1="0" x2="1"><stop offset="0" stop-color="${c}"/><stop offset=".3" stop-color="${a}"/><stop offset=".7" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>
+<radialGradient id="h" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="${a}"/><stop offset=".75" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></radialGradient>
+</defs>
+<ellipse cx="50" cy="91" rx="31" ry="7" fill="#000" opacity=".28"/>
+<path d="M19 88Q19 76 50 76Q81 76 81 88Q81 95 50 95Q19 95 19 88Z" fill="url(#b)" stroke="${c}" stroke-width="1.5"/>
+<path d="M33 78Q37 54 43 45H57Q63 54 67 78Z" fill="url(#b)" stroke="${c}" stroke-width="1.5"/>
+<ellipse cx="50" cy="45" rx="15" ry="5.5" fill="url(#b)" stroke="${c}" stroke-width="1.5"/>
+<circle cx="50" cy="29" r="17" fill="url(#h)" stroke="${c}" stroke-width="1.5"/>
+<ellipse cx="43" cy="22" rx="5.5" ry="3.8" fill="#fff" opacity=".75" transform="rotate(-30 43 22)"/>
+</svg>`);
+  const PAWN = {
+    red: pawn("#ff9a90", "#e53935", "#8e1b1b"),
+    green: pawn("#8ee0a0", "#2fa84f", "#14663a"),
+    yellow: pawn("#ffe88a", "#f5b301", "#a87500"),
+    blue: pawn("#9bbcff", "#2f6fe0", "#183f93"),
+    gold: pawn("#fff6c0", "#f0c030", "#a07410")
+  };
+  const BOARD_URI = uri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" preserveAspectRatio="none">
+<rect x="6" y="6" width="3" height="3" fill="#20254a"/>
+<rect width="6" height="6" rx="1.1" fill="#e53935" opacity=".3"/>
+<rect x="9" width="6" height="6" rx="1.1" fill="#2f6fe0" opacity=".3"/>
+<rect y="9" width="6" height="6" rx="1.1" fill="#2fa84f" opacity=".3"/>
+<rect x="9" y="9" width="6" height="6" rx="1.1" fill="#f5b301" opacity=".3"/>
+<rect x="1.2" y="1.2" width="3.6" height="3.6" rx=".8" fill="#fff" opacity=".45"/>
+<rect x="10.2" y="1.2" width="3.6" height="3.6" rx=".8" fill="#fff" opacity=".45"/>
+<rect x="1.2" y="10.2" width="3.6" height="3.6" rx=".8" fill="#fff" opacity=".45"/>
+<rect x="10.2" y="10.2" width="3.6" height="3.6" rx=".8" fill="#fff" opacity=".45"/>
+</svg>`);
+
   const css = `
 @keyframes gxIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
 .token.red{--d:#a3262b}.token.green{--d:#14783a}.token.yellow{--d:#b4791a}.token.blue{--d:#2c55b8}
@@ -10867,11 +10900,18 @@ ${crown ? `<g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 4
 .die::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(150deg,#ffffff66 0,#fff0 38%,#0000 62%,#0000002a)}
 button,[data-action]{-webkit-tap-highlight-color:transparent}
 
-/* ===== FICHAS: peón 3D ===== */
-body .board .token{width:58%;height:64%;left:21%;top:27%;border-radius:50% 50% 36% 36%/72% 72% 28% 28%;background:linear-gradient(145deg,var(--c),var(--d));box-shadow:inset 3px 0 5px #fff6,inset -4px -5px 7px #0006,0 6px 8px #000a}
-body .board .token::before{content:"";position:absolute;z-index:-1;left:16%;top:-38%;width:68%;height:58%;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fffb,#fff0 40%),linear-gradient(145deg,var(--c),var(--d));border:2px solid #fff;box-shadow:inset -3px -4px 6px #0005}
-body .board .token::after{content:"";position:absolute;z-index:-1;left:-12%;right:-12%;bottom:-9%;height:24%;border-radius:50%;background:linear-gradient(var(--c),var(--d));border:2px solid #fff;box-shadow:0 4px 6px #0008}
-body .board .yard .token{height:66%;width:60%;left:auto;top:auto;justify-self:center;align-self:end}
+/* ===== FICHAS: peón 3D (SVG) ===== */
+body .board .token{width:74%;height:74%;left:13%;top:13%;padding:30% 0 0;border:0;border-radius:0;background:var(--pw) center/contain no-repeat;box-shadow:none;color:#fff;font:900 clamp(6px,1.9vw,10px) monospace;text-shadow:0 1px 2px #000c;filter:drop-shadow(0 3px 2px #0006)}
+body .board .token.red{--pw:${PAWN.red}}
+body .board .token.green{--pw:${PAWN.green}}
+body .board .token.yellow{--pw:${PAWN.yellow}}
+body .board .token.blue{--pw:${PAWN.blue}}
+body .board .token.finished{background:${PAWN.gold} center/contain no-repeat!important;color:#5a3a00;text-shadow:none}
+body .board .yard .token{width:100%;height:100%;left:auto;top:auto}
+body .board .token::before,body .board .token::after{content:none}
+body .board .token.valid{outline:none;box-shadow:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 9px var(--c))}
+body .board .token.valid::after{content:"";position:absolute;left:10%;right:10%;bottom:4%;height:22%;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px #fff;animation:gx7Ring 1s ease-in-out infinite}
+@keyframes gx7Ring{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.15);opacity:1}}
 
 /* ===== TABLERO claro (maqueta) ===== */
 body .board-frame{background:linear-gradient(145deg,#3a3f7a,#14183a);border:3px solid #7c6cf0aa;box-shadow:0 0 36px #6d28d966,0 28px 60px #000a}
@@ -10888,7 +10928,7 @@ body .home.blue{background:linear-gradient(145deg,#5b9bff,#1d4ed8)}
 body .home.green{background:linear-gradient(145deg,#46c872,#1b7a3a)}
 body .home.yellow{background:linear-gradient(145deg,#ffd84a,#d99a00)}
 body .yard{background:#ffffffee;border:3px solid #fff;border-radius:18%;box-shadow:inset 0 3px 8px #0003}
-body .finish{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);width:24%;height:24%;left:38%;top:38%;border:0;border-radius:0;background:conic-gradient(from 0deg,#2f6fe0 0 25%,#f5b301 25% 50%,#2fa84f 50% 75%,#e53935 75%);box-shadow:none}
+body .finish{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);width:20%;height:20%;left:40%;top:40%;border:0;border-radius:0;background:conic-gradient(from 0deg,#2f6fe0 0 25%,#f5b301 25% 50%,#2fa84f 50% 75%,#e53935 75%);box-shadow:none}
 body .finish::after{box-shadow:0 0 0 2px #fff}
 .panel,.game-intro{border-radius:22px}
 .dice-row{border-radius:22px;border-color:#8b5cf644;background:linear-gradient(145deg,#1b2040,#10142a)}
@@ -11033,6 +11073,37 @@ html,body{overscroll-behavior:none}
 .gx-letter.gx-x{color:#7c3aed;text-shadow:none!important;filter:drop-shadow(0 0 10px #7c3aedcc) drop-shadow(0 0 24px #7c3aed88);animation-name:gx6LetterX!important}
 @keyframes gx6Letter{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
 @keyframes gx6LetterX{0%{opacity:0;transform:translateX(-18px) scale(1.25)}70%{opacity:1;transform:translateX(0) scale(1.06)}100%{opacity:1;transform:none}}
+
+/* ===== tablero: las 4 casas siempre visibles ===== */
+body .board{background:${BOARD_URI} center/100% 100% no-repeat,#e9edfb}
+body .board .cell:not(.track):not([class*="lane-"]){background:transparent;border-color:transparent}
+.board:not(:has(.home.red)) :is(.cell.lane-red,.cell.start-red),
+.board:not(:has(.home.green)) :is(.cell.lane-green,.cell.start-green),
+.board:not(:has(.home.yellow)) :is(.cell.lane-yellow,.cell.start-yellow),
+.board:not(:has(.home.blue)) :is(.cell.lane-blue,.cell.start-blue){opacity:.3}
+main:has(.turn-chip.red-turn) .home.red,main:has(.turn-chip.green-turn) .home.green,
+main:has(.turn-chip.yellow-turn) .home.yellow,main:has(.turn-chip.blue-turn) .home.blue{animation:gx7Glow 1.4s ease-in-out infinite}
+@keyframes gx7Glow{0%,100%{box-shadow:inset 0 0 0 0 #fff0}50%{box-shadow:inset 0 0 0 5px #ffffffaa}}
+
+/* ===== sin logo arriba en ninguna pantalla ===== */
+.topbar{display:none!important}
+.shell:has(.top-actions){padding-top:calc(66px + env(safe-area-inset-top,0px))}
+
+/* ===== juego en celular: dado siempre a mano ===== */
+@media (max-width:560px){
+  .game-intro h1{display:none}
+  .game-intro{padding:10px 14px;margin-bottom:12px;text-align:center}
+  .turn-chip{margin-top:0;display:inline-flex}
+  main:has(.dice-row){padding-bottom:190px}
+  .dice-row{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:60;background:linear-gradient(145deg,#1b2040,#10142a);box-shadow:0 14px 34px #000c,0 0 0 1px #8b5cf655}
+  .hint{position:fixed;left:16px;right:16px;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 100px);z-index:60;margin:0;min-height:0;padding:7px 12px;border-radius:14px;background:#0b0e24dd;color:#e2e8f0;font-size:.74rem;font-weight:700;text-align:center}
+  .hint:empty{display:none}
+}
+
+/* ===== configuración: fija a la pantalla ===== */
+body.gx7-lock{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+body .settings-overlay{top:0;left:0;right:0;bottom:auto;height:100%;height:100dvh;overscroll-behavior:contain}
+body .settings-panel{overscroll-behavior:contain}
 `;
   const st = document.createElement("style");
   st.id = "gxV4css"; st.textContent = css; document.head.appendChild(st);
@@ -11175,7 +11246,22 @@ html,body{overscroll-behavior:none}
   box.addEventListener("click", go);
   nav.addEventListener("click", go);
 
+  let lockY = null;
+  function lock(on) {
+    if (on && lockY === null) {
+      lockY = window.scrollY || 0;
+      document.body.style.top = (-lockY) + "px";
+      document.body.classList.add("gx7-lock");
+    } else if (!on && lockY !== null) {
+      document.body.classList.remove("gx7-lock");
+      document.body.style.top = "";
+      window.scrollTo(0, lockY);
+      lockY = null;
+    }
+  }
+
   function sync() {
+    lock(!!$(".settings-overlay"));
     const s = read(), on = !!s;
     box.classList.toggle("on", on);
     nav.classList.toggle("on", on);
