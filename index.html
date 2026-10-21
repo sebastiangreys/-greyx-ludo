@@ -11292,24 +11292,24 @@ body.gxm-on{overflow:hidden}
 })();
 </script> 
 <script>
-/* GREYX LUDO — CAPA v4 (reemplaza v2 y v3: deja SOLO este script extra) */
+/* GREYX LUDO — CAPA v5 (reemplaza v4: deja SOLO este script extra) */
 (() => {
   const $ = s => document.querySelector(s);
   const click = a => { const b = $('[data-action="' + a + '"]'); if (b) b.click(); };
 
   /* ---------- Logo ---------- */
-  const logo = () => `<svg viewBox="40 10 630 540" xmlns="http://www.w3.org/2000/svg">
+  const logo = (crown, u) => `<svg viewBox="40 ${crown ? 10 : 90} 630 ${crown ? 540 : 460}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#b9bcc9"/></linearGradient>
-<linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1fd0"/></linearGradient>
-<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#e09a00"/></linearGradient>
+<linearGradient id="gA${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#b9bcc9"/></linearGradient>
+<linearGradient id="gB${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1fd0"/></linearGradient>
+<linearGradient id="gC${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#e09a00"/></linearGradient>
 </defs>
-<g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 44L114 14L124 74Z" fill="url(#gC)" stroke="#8a5a00" stroke-width="4" stroke-linejoin="round"/><circle cx="10" cy="12" r="8" fill="#ffe27a"/><circle cx="62" cy="-2" r="8" fill="#ffe27a"/><circle cx="114" cy="12" r="8" fill="#ffe27a"/></g>
-<path fill="url(#gA)" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
-<path fill="url(#gA)" d="M255 295H440L385 365H275L237 318Z"/>
-<path fill="url(#gB)" stroke="#2a1580" stroke-width="5" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
+${crown ? `<g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 44L114 14L124 74Z" fill="url(#gC${u})" stroke="#8a5a00" stroke-width="4" stroke-linejoin="round"/><circle cx="10" cy="12" r="8" fill="#ffe27a"/><circle cx="62" cy="-2" r="8" fill="#ffe27a"/><circle cx="114" cy="12" r="8" fill="#ffe27a"/></g>` : ""}
+<path fill="url(#gA${u})" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
+<path fill="url(#gA${u})" d="M255 295H440L385 365H275L237 318Z"/>
+<path fill="url(#gB${u})" stroke="#2a1580" stroke-width="5" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
 </svg>`;
-  const LOGO_URI = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(logo()) + '")';
+  const LOGO_URI = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(logo(true, "u")) + '")';
 
   /* ---------- CSS ---------- */
   const css = `
@@ -11415,39 +11415,62 @@ body .settings-panel{width:100%;max-width:520px;height:100%;max-height:none;marg
 .settings-option-icon{width:42px;height:42px;border-radius:13px;font-size:20px;background:linear-gradient(145deg,#8b5cf644,#ffffff0d)}
 
 /* ===== MENÚ PRINCIPAL ===== */
+.top-action-friends{display:none!important}
+.top-action-btn.settings-button{border-radius:50%;width:46px;height:46px;background:linear-gradient(145deg,#12163a,#0a0c24);border:1px solid #4f5bd5aa;box-shadow:0 0 18px #3b3fd855}
 body.gxm-on{overflow:hidden}
-.gxm{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;align-items:center;color:#fff;overflow:hidden;
-  padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(82px + env(safe-area-inset-bottom,0px));
-  background:radial-gradient(circle at 50% 26%,#4c1d9577,transparent 58%),radial-gradient(circle at 50% 100%,#1d4ed855,transparent 55%),linear-gradient(180deg,#0b0c2e,#05060f)}
-.gxm.on{display:flex;animation:gxIn .4s cubic-bezier(.2,.8,.2,1) both}
-.gxm-hd{align-self:flex-start;display:flex;align-items:center;gap:10px;max-width:190px;height:44px}
-.gxm-lv{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a78bfa,#4c1d95);border:2px solid #fde68a;box-shadow:0 0 16px #8b5cf6aa;line-height:1}
-.gxm-lv small{font:800 .42rem monospace;color:#ddd6fe}.gxm-lv b{font-size:1rem}
-.gxm-xp{min-width:0;flex:1}.gxm-xp small{display:block;font-size:.6rem;color:#a3abbd;white-space:nowrap}
-.gxm-bar{height:7px;border-radius:9px;background:#1e293b;overflow:hidden;margin:4px 0 3px}
-.gxm-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22d3ee,#a78bfa);box-shadow:0 0 8px #22d3ee99}
-.gxm-main{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;flex:1;justify-content:center;gap:13px}
-.gxm-main.hide{display:none}
-.gxm-logo{width:min(54vw,210px);filter:drop-shadow(0 10px 22px #6d28d9aa)}
-.gxm-t{text-align:center;line-height:.95;margin:-2px 0 8px}
-.gxm-t1{display:block;font:900 italic 2rem Inter,system-ui,sans-serif;color:#fff;-webkit-text-stroke:1.5px #2a1a78;text-shadow:0 3px 0 #4c2fd0,0 6px 0 #2a1a78,0 10px 16px #000a}
-.gxm-t2{display:block;font:900 3.1rem Inter,system-ui,sans-serif;color:#c4b1ff;-webkit-text-stroke:2px #2a1a78;text-shadow:0 4px 0 #5b35f0,0 8px 0 #2a1a78,0 12px 20px #000a}
-.gxm-b{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:60px;border:2px solid #ffffff55;border-radius:18px;color:#fff;font:800 1.12rem Inter,system-ui,sans-serif;text-shadow:0 2px 3px #0006;position:relative}
-.gxm-b::before{content:"";position:absolute;inset:2px 2px 50%;border-radius:15px 15px 40% 40%;background:linear-gradient(#ffffff55,#ffffff08);pointer-events:none}
-.gxm-b.g{background:linear-gradient(180deg,#3ddc6a,#16a34a);box-shadow:0 5px 0 #0d6b2e,0 12px 20px #16a34a44}
-.gxm-b.b{background:linear-gradient(180deg,#4f9bff,#1d4ed8);box-shadow:0 5px 0 #14339a,0 12px 20px #1d4ed844}
-.gxm-b.p{background:linear-gradient(180deg,#b58cff,#6d28d9);box-shadow:0 5px 0 #3b1d8f,0 12px 20px #6d28d944}
-.gxm-b span{font-size:1.4rem}
-.gxm-sheet{display:none;width:100%;max-width:400px;flex:1;flex-direction:column;gap:12px;padding-top:12px}.gxm-sheet.on{display:flex}
-.gxm-top{display:flex;align-items:center;gap:12px;margin:6px 0}
-.gxm-top button{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff22;background:#ffffff12;color:#fff;font-size:1.1rem}
-.gxm-top h2{margin:0;font-size:1.25rem}
-.gxm-card{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:20px;text-align:left;color:#fff;border:1.5px solid var(--cc);background:linear-gradient(135deg,#1b2a66,#0d1233);box-shadow:0 0 22px #0006,inset 0 1px 0 #ffffff1a}
-.gxm-card em{font-style:normal;display:grid;place-items:center;width:58px;height:58px;flex:0 0 58px;border-radius:16px;font-size:1.9rem;background:#ffffff12;box-shadow:0 0 18px var(--cc)}
-.gxm-card strong{display:block;font-size:1rem}.gxm-card small{color:#9aa6c4;font-size:.76rem;line-height:1.35}
-.gxm-nav{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#0d1233f0,#070a1e);border-top:1px solid #ffffff18}
-.gxm-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:#8e97b8;font:700 .66rem Inter,system-ui,sans-serif}
-.gxm-nav button span{font-size:1.35rem}.gxm-nav button.on{color:#c4b5fd}
+.gxm{position:fixed;inset:0;z-index:85;display:none;color:#fff;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(100px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(circle at 50% 14%,#3b1fa877,transparent 50%),radial-gradient(circle at 100% 40%,#2a3cc844,transparent 40%),radial-gradient(circle at 0 70%,#4c1d9544,transparent 40%),linear-gradient(180deg,#070925,#04051a)}
+.gxm.on{display:block;animation:gxIn .4s cubic-bezier(.2,.8,.2,1) both}
+.gxm-in{max-width:440px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+.gxm-brand{align-self:flex-start;display:flex;align-items:center;gap:10px;height:46px}
+.gxm-brand svg{width:50px;height:auto}
+.gxm-brand b{font:700 1.1rem Syncopate,Arial Black,sans-serif;letter-spacing:.2em;color:#fff}
+.gxm-brand b i{font-style:normal;color:#7c3aed;text-shadow:0 0 10px #7c3aed88}
+.gxm-st{display:flex;align-items:center;gap:12px;margin:14px 0 4px;font:800 .7rem Inter,system-ui,sans-serif;letter-spacing:.34em;color:#8b8fe8}
+.gxm-st::before,.gxm-st::after{content:"";width:44px;height:2px;background:#4f46e5;box-shadow:0 0 8px #4f46e5}
+.gxm-t{text-align:center;line-height:.88}
+.gxm-t1,.gxm-t2{display:block;font:900 min(16.5vw,5.1rem) Inter,system-ui,sans-serif;letter-spacing:-.03em;-webkit-background-clip:text;background-clip:text;color:transparent}
+.gxm-t1{background-image:linear-gradient(180deg,#fff,#d9d4ff);filter:drop-shadow(0 6px 14px #0008)}
+.gxm-t2{background-image:linear-gradient(180deg,#b79dff,#6d28d9);filter:drop-shadow(0 0 22px #7c3aedaa)}
+.gxm-hero{position:relative;width:100%;height:158px;margin:12px 0 6px;display:grid;place-items:center}
+.gxm-hero::before{content:"";position:absolute;left:2%;right:2%;top:26%;bottom:4%;border-radius:50%;border:2px solid #4f46e5aa;box-shadow:0 0 30px #4f46e588,inset 0 0 30px #4f46e544}
+.gxm-hero svg{position:relative;height:138px;width:auto;filter:drop-shadow(0 0 24px #6d28d9cc)}
+.gxm-pill{display:inline-flex;align-items:center;gap:10px;padding:10px 24px;border:2px solid #3b6cff;border-radius:99px;background:#070d2a;color:#9fd8ff;font:800 .68rem Inter,system-ui,sans-serif;letter-spacing:.16em;box-shadow:0 0 20px #2a5bff55}
+.gxm-pill i{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px #22c55e}
+.gxm-sec{display:flex;align-items:center;gap:12px;margin:22px 0 14px;font:900 1.05rem Inter,system-ui,sans-serif;letter-spacing:.06em}
+.gxm-sec::before,.gxm-sec::after{content:"";width:34px;height:2px;background:linear-gradient(90deg,transparent,#6d5cff)}
+.gxm-sec::after{transform:scaleX(-1)}
+.gxm-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%}
+.gxm-card{position:relative;min-height:176px;display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 8px 34px;border-radius:22px;color:#fff;border:2px solid var(--cc);background:var(--cb);box-shadow:0 0 22px var(--cg),inset 0 1px 0 #ffffff22}
+.gxm-card svg{width:48px;height:48px;margin-bottom:8px;color:var(--ci)}
+.gxm-card strong{font:900 .8rem/1.15 Inter,system-ui,sans-serif}
+.gxm-card small{margin-top:6px;color:#aab3d6;font-size:.62rem;line-height:1.35}
+.gxm-card u{position:absolute;right:9px;bottom:9px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#ffffff18;border:1px solid #ffffff33;text-decoration:none;font-size:1rem}
+.gxm-prog{display:flex;align-items:center;gap:14px;width:100%;margin-top:16px;padding:14px;border-radius:22px;border:2px solid #4a45d8aa;background:linear-gradient(160deg,#10164a,#080b2a);box-shadow:0 0 22px #3b3fd844}
+.gxm-hex{position:relative;flex:0 0 auto;width:78px;height:86px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(145deg,#a78bfa,#4338ca)}
+.gxm-hex::before{content:"";position:absolute;inset:3px;clip-path:inherit;background:linear-gradient(160deg,#1b1f6b,#0a0c30)}
+.gxm-hex div{position:relative;text-align:center;line-height:1}
+.gxm-hex small{display:block;font:800 .55rem Inter,system-ui,sans-serif;color:#a9b0ff;letter-spacing:.1em}
+.gxm-hex b{font-size:1.9rem;font-weight:900}
+.gxm-pb{flex:1;min-width:0;border-left:1px solid #ffffff1c;padding-left:14px}
+.gxm-pt{font:900 .72rem Inter,system-ui,sans-serif;letter-spacing:.12em;margin-bottom:8px}
+.gxm-ps{display:flex;gap:10px}
+.gxm-ps div{flex:1;display:flex;align-items:center;gap:7px;font-size:1.05rem}
+.gxm-ps div+div{border-left:1px solid #ffffff1c;padding-left:10px}
+.gxm-ps b{display:block;font-size:1.15rem;line-height:1}
+.gxm-ps small{font-size:.56rem;letter-spacing:.06em;color:#94a0cc}
+.gxm-bar2{display:flex;align-items:center;gap:10px;margin-top:10px}
+.gxm-bar2 span{flex:1;height:10px;border-radius:9px;border:1.5px solid #6d5cff;background:#0a0d30;overflow:hidden}
+.gxm-bar2 span i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa)}
+.gxm-bar2 em{font-style:normal;font-size:.72rem;color:#c2c8ee;white-space:nowrap}
+.gxm-nav{position:fixed;left:0;right:0;bottom:0;z-index:2;display:flex;padding:10px 6px calc(10px + env(safe-area-inset-bottom,0px));border-radius:26px 26px 0 0;border:1.5px solid #2e3a9a88;border-bottom:0;background:linear-gradient(180deg,#0c1240f5,#070a24)}
+.gxm-nav button{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:transparent;color:#aeb6e6;font:700 .74rem Inter,system-ui,sans-serif}
+.gxm-nav button+button::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:1px;background:#ffffff18}
+.gxm-nav svg{width:26px;height:26px}
+.gxm-nav button.on{color:#8b7cff}
+.gxm-nav button.on::after{content:"";width:46px;height:3px;border-radius:3px;background:#6d5cff;box-shadow:0 0 8px #6d5cff}
+.gxm-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:5;padding:11px 20px;border-radius:99px;background:#111631;border:1px solid #a78bfa;font-weight:800;font-size:.82rem;box-shadow:0 10px 30px #000c}
 `;
   const st = document.createElement("style");
   st.id = "gxV4css"; st.textContent = css; document.head.appendChild(st);
@@ -11509,7 +11532,16 @@ body.gxm-on{overflow:hidden}
   /* ---------- Menú principal ---------- */
   const box = document.createElement("div");
   box.className = "gxm"; document.body.appendChild(box);
-  let sheet = false, sig = "";
+  let sig = "";
+
+  const ICO = {
+    people: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.4"/><circle cx="16.5" cy="9" r="2.8" opacity=".85"/><path d="M3 19c.7-3.6 3-5.5 6-5.5s5.3 1.9 6 5.5z"/><path d="M14.5 14.2c.7-.3 1.3-.4 2-.4 2.4 0 4.2 1.5 4.8 4.2h-5.4c-.2-1.5-.6-2.8-1.4-3.8z" opacity=".85"/></svg>`,
+    robot: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="8" width="14" height="11" rx="4"/><circle cx="9.5" cy="13.5" r="1.5" fill="#0b0e1a"/><circle cx="14.5" cy="13.5" r="1.5" fill="#0b0e1a"/><rect x="11" y="3.5" width="2" height="4"/><circle cx="12" cy="3.5" r="1.6"/></svg>`,
+    globe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9S9.5 5.8 12 3z"/></svg>`,
+    home: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L3 11h2.5v9h5v-6h3v6h5v-9H21z"/></svg>`,
+    trophy: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v4a5 5 0 0 1-10 0zM4 4h3v2.5A3 3 0 0 1 4 4zm16 0h-3v2.5A3 3 0 0 0 20 4zM11 12h2v4h3v2H8v-2h3z"/></svg>`,
+    user: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c.8-4 3.7-6 8-6s7.2 2 8 6z"/></svg>`
+  };
 
   function read() {
     const h = $(".gx-home"); if (!h) return null;
@@ -11520,56 +11552,70 @@ body.gxm-on{overflow:hidden}
   }
 
   function draw(s) {
+    const pct = Math.max(0, Math.min(100, parseInt(s.xp) || 0));
     box.innerHTML = `
-    <div class="gxm-hd">
-      <div class="gxm-lv"><small>NV.</small><b>${s.lv}</b></div>
-      <div class="gxm-xp"><small>🎮 ${s.g} · 🏆 ${s.w}</small><div class="gxm-bar"><i style="width:${s.xp}"></i></div></div>
-    </div>
-    <div class="gxm-main ${sheet ? "hide" : ""}">
-      <div class="gxm-logo">${logo()}</div>
-      <div class="gxm-t"><span class="gxm-t1">Ludo</span><span class="gxm-t2">GREYX</span></div>
-      <button class="gxm-b g" data-go="play"><span>▶</span>Jugar</button>
-      <button class="gxm-b b" data-go="friends"><span>👥</span>Amigos</button>
-      <button class="gxm-b p" data-go="settings"><span>⚙️</span>Configuración</button>
-    </div>
-    <div class="gxm-sheet ${sheet ? "on" : ""}">
-      <div class="gxm-top"><button data-go="back">←</button><h2>Jugar</h2></div>
-      <button class="gxm-card" style="--cc:#22d3ee" data-go="local"><em>👥</em><span><strong>Modo Local</strong><small>Juega en el mismo dispositivo.</small></span></button>
-      <button class="gxm-card" style="--cc:#e879f9" data-go="bot"><em>🤖</em><span><strong>Reto IA</strong><small>Pon a prueba tu estrategia contra bots.</small></span></button>
-      <button class="gxm-card" style="--cc:#38bdf8" data-go="online"><em>🌐</em><span><strong>Modo Online</strong><small>Conecta con jugadores de todo el mundo.</small></span></button>
+    <div class="gxm-in">
+      <div class="gxm-brand">${logo(false, "h")}<b>GREY<i>X</i></b></div>
+      <div class="gxm-st">GREYX STUDIOS</div>
+      <div class="gxm-t"><span class="gxm-t1">LUDO</span><span class="gxm-t2">GREYX</span></div>
+      <div class="gxm-hero">${logo(true, "c")}</div>
+      <div class="gxm-pill"><i></i>TODO LISTO PARA JUGAR</div>
+      <div class="gxm-sec">ELIGE TU DESAFÍO</div>
+      <div class="gxm-cards">
+        <button class="gxm-card" style="--cc:#38a6ff;--cb:linear-gradient(160deg,#1b3fb8,#0b1245);--cg:#2a7bff77;--ci:#6fd2ff" data-go="local">${ICO.people}<strong>PARTIDA LOCAL</strong><small>Juega con amigos en el mismo dispositivo.</small><u>›</u></button>
+        <button class="gxm-card" style="--cc:#9b6bff;--cb:linear-gradient(160deg,#4d22b8,#140b45);--cg:#8b5cf666;--ci:#c4b5fd" data-go="bot">${ICO.robot}<strong>RETO IA</strong><small>Pon a prueba tu estrategia.</small><u>›</u></button>
+        <button class="gxm-card" style="--cc:#3d4a86;--cb:linear-gradient(160deg,#1a2347,#0a0e26);--cg:#0000;--ci:#6a86ff" data-go="online">${ICO.globe}<strong>MODO ONLINE</strong><small>Compite con jugadores de todo el mundo.</small><u>›</u></button>
+      </div>
+      <div class="gxm-prog">
+        <div class="gxm-hex"><div><small>NV.</small><b>${s.lv}</b></div></div>
+        <div class="gxm-pb">
+          <div class="gxm-pt">TU PROGRESO</div>
+          <div class="gxm-ps">
+            <div>🎮<span><b>${s.g}</b><small>PARTIDAS</small></span></div>
+            <div>🏆<span><b>${s.w}</b><small>VICTORIAS</small></span></div>
+          </div>
+          <div class="gxm-bar2"><span><i style="width:${pct}%"></i></span><em>${pct} / 100</em></div>
+        </div>
+      </div>
     </div>
     <nav class="gxm-nav">
-      <button class="on" data-go="back"><span>🏠</span>Inicio</button>
-      <button data-go="friends"><span>👥</span>Amigos</button>
-      <button data-go="settings"><span>⚙️</span>Ajustes</button>
+      <button class="on" data-go="home">${ICO.home}Inicio</button>
+      <button data-go="friends">${ICO.people}Amigos</button>
+      <button data-go="rank">${ICO.trophy}Ranking</button>
+      <button data-go="profile">${ICO.user}Perfil</button>
     </nav>`;
-    const items = [...box.querySelectorAll(sheet ? ".gxm-top,.gxm-card" : ".gxm-logo,.gxm-t,.gxm-b")];
-    items.forEach((el, i) => el.animate(
+    box.querySelectorAll(".gxm-brand,.gxm-st,.gxm-t,.gxm-hero,.gxm-pill,.gxm-sec,.gxm-card,.gxm-prog").forEach((el, i) => el.animate(
       [{ opacity: 0, transform: "translateY(26px) scale(.95)" }, { opacity: 1, transform: "none" }],
       { duration: 440, delay: i * 55, easing: "cubic-bezier(.2,.9,.3,1.15)", fill: "backwards" }));
+  }
+
+  function toast(m) {
+    const t = document.createElement("div");
+    t.className = "gxm-toast"; t.textContent = m;
+    box.appendChild(t); setTimeout(() => t.remove(), 1800);
   }
 
   box.addEventListener("click", e => {
     const b = e.target.closest("[data-go]"); if (!b) return;
     const g = b.dataset.go;
-    if (g === "play") { sheet = true; sig = ""; swish(); }
-    else if (g === "back") { if (sheet) swish(); sheet = false; sig = ""; }
-    else if (g === "friends") click("friends-open");
-    else if (g === "settings") click("settings");
+    if (g === "friends") click("friends-open");
+    else if (g === "profile") click("settings");
     else if (g === "local") click("local");
     else if (g === "bot") click("mode");
     else if (g === "online") click("online-open");
+    else if (g === "rank") toast("Ranking: próximamente");
   });
 
   setInterval(() => {
     const s = read(), on = !!s;
     box.classList.toggle("on", on);
     document.body.classList.toggle("gxm-on", on);
-    if (!on) { sheet = false; sig = ""; return; }
-    const k = JSON.stringify(s) + sheet;
+    if (!on) { sig = ""; return; }
+    const k = JSON.stringify(s);
     if (k !== sig) { sig = k; draw(s); }
   }, 300);
 })();
+
 </script>
 
 </body>
