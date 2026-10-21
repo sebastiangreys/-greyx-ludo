@@ -4746,6 +4746,175 @@ button.gx-mode:active {
   font: 700 .58rem monospace;
   color: #64748b;
 }
+/* GREYX LUDO — MEJORA VISUAL (cargar DESPUÉS de tu <style>) */
+:root{
+  --gx-violet:#8b5cf6; --gx-violet2:#6d28d9; --gx-gold:#fbbf24;
+  --gx-card:linear-gradient(160deg,#1c2140,#0e1224);
+  --gx-line:#ffffff1a;
+}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(120% 60% at 50% 0%,#6d28d933,transparent 60%),
+             radial-gradient(90% 50% at 50% 100%,#0ea5e922,transparent 60%)}
+
+/* ---------- PORTADA ---------- */
+.gx-title{background:linear-gradient(180deg,#fff,#c9c3ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 6px 18px #6d28d9aa)}
+.gx-title span{background:linear-gradient(90deg,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gx-board{box-shadow:0 0 0 3px #fbbf2499,0 0 50px #8b5cf688,0 24px 50px #000a}
+.gx-mode{border-radius:22px;min-height:160px}
+.gx-mode strong{font-size:.76rem}
+.gx-progress{border-radius:20px;border-color:#8b5cf655}
+.gx-xp-bar{height:7px}
+.gx-xp-bar i{box-shadow:0 0 10px #22d3ee99}
+
+/* ---------- BOTONES ---------- */
+.primary-button,.roll-button{border-radius:18px;background:linear-gradient(135deg,#a78bfa,#6d28d9);
+  box-shadow:0 6px 0 #3b1d8f,0 14px 26px #6d28d955,inset 0 1px 0 #ffffff55;letter-spacing:.03em}
+.roll-button{min-height:60px;font-size:1rem}
+.secondary-button{border-radius:18px}
+
+/* ---------- TABLERO ---------- */
+.board-frame{padding:10px;border-radius:30px;border:2px solid #fbbf2455;
+  background:linear-gradient(145deg,#2d3354,#0d1020);
+  box-shadow:0 30px 70px #000a,0 0 40px #6d28d944,inset 0 1px 0 #ffffff22}
+.board{border-radius:22px;box-shadow:inset 0 0 40px #0008,inset 0 0 0 2px #ffffff12}
+.cell{border-color:#ffffff08}
+.cell.track{background:linear-gradient(145deg,#2a3050,#1b2038)}
+.cell.safe::before{color:#fde68a;text-shadow:0 0 8px #fbbf24cc,0 0 16px #fbbf2466}
+.home{border-radius:18%}
+.yard{border-radius:22%;background:#0a0d18bb;border:2px solid #ffffff22}
+.finish{border-radius:14px;box-shadow:0 0 34px #a78bfa88,inset 0 0 22px #ffffff33}
+.finish::after{background:radial-gradient(circle,#2b2f55,#0c0f1e);box-shadow:0 0 0 2px #fde68a,0 0 20px #a78bfa}
+
+/* ---------- FICHAS (3D) ---------- */
+.token.red{--c:#ff5a5f}.token.green{--c:#22c55e}.token.yellow{--c:#fbbf24}.token.blue{--c:#4f8cff}
+.token{border:2.5px solid #fff;
+  box-shadow:inset 0 3px 4px #ffffffaa,inset 0 -6px 8px #00000044,0 4px 0 #0006,0 8px 14px #0007;
+  text-shadow:0 1px 2px #0008}
+.token.valid{outline:3px solid #fff;box-shadow:0 0 0 7px #ffffff55,0 0 22px var(--c),0 8px 0 #0005}
+
+/* ---------- DADO ---------- */
+.dice-row{border-radius:22px;border-color:#8b5cf644;background:linear-gradient(145deg,#1b2040,#10142a)}
+.die{border-radius:20px;background:linear-gradient(145deg,#fff,#d9deef);
+  box-shadow:0 12px 24px #0008,inset 0 2px 3px #fff,inset 0 -5px 8px #0002}
+.die.six{box-shadow:0 0 0 3px #fbbf24aa,0 0 26px #fbbf24aa,0 12px 24px #0008}
+.pip{background:radial-gradient(circle at 35% 30%,#4b5278,#161a2e)}
+
+/* ---------- PANELES / TURNO ---------- */
+.panel,.game-intro{border-radius:22px;border:1px solid var(--gx-line);background:var(--gx-card)}
+.turn-chip{border-color:#ffffff30;font-size:.8rem}
+.score-grid{border-radius:18px}
+
+/* ---------- CONFIGURACIÓN / IDIOMA / PERFIL ---------- */
+.settings-panel{border-radius:28px;background:linear-gradient(160deg,#242a4d,#0f1326);border:1px solid #a78bfa33;
+  box-shadow:0 30px 80px #000c,0 0 40px #6d28d933,inset 0 1px 0 #ffffff1f}
+.settings-option{border-radius:18px;padding:12px;background:#ffffff06;border:1px solid #ffffff0d;margin-bottom:8px}
+.settings-option-icon{width:40px;height:40px;border-radius:13px;font-size:20px;background:linear-gradient(145deg,#8b5cf644,#ffffff0d)}
+.settings-toggle{width:46px;height:26px;border-radius:99px}
+.settings-toggle span{width:20px;height:20px}
+.settings-toggle.active span{transform:translateX(20px)}
+.lang-option{border-radius:16px;padding:15px}
+.lang-option.selected{background:linear-gradient(100deg,#8b5cf633,#22d3ee1a);box-shadow:0 0 18px #8b5cf633}
+.account-avatar{width:48px;height:48px;font-size:26px;border-radius:50%;background:linear-gradient(145deg,#8b5cf6,#4c1d95);border:2px solid #fde68a;box-shadow:0 0 18px #8b5cf688}
+.avatar-grid{gap:10px}
+.avatar-pick{border-radius:50%;font-size:28px;background:radial-gradient(circle at 35% 30%,#3b3f75,#14172e)}
+.avatar-pick.selected{border:2px solid #fde68a;box-shadow:0 0 0 4px #fbbf2433,0 0 18px #8b5cf6}
+.trophy-big{border-radius:22px;border-color:#fbbf2466;box-shadow:0 0 28px #fbbf2422}
+.stat{border-radius:16px;background:linear-gradient(160deg,#ffffff0d,#ffffff04)}
+.auth-input{border-radius:16px;background:#0a0d1a}
+
+/* ---------- XP / NIVEL ---------- */
+.xp-popup-badge{background:linear-gradient(135deg,#fbbf24,#f59e0b);border:2px solid #fff;color:#3a2200;box-shadow:0 0 30px #fbbf24aa,0 8px 20px #0008;font-size:1.25rem}
+.xp-popup-label{color:#fde68a}
+.levelup-card{border-radius:30px;border:2px solid #fbbf24;background:radial-gradient(circle at 50% 0%,#4c1d95,#0b0e1e 70%);box-shadow:0 0 80px #fbbf2466,0 30px 60px #000a}
+.levelup-num{background:linear-gradient(180deg,#fff,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:5rem}
+.levelup-star{filter:drop-shadow(0 0 16px #fbbf24)}
+.xp-bar-wrap{height:8px}.xp-bar-fill{background:linear-gradient(90deg,#8b5cf6,#22d3ee,#fbbf24);box-shadow:0 0 10px #22d3ee88}
+
+/* ---------- ONLINE / SALA / AMIGOS ---------- */
+.online-option{border-radius:24px;padding:20px 16px}
+.online-option-icon{width:58px;height:58px;flex-basis:58px;border-radius:18px;font-size:1.8rem}
+.mm-timer{background:linear-gradient(180deg,#fff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.mm-pill{padding:9px 16px;font-size:.78rem}
+.mm-bar{box-shadow:0 0 12px #22d3ee99}
+.room-slot{border-radius:22px;min-height:132px;backdrop-filter:none}
+.room-slot.taken{box-shadow:0 0 22px currentColor;background:linear-gradient(160deg,#ffffff14,#ffffff05)}
+.room-slot-avatar{font-size:2.2rem;width:58px;height:58px;display:grid;place-items:center;border-radius:50%;background:#0008;border:2px solid currentColor}
+.room-invite-btn{border-radius:18px;border-width:2px}
+.room-start-btn{border-radius:20px;min-height:60px;background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 6px 0 #065f46,0 14px 28px #05966955}
+.room-start-btn:disabled{background:linear-gradient(135deg,#475569,#334155);box-shadow:0 3px 0 #1e293b}
+.fx-stat{border-radius:20px}
+.fx-panel{border-radius:24px}
+.fx-avatar-ring{width:64px;height:64px;border-color:#fbbf24aa;box-shadow:0 0 20px #fbbf2455}
+.fx-avatar-emoji{font-size:1.7rem}
+.fx-online-dot{width:13px;height:13px}
+.friend-result-card{border-radius:20px}
+.friend-result-avatar{border-radius:50%}
+
+/* ===================== TIENDA ===================== */
+.gx-gems{position:fixed;z-index:91;top:calc(14px + env(safe-area-inset-top,0px));right:112px;height:44px;
+  display:none;align-items:center;gap:7px;padding:0 13px 0 8px;border-radius:14px;cursor:pointer;
+  border:1px solid #22d3ee88;background:linear-gradient(145deg,#12385a,#0a1630);color:#e0f7ff;
+  font:900 .85rem inherit;box-shadow:0 0 18px #22d3ee44,0 6px 16px #0008}
+.gx-gems.show{display:flex}
+.gx-gems i{font-style:normal;font-size:1.15rem;filter:drop-shadow(0 0 6px #22d3ee)}
+.gx-gems b{font-size:.7rem;background:#22d3ee;color:#04202c;border-radius:50%;width:18px;height:18px;display:grid;place-items:center}
+.gx-shop{position:fixed;inset:0;z-index:1000000;display:none;flex-direction:column;
+  background:radial-gradient(100% 50% at 50% 0,#4c1d9566,transparent),#070911;color:#fff;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
+.gx-shop.open{display:flex}
+.gx-shop-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.gx-shop-top h2{flex:1;margin:0;font-size:1.3rem;letter-spacing:-.02em}
+.gx-x{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff22;background:#ffffff10;color:#fff;font-size:1.1rem}
+.gx-bal{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;font-weight:900;
+  background:linear-gradient(135deg,#0e7490,#1e3a8a);border:1px solid #67e8f9aa;box-shadow:0 0 18px #22d3ee55}
+.gx-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}
+.gx-tab{flex:0 0 auto;padding:10px 16px;border-radius:99px;border:1px solid #ffffff18;background:#ffffff0a;color:#aab3c8;font-weight:800;font-size:.8rem}
+.gx-tab.on{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border-color:#c4b5fd;box-shadow:0 0 16px #8b5cf688}
+.gx-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;padding:4px 2px 20px;-webkit-overflow-scrolling:touch}
+.gx-item{border-radius:22px;padding:12px;border:1px solid #ffffff1a;background:var(--gx-card);display:flex;flex-direction:column;gap:9px;text-align:center}
+.gx-item.eq{border-color:#fbbf24;box-shadow:0 0 20px #fbbf2433}
+.gx-prev{height:84px;border-radius:16px;display:grid;place-items:center;font-size:2rem;border:1px solid #ffffff22;box-shadow:inset 0 0 20px #0005}
+.gx-item strong{font-size:.86rem}
+.gx-btn{min-height:40px;border-radius:13px;border:0;font-weight:900;font-size:.8rem;color:#fff;background:linear-gradient(135deg,#0ea5e9,#2563eb);box-shadow:0 4px 0 #1e3a8a}
+.gx-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #1e3a8a}
+.gx-btn.own{background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 4px 0 #3b1d8f}
+.gx-btn.eqd{background:#334155;box-shadow:none;color:#fde68a}
+.gx-pack{grid-column:1/-1;flex-direction:row;align-items:center;text-align:left;gap:14px}
+.gx-pack .gx-prev{width:76px;height:76px;flex:0 0 76px;font-size:2rem}
+.gx-pack div.i{flex:1}
+.gx-pack small{color:#94a3b8;display:block;margin-top:3px}
+.gx-toast{position:fixed;z-index:1000001;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  padding:12px 20px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font-weight:800;font-size:.85rem;box-shadow:0 10px 30px #000c}
+
+/* ===================== SKINS ===================== */
+/* Tableros */
+body.b-neon .board-frame{border-color:#22d3ee;box-shadow:0 0 40px #22d3ee66,0 30px 70px #000a}
+body.b-neon .cell.track{background:#0b1030;box-shadow:inset 0 0 0 1px #22d3ee55!important}
+body.b-neon .cell.safe::before{color:#22d3ee;text-shadow:0 0 10px #22d3ee}
+body.b-wood .board-frame{background:linear-gradient(145deg,#8a5a2b,#4a2c12);border-color:#e0b070}
+body.b-wood .cell.track{background:#e2b57a;box-shadow:inset 0 0 0 1px #8a5a2b66!important}
+body.b-wood .board{background:#3b2410}
+body.b-wood .cell.safe::before{color:#7a3b10;text-shadow:none}
+body.b-ice .board-frame{background:linear-gradient(145deg,#bfe6ff,#5aa9d6);border-color:#fff}
+body.b-ice .cell.track{background:#eaf7ff;box-shadow:inset 0 0 0 1px #7cc4ec!important}
+body.b-ice .board{background:#9fd4f2}
+body.b-ice .cell.safe::before{color:#2563eb;text-shadow:none}
+body.b-lava .board-frame{background:linear-gradient(145deg,#7f1d1d,#1c0606);border-color:#fb923c;box-shadow:0 0 44px #f9731688,0 30px 70px #000a}
+body.b-lava .cell.track{background:#2a0d0d;box-shadow:inset 0 0 0 1px #fb923c66!important}
+body.b-lava .cell.safe::before{color:#fdba74;text-shadow:0 0 10px #f97316}
+/* Fichas */
+body.t-glass .token{opacity:.93;background-blend-mode:screen;box-shadow:inset 0 4px 8px #fff,inset 0 -8px 12px #0003,0 0 14px var(--c),0 6px 12px #0006}
+body.t-gold .token{border-color:#fff3b0;box-shadow:inset 0 3px 5px #fff9,inset 0 -6px 8px #7a4a0066,0 0 0 3px #fbbf24,0 0 16px #fbbf24aa,0 6px 12px #0007}
+body.t-neon .token{border-color:var(--c);box-shadow:0 0 0 2px #000,0 0 16px var(--c),0 0 30px var(--c),inset 0 0 10px #fff9}
+body.t-metal .token{border-color:#e5e7eb;filter:saturate(.8) contrast(1.15);box-shadow:inset 0 4px 5px #fff,inset 0 -8px 10px #0006,0 0 0 3px #64748b,0 6px 12px #0008}
+/* Dados */
+body.d-gold .die{background:linear-gradient(145deg,#fff3b0,#e0a92b);border-color:#fff}
+body.d-gold .pip{background:#5a3a00}
+body.d-obsidian .die{background:linear-gradient(145deg,#2b2f45,#07080f);border-color:#a78bfa}
+body.d-obsidian .pip{background:radial-gradient(circle at 35% 30%,#fff,#c4b5fd);box-shadow:0 0 8px #a78bfa}
+body.d-ruby .die{background:linear-gradient(145deg,#ff6b81,#9f1239);border-color:#fecdd3}
+body.d-ruby .pip{background:#fff}
 
 </style>
 <div id="app" class="app"></div>
@@ -7968,7 +8137,6 @@ function friendsMarkup() {
       </div>
 
       ${resultsHtml}
-      ${resultsHtml}
 
       <div class="fx-stats">
         <div class="fx-stat fx-stat-friends">
@@ -8613,7 +8781,7 @@ function nextTurn() {
     : "Tu turno. Lanza el dado.";
 
   render();
-  maybeBotTurn();  // ← cámbiala por queueBotTurn();
+  queueBotTurn();.
 }
 
 function rollDice(fromBot = false) {
@@ -10670,6 +10838,145 @@ startAuth();
 
 })();
 </script>
+ <script>
+/* GREYX LUDO — TIENDA DE DIAMANTES (cargar DESPUÉS de tu <script>) */
+(() => {
+  // true = recargas de PRUEBA (gratis). Pasa a false cuando conectes pagos reales.
+  const TEST_MODE = true;
+  const KEY = "gx-shop-v1";
 
+  const ITEMS = {
+    board: [
+      { id:"classic", n:"Clásico",  p:0,   s:"linear-gradient(145deg,#2a3050,#171b29)", e:"🎲" },
+      { id:"neon",    n:"Neón",     p:150, s:"linear-gradient(145deg,#0b1030,#0891b2)", e:"💠" },
+      { id:"wood",    n:"Madera",   p:200, s:"linear-gradient(145deg,#e2b57a,#7a4a22)", e:"🪵" },
+      { id:"ice",     n:"Hielo",    p:250, s:"linear-gradient(145deg,#eaf7ff,#5aa9d6)", e:"❄️" },
+      { id:"lava",    n:"Volcán",   p:300, s:"linear-gradient(145deg,#fb923c,#450a0a)", e:"🌋" }
+    ],
+    token: [
+      { id:"classic", n:"Clásica",  p:0,   s:"radial-gradient(circle at 35% 30%,#fff,#ef4444 55%,#7f1d1d)", e:"" },
+      { id:"glass",   n:"Cristal",  p:100, s:"radial-gradient(circle at 35% 30%,#fff,#7dd3fc 55%,#0369a1)", e:"" },
+      { id:"gold",    n:"Dorada",   p:200, s:"radial-gradient(circle at 35% 30%,#fff7c2,#fbbf24 55%,#92400e)", e:"" },
+      { id:"neon",    n:"Neón",     p:250, s:"radial-gradient(circle at 50% 50%,#0b1030 45%,#22d3ee 50%,#0b1030 80%)", e:"" },
+      { id:"metal",   n:"Metal",    p:300, s:"radial-gradient(circle at 35% 30%,#fff,#94a3b8 55%,#334155)", e:"" }
+    ],
+    dice: [
+      { id:"classic",  n:"Clásico",  p:0,   s:"linear-gradient(145deg,#fff,#d9deef)", e:"⚀" },
+      { id:"gold",     n:"Oro",      p:120, s:"linear-gradient(145deg,#fff3b0,#e0a92b)", e:"⚁" },
+      { id:"obsidian", n:"Obsidiana",p:180, s:"linear-gradient(145deg,#2b2f45,#07080f)", e:"⚂" },
+      { id:"ruby",     n:"Rubí",     p:220, s:"linear-gradient(145deg,#ff6b81,#9f1239)", e:"⚃" }
+    ]
+  };
+  const PACKS = [
+    { id:"p1", gems:100,  price:"$0.99",  e:"💎" },
+    { id:"p2", gems:550,  price:"$4.99",  e:"💎💎" },
+    { id:"p3", gems:1200, price:"$9.99",  e:"💎💎💎" }
+  ];
+  const TABS = [["board","Tableros"],["token","Fichas"],["dice","Dados"],["gems","Diamantes"]];
+
+  let S = { gems: TEST_MODE ? 200 : 0, owned: ["board:classic","token:classic","dice:classic"],
+            equip: { board:"classic", token:"classic", dice:"classic" } };
+  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.equip) S = r; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  let tab = "board";
+  const $ = id => document.getElementById(id);
+
+  function applySkins() {
+    const c = document.body.classList;
+    [...c].filter(x => /^[btd]-/.test(x)).forEach(x => c.remove(x));
+    c.add("b-" + S.equip.board, "t-" + S.equip.token, "d-" + S.equip.dice);
+  }
+
+  function toast(msg) {
+    const t = document.createElement("div");
+    t.className = "gx-toast"; t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1900);
+  }
+
+  function addGems(n) { S.gems += n; save(); paint(); }
+
+  function buy(type, id) {
+    const it = ITEMS[type].find(x => x.id === id), k = type + ":" + id;
+    if (!it || S.owned.includes(k)) return;
+    if (S.gems < it.p) { toast("Te faltan " + (it.p - S.gems) + " 💎"); tab = "gems"; paint(); return; }
+    S.gems -= it.p; S.owned.push(k); S.equip[type] = id;
+    save(); applySkins(); paint(); toast("¡Comprado y equipado!");
+  }
+
+  function equip(type, id) { S.equip[type] = id; save(); applySkins(); paint(); }
+
+  function buyPack(id) {
+    const p = PACKS.find(x => x.id === id);
+    if (!p) return;
+    if (TEST_MODE) { addGems(p.gems); toast("+" + p.gems + " 💎 (modo prueba)"); return; }
+    // AQUÍ conectas el pago real (Google Play Billing / Stripe) y,
+    // cuando el servidor confirme, llamas a GX_SHOP.addGems(p.gems).
+    toast("Pagos aún no conectados");
+  }
+
+  function paint() {
+    const pill = $("gxGems"); if (pill) pill.querySelector("span").textContent = S.gems;
+    const box = $("gxShop"); if (!box || !box.classList.contains("open")) return;
+    $("gxBal").textContent = "💎 " + S.gems;
+    $("gxTabs").innerHTML = TABS.map(([k, n]) =>
+      `<button class="gx-tab ${tab === k ? "on" : ""}" data-tab="${k}">${n}</button>`).join("");
+    if (tab === "gems") {
+      $("gxGrid").innerHTML = PACKS.map(p => `
+        <div class="gx-item gx-pack">
+          <div class="gx-prev">${p.e.slice(0, 2)}</div>
+          <div class="i"><strong>${p.gems} diamantes</strong><small>${TEST_MODE ? "Gratis · modo prueba" : p.price}</small></div>
+          <button class="gx-btn" style="width:96px" data-pack="${p.id}">${TEST_MODE ? "Obtener" : p.price}</button>
+        </div>`).join("");
+      return;
+    }
+    $("gxGrid").innerHTML = ITEMS[tab].map(it => {
+      const k = tab + ":" + it.id, own = S.owned.includes(k), on = S.equip[tab] === it.id;
+      const btn = on ? `<button class="gx-btn eqd" disabled>Equipado ✓</button>`
+        : own ? `<button class="gx-btn own" data-eq="${it.id}">Equipar</button>`
+        : `<button class="gx-btn" data-buy="${it.id}">💎 ${it.p}</button>`;
+      return `<div class="gx-item ${on ? "eq" : ""}">
+        <div class="gx-prev" style="background:${it.s}">${it.e}</div>
+        <strong>${it.n}</strong>${btn}</div>`;
+    }).join("");
+  }
+
+  function openShop() { $("gxShop").classList.add("open"); paint(); }
+  function closeShop() { $("gxShop").classList.remove("open"); }
+
+  function init() {
+    document.body.insertAdjacentHTML("beforeend", `
+      <button class="gx-gems" id="gxGems" type="button" aria-label="Tienda"><i>💎</i><span>0</span><b>+</b></button>
+      <div class="gx-shop" id="gxShop">
+        <div class="gx-shop-top">
+          <button class="gx-x" id="gxClose" type="button">←</button>
+          <h2>Tienda</h2>
+          <div class="gx-bal" id="gxBal">💎 0</div>
+        </div>
+        <div class="gx-tabs" id="gxTabs"></div>
+        <div class="gx-grid" id="gxGrid"></div>
+      </div>`);
+    $("gxGems").onclick = openShop;
+    $("gxClose").onclick = closeShop;
+    $("gxShop").addEventListener("click", e => {
+      const d = e.target.closest("button"); if (!d) return;
+      if (d.dataset.tab) { tab = d.dataset.tab; paint(); }
+      else if (d.dataset.buy) buy(tab, d.dataset.buy);
+      else if (d.dataset.eq) equip(tab, d.dataset.eq);
+      else if (d.dataset.pack) buyPack(d.dataset.pack);
+    });
+    // Mostrar el botón solo cuando existe la barra superior del juego
+    setInterval(() => {
+      const show = !!document.querySelector(".top-actions") && !$("gxShop").classList.contains("open");
+      $("gxGems").classList.toggle("show", show);
+    }, 500);
+    applySkins(); paint();
+  }
+
+  window.GX_SHOP = { addGems, open: openShop, state: () => S };
+  if (document.body) init(); else document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
 </body>
 </html>
