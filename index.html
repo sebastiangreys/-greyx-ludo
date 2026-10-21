@@ -11278,6 +11278,127 @@ body .settings-panel{overscroll-behavior:contain}
 })();
 
 </script>
+<style id="gx-parche">
+/* 1) X de la intro */
+.gx-name .gx-letter.gx-x{
+  width:auto!important;height:auto!important;min-width:0!important;
+  padding:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;
+  background:none!important;box-shadow:none!important;
+  font-size:inherit!important;line-height:inherit!important;
+  display:inline-block;color:#7c3aed!important;
+}
+
+/* 2) Botón de configuración fijo */
+.top-actions{display:none!important}
+.gx-fab{
+  position:fixed;z-index:999;
+  top:calc(12px + env(safe-area-inset-top,0px));right:14px;
+  width:46px;height:46px;display:none;place-items:center;
+  border-radius:50%;font-size:19px;cursor:pointer;color:#fff;
+  background:linear-gradient(145deg,#232a66,#0d1030);
+  border:1px solid #6d5cffaa;
+  box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
+}
+.gx-fab:active{transform:scale(.93)}
+
+/* 3) Tablero */
+body .board-frame{
+  padding:12px;border-radius:32px;border:0;
+  background:linear-gradient(145deg,#f8d977,#b9862a 45%,#f2cf6b);
+  box-shadow:0 30px 70px #000b,0 0 0 3px #5a3d0a,0 0 46px #fbbf2455,inset 0 2px 3px #fff9;
+}
+body .board{border-radius:22px;box-shadow:inset 0 0 0 3px #5a3d0a,inset 0 0 30px #0004}
+body .board .cell{border:1px solid #b7c1e2}
+body .cell.track{background:linear-gradient(145deg,#fff,#dde4f7)}
+body .cell.safe::before{
+  content:"★";color:#f59e0b;font-size:clamp(11px,2.8vw,19px);
+  text-shadow:0 1px 0 #fff,0 0 8px #fbbf2499;
+}
+body .cell[class*="lane-"]{box-shadow:inset 0 0 0 1px #ffffff88,inset 0 -3px 5px #0003!important}
+body .cell[class*="start-"]{box-shadow:inset 0 0 0 2px #fff,inset 0 0 12px #0004!important}
+body .cell[class*="start-"]::before{content:"➜";color:#fff;font-size:clamp(9px,2.2vw,15px);text-shadow:0 1px 2px #0007}
+body .cell[class*="start-"].safe::before{content:"★";color:#fff}
+body .home{box-shadow:inset 0 0 0 3px #ffffff55,inset 0 -8px 16px #0003}
+body .yard{background:radial-gradient(circle at 50% 35%,#fff,#e6ebfa);box-shadow:inset 0 4px 10px #0003,0 2px 0 #fff}
+body .finish{filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 18px #a78bfa)}
+
+/* 4) Partida */
+.shell:has(.game-layout){width:min(1180px,calc(100% - 14px))}
+.game-intro{
+  border-radius:22px;border:1px solid #ffffff22;
+  background:linear-gradient(145deg,#262d5c,#10142d);
+  box-shadow:0 14px 34px #0009,inset 0 1px 0 #ffffff1f;
+}
+.turn-chip{font-weight:900;background:#0d1030;border-width:2px}
+.turn-chip.red-turn{border-color:#ef4444;box-shadow:0 0 20px #ef444477}
+.turn-chip.green-turn{border-color:#22c55e;box-shadow:0 0 20px #22c55e77}
+.turn-chip.yellow-turn{border-color:#fbbf24;box-shadow:0 0 20px #fbbf2477}
+.turn-chip.blue-turn{border-color:#3b82f6;box-shadow:0 0 20px #3b82f677}
+.panel{
+  border-radius:24px;border:1px solid #ffffff1f;
+  background:linear-gradient(160deg,#242b58,#0f132b);
+  box-shadow:0 18px 40px #0009,inset 0 1px 0 #ffffff1a;
+}
+.orb{width:20px;height:20px;border:2px solid #fff;box-shadow:0 0 14px currentColor}
+.orb.red{color:#ef4444;background:#ef4444}
+.orb.green{color:#22c55e;background:#22c55e}
+.orb.yellow{color:#fbbf24;background:#fbbf24}
+.orb.blue{color:#3b82f6;background:#3b82f6}
+.dice-row{
+  grid-template-columns:72px 1fr;border-radius:24px;border:1px solid #8b5cf666;
+  background:linear-gradient(145deg,#1d2350,#0e1228);
+}
+.die{width:72px;height:72px}
+.roll-button{
+  min-height:62px;font-size:1.05rem;border-radius:20px;
+  background:linear-gradient(135deg,#34d399,#059669);
+  box-shadow:0 6px 0 #065f46,0 14px 26px #05966966,inset 0 1px 0 #ffffff66;
+  color:#032016;
+}
+.roll-button:active{transform:translateY(5px);box-shadow:0 1px 0 #065f46}
+.roll-button:disabled{background:linear-gradient(135deg,#475569,#334155);box-shadow:0 3px 0 #1e293b;color:#cbd5e1}
+.score-grid{border-radius:20px;background:#0c1026}
+.score-dot{width:12px;height:12px;border:2px solid #fff}
+.hint{padding:8px 12px;border-radius:14px;background:#ffffff0d;color:#e2e8f0;font-weight:700;text-align:center}
+.hint.pass{background:#ef444422;color:#fca5a5}
+body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
+@keyframes gxBob{0%,100%{transform:translateY(-2px) scale(1.05)}50%{transform:translateY(-7px) scale(1.14)}}
+
+@media (max-width:560px){
+  body .board-frame{padding:7px;border-radius:22px}
+  body .board{border-radius:14px}
+  .game-intro{padding:9px 12px;border-radius:18px}
+  .dice-row{grid-template-columns:66px 1fr}
+  .die{width:66px;height:66px}
+}
+</style>
+
+<script>
+(() => {
+  const fab = document.createElement("button");
+  fab.className = "gx-fab";
+  fab.type = "button";
+  fab.setAttribute("aria-label", "Configuración");
+  fab.textContent = "⚙️";
+  document.body.appendChild(fab);
+
+  fab.addEventListener("click", () => {
+    const o = document.querySelector('.top-actions [data-action="settings"]');
+    if (o) o.click();
+  });
+
+  const sync = () => {
+    const ok = !!document.querySelector('.top-actions [data-action="settings"]');
+    const blocked = !!document.querySelector(".settings-overlay,.gx-intro,.gx-gate");
+    fab.style.display = ok && !blocked ? "grid" : "none";
+  };
+
+  new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
+  setInterval(sync, 400);
+  sync();
+})();
+</script>
 
 </body>
 </html>
