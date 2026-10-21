@@ -11118,5 +11118,179 @@ body:has(.auth-field) .setup-lead{margin:0 auto}
 })();
 
 </script>
+<script>
+/* GREYX LUDO — CAPA v3 (agrégalo como TERCER <script>, debajo del v2) */
+(() => {
+  const $ = s => document.querySelector(s);
+  const click = a => { const b = $('[data-action="' + a + '"]'); if (b) b.click(); };
+
+  /* ---------- Logo (SVG, sin imágenes) ---------- */
+  const logo = (crown) => `<svg viewBox="40 ${crown ? 10 : 90} 630 ${crown ? 540 : 460}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#b9bcc9"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1fd0"/></linearGradient>
+<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#e09a00"/></linearGradient>
+</defs>
+${crown ? `<g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 44L114 14L124 74Z" fill="url(#gC)" stroke="#8a5a00" stroke-width="4" stroke-linejoin="round"/><circle cx="10" cy="12" r="8" fill="#ffe27a"/><circle cx="62" cy="-2" r="8" fill="#ffe27a"/><circle cx="114" cy="12" r="8" fill="#ffe27a"/></g>` : ""}
+<g transform="translate(0,8)" opacity=".5"><path fill="#000" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/></g>
+<path fill="url(#gA)" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/>
+<path fill="url(#gA)" d="M255 295H440L385 365H275L237 318Z"/>
+<path fill="url(#gB)" stroke="#2a1580" stroke-width="5" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/>
+</svg>`;
+  const LOGO_URI = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(logo(true)) + '")';
+
+  /* ---------- CSS ---------- */
+  const css = `
+/* Acceso: logo real en vez del cuadro "GX" */
+body:has(.auth-field) .setup-copy::before{content:"";width:170px;height:140px;margin:0 auto 6px;border-radius:0;background:${LOGO_URI} center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 8px 18px #6d28d9aa)}
+/* Pantalla "toca para entrar" */
+.gx-gate{background:radial-gradient(circle at 50% 38%,#4c1d9566,transparent 55%),linear-gradient(180deg,#0b0c2e,#05060f)}
+.gx-gate svg{filter:drop-shadow(0 0 28px #6d28d9cc)}
+.gx-gate::after{content:"Tu juego, tus reglas.";position:absolute;bottom:calc(36px + env(safe-area-inset-bottom,0px));color:#c9c3ff;font:600 .95rem Inter,system-ui,sans-serif}
+
+/* Tablero Clásico: estilo de la maqueta */
+body.b-classic .board-frame{background:linear-gradient(145deg,#3a3f7a,#14183a);border:3px solid #7c6cf0aa;box-shadow:0 0 36px #6d28d966,0 28px 60px #000a}
+body.b-classic .board{background:#e9edfb}
+body.b-classic .cell{border-color:#c6cde6}
+body.b-classic .cell.track{background:linear-gradient(145deg,#fff,#e4e9f8)}
+body.b-classic .cell.safe::before{color:#f5a623;text-shadow:none}
+body.b-classic .cell.lane-red,body.b-classic .cell.start-red{background:#e53935}
+body.b-classic .cell.lane-green,body.b-classic .cell.start-green{background:#2fa84f}
+body.b-classic .cell.lane-yellow,body.b-classic .cell.start-yellow{background:#f5b301}
+body.b-classic .cell.lane-blue,body.b-classic .cell.start-blue{background:#2f6fe0}
+body.b-classic .home.red{background:linear-gradient(145deg,#ff6a60,#c62828)}
+body.b-classic .home.blue{background:linear-gradient(145deg,#5b9bff,#1d4ed8)}
+body.b-classic .home.green{background:linear-gradient(145deg,#46c872,#1b7a3a)}
+body.b-classic .home.yellow{background:linear-gradient(145deg,#ffd84a,#d99a00)}
+body.b-classic .yard{background:#ffffffee;border:3px solid #fff;border-radius:18%;box-shadow:inset 0 3px 8px #0003}
+body.b-classic .finish{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);width:24%;height:24%;left:38%;top:38%;border:0;border-radius:0;background:conic-gradient(from 0deg,#2f6fe0 0 25%,#f5b301 25% 50%,#2fa84f 50% 75%,#e53935 75%);box-shadow:none}
+body.b-classic .finish::after{box-shadow:0 0 0 2px #fff}
+
+/* ===== MENÚ PRINCIPAL ===== */
+body.gxm-on{overflow:hidden}
+.gxm{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;align-items:center;color:#fff;overflow:hidden;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(82px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(circle at 50% 26%,#4c1d9577,transparent 58%),radial-gradient(circle at 50% 100%,#1d4ed855,transparent 55%),linear-gradient(180deg,#0b0c2e,#05060f)}
+.gxm.on{display:flex}
+.gxm-hd{align-self:flex-start;display:flex;align-items:center;gap:10px;max-width:182px;height:44px}
+.gxm-lv{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a78bfa,#4c1d95);border:2px solid #fde68a;box-shadow:0 0 16px #8b5cf6aa;line-height:1}
+.gxm-lv small{font:800 .42rem monospace;color:#ddd6fe}.gxm-lv b{font-size:1rem}
+.gxm-xp{min-width:0;flex:1}
+.gxm-xp small{display:block;font-size:.6rem;color:#a3abbd;white-space:nowrap}
+.gxm-bar{height:7px;border-radius:9px;background:#1e293b;overflow:hidden;margin:4px 0 3px}
+.gxm-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22d3ee,#a78bfa);box-shadow:0 0 8px #22d3ee99}
+.gxm-main{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;flex:1;justify-content:center;gap:12px}
+.gxm-main.hide{display:none}
+.gxm-logo{width:min(54vw,210px);filter:drop-shadow(0 10px 22px #6d28d9aa)}
+.gxm-t{text-align:center;line-height:.95;margin:-2px 0 6px}
+.gxm-t1{display:block;font:900 italic 2rem Inter,system-ui,sans-serif;color:#fff;-webkit-text-stroke:1.5px #2a1a78;text-shadow:0 3px 0 #4c2fd0,0 6px 0 #2a1a78,0 10px 16px #000a}
+.gxm-t2{display:block;font:900 3.1rem Inter,system-ui,sans-serif;color:#c4b1ff;-webkit-text-stroke:2px #2a1a78;text-shadow:0 4px 0 #5b35f0,0 8px 0 #2a1a78,0 12px 20px #000a;letter-spacing:.01em}
+.gxm-b{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:58px;border:2px solid #ffffff55;border-radius:18px;color:#fff;font:800 1.12rem Inter,system-ui,sans-serif;text-shadow:0 2px 3px #0006;cursor:pointer;position:relative}
+.gxm-b::before{content:"";position:absolute;inset:2px 2px 50%;border-radius:15px 15px 40% 40%;background:linear-gradient(#ffffff55,#ffffff08);pointer-events:none}
+.gxm-b:active{transform:translateY(4px)}
+.gxm-b.g{background:linear-gradient(180deg,#3ddc6a,#16a34a);box-shadow:0 5px 0 #0d6b2e,0 12px 20px #16a34a44}
+.gxm-b.b{background:linear-gradient(180deg,#4f9bff,#1d4ed8);box-shadow:0 5px 0 #14339a,0 12px 20px #1d4ed844}
+.gxm-b.y{background:linear-gradient(180deg,#ffd84a,#e8a100);box-shadow:0 5px 0 #9a6700,0 12px 20px #e8a10044}
+.gxm-b.p{background:linear-gradient(180deg,#b58cff,#6d28d9);box-shadow:0 5px 0 #3b1d8f,0 12px 20px #6d28d944}
+.gxm-b span{font-size:1.4rem}
+.gxm-sheet{display:none;width:100%;max-width:400px;flex:1;flex-direction:column;gap:12px;padding-top:12px}
+.gxm-sheet.on{display:flex}
+.gxm-top{display:flex;align-items:center;gap:12px;margin:6px 0 6px}
+.gxm-top button{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff22;background:#ffffff12;color:#fff;font-size:1.1rem}
+.gxm-top h2{margin:0;font-size:1.25rem}
+.gxm-card{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:20px;text-align:left;color:#fff;border:1.5px solid var(--cc);background:linear-gradient(135deg,#1b2a66,#0d1233);box-shadow:0 0 22px #0006,inset 0 1px 0 #ffffff1a}
+.gxm-card:active{transform:scale(.98)}
+.gxm-card em{font-style:normal;display:grid;place-items:center;width:58px;height:58px;flex:0 0 58px;border-radius:16px;font-size:1.9rem;background:#ffffff12;box-shadow:0 0 18px var(--cc)}
+.gxm-card strong{display:block;font-size:1rem}.gxm-card small{color:#9aa6c4;font-size:.76rem;line-height:1.35}
+.gxm-nav{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#0d1233f0,#070a1e);border-top:1px solid #ffffff18}
+.gxm-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:#8e97b8;font:700 .66rem Inter,system-ui,sans-serif}
+.gxm-nav button span{font-size:1.35rem}.gxm-nav button.on{color:#c4b5fd}
+`;
+
+  const st = document.createElement("style");
+  st.id = "gxV3css"; st.textContent = css; document.head.appendChild(st);
+
+  /* ---------- Menú ---------- */
+  const box = document.createElement("div");
+  box.className = "gxm"; document.body.appendChild(box);
+  let sheet = false, sig = "";
+
+  function read() {
+    const h = $(".gx-home"); if (!h) return null;
+    const b = h.querySelectorAll(".gx-progress-stats b"), q = s => h.querySelector(s);
+    return { lv: q(".gx-level strong") ? q(".gx-level strong").textContent : "01",
+             g: b[0] ? b[0].textContent : "0", w: b[1] ? b[1].textContent : "0",
+             xp: q(".gx-xp-bar i") ? q(".gx-xp-bar i").style.width : "0%" };
+  }
+
+  function draw(s) {
+    box.innerHTML = `
+    <div class="gxm-hd">
+      <div class="gxm-lv"><small>NV.</small><b>${s.lv}</b></div>
+      <div class="gxm-xp"><small>🎮 ${s.g} · 🏆 ${s.w}</small><div class="gxm-bar"><i style="width:${s.xp}"></i></div></div>
+    </div>
+    <div class="gxm-main ${sheet ? "hide" : ""}">
+      <div class="gxm-logo">${logo(true)}</div>
+      <div class="gxm-t"><span class="gxm-t1">Ludo</span><span class="gxm-t2">GREYX</span></div>
+      <button class="gxm-b g" data-go="play"><span>▶</span>Jugar</button>
+      <button class="gxm-b b" data-go="friends"><span>👥</span>Amigos</button>
+      <button class="gxm-b y" data-go="shop"><span>🏪</span>Tienda</button>
+      <button class="gxm-b p" data-go="settings"><span>⚙️</span>Configuración</button>
+    </div>
+    <div class="gxm-sheet ${sheet ? "on" : ""}">
+      <div class="gxm-top"><button data-go="back">←</button><h2>Jugar</h2></div>
+      <button class="gxm-card" style="--cc:#22d3ee" data-go="local"><em>👥</em><span><strong>Modo Local</strong><small>Juega en el mismo dispositivo.</small></span></button>
+      <button class="gxm-card" style="--cc:#e879f9" data-go="bot"><em>🤖</em><span><strong>Reto IA</strong><small>Pon a prueba tu estrategia contra bots.</small></span></button>
+      <button class="gxm-card" style="--cc:#38bdf8" data-go="online"><em>🌐</em><span><strong>Modo Online</strong><small>Conecta con jugadores de todo el mundo.</small></span></button>
+    </div>
+    <nav class="gxm-nav">
+      <button class="on" data-go="back"><span>🏠</span>Inicio</button>
+      <button data-go="friends"><span>👥</span>Amigos</button>
+      <button data-go="shop"><span>🏪</span>Tienda</button>
+      <button data-go="settings"><span>👤</span>Perfil</button>
+    </nav>`;
+  }
+
+  box.addEventListener("click", e => {
+    const b = e.target.closest("[data-go]"); if (!b) return;
+    const g = b.dataset.go;
+    if (g === "play") { sheet = true; sig = ""; }
+    else if (g === "back") { sheet = false; sig = ""; }
+    else if (g === "friends") click("friends-open");
+    else if (g === "shop") { if (window.GX_SHOP) GX_SHOP.open(); }
+    else if (g === "settings") click("settings");
+    else if (g === "local") click("local");
+    else if (g === "bot") click("mode");
+    else if (g === "online") click("online-open");
+  });
+
+  setInterval(() => {
+    const s = read(), on = !!s;
+    box.classList.toggle("on", on);
+    document.body.classList.toggle("gxm-on", on);
+    if (!on) { sheet = false; sig = ""; return; }
+    const k = JSON.stringify(s) + sheet;
+    if (k !== sig) { sig = k; draw(s); }
+  }, 350);
+
+  /* ---------- Fichas peón + tablero claro por defecto (una sola vez) ---------- */
+  try {
+    if (!localStorage.getItem("gx-v3") && window.GX_SHOP) {
+      const S = GX_SHOP.state();
+      if (S.equip.token === "classic") {
+        S.equip.token = "peon";
+        if (!S.owned.includes("token:peon")) S.owned.push("token:peon");
+      }
+      S.equip.board = "classic";
+      GX_SHOP.addGems(0); // guarda
+      const c = document.body.classList;
+      [...c].filter(x => /^[bt]-/.test(x)).forEach(x => c.remove(x));
+      c.add("b-classic", "t-" + S.equip.token);
+      localStorage.setItem("gx-v3", "1");
+    }
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
