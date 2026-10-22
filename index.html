@@ -4919,6 +4919,8 @@ body.d-ruby .pip{background:#fff}
 </style>
 <div id="app" class="app"></div>
 <script src="greyx-core.js"></script>
+<script src="greyx-catalog.js"></script>
+<script src="greyx-extras.js"></script>
 
 <script>
 (() => {
@@ -10874,6 +10876,13 @@ function xpBarMarkup() {
     </div>
   `;
 }
+window.GX = {
+  get fb() { return fb; },
+  get state() { return state; },
+  fsModule, render,
+  xpLevelFromTotal, xpForLevel, xpToNext, xpBarPct,
+  avatarEmoji
+};
 
 showTapGate();
 startAuth();
