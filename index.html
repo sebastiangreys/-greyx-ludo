@@ -4918,6 +4918,7 @@ body.d-ruby .pip{background:#fff}
 
 </style>
 <div id="app" class="app"></div>
+<script src="greyx-core.js"></script>
 
 <script>
 (() => {
@@ -9402,6 +9403,15 @@ function onAuthChange(user) {
   }
   if (state.introDone) render();
 }
+async function syncPublic() {
+  if (!fb || !fb.db || !state.user || !state.profile) return;
+  try {
+    await GreyxCore.syncPublicProfile({
+      fb, fs: await fsModule(), uid: state.user.uid, profile: state.profile
+    });
+  } catch (e) { console.warn("syncPublic", e); }
+}
+
 
 async function loadProfile() {
   if (!fb || !fb.db || !state.user) return;
@@ -9412,7 +9422,7 @@ async function loadProfile() {
 
     state.profile = snap.exists() ? snap.data() : null;
     state.profileLoaded = true;
-
+    syncPublic();
     if (!state.profile && !state.profileSkipped && state.phase !== "playing") {
       state.showProfile = "create";
       state.profileName = "";
@@ -9766,7 +9776,8 @@ async function saveProfile() {
     await batch.commit();
 
     state.profile = { username: name, usernameLower: lower, avatar: state.profileAvatar };
-    state.profileBusy = false;
+   syncPublic();
+     state.profileBusy = false;
     state.showProfile = null;
     render();
 
@@ -9792,7 +9803,8 @@ async function saveAvatar() {
     });
     state.profile = Object.assign({}, state.profile, { avatar: state.profileAvatar });
     state.profileNotice = "Avatar actualizado.";
-  } catch (e) {
+ syncPublic();
+   } catch (e) {
     state.profileError = profileErrText(e, false);
   }
 
@@ -10015,6 +10027,7 @@ async function fsModule() {
 
 function resetGameStats() {
   state.gameStats = { captures:0, goals:0 };
+  state.gameStartedAt = Date.now();
   state.statsRecorded = false;
   state.gameResult = null;
 }
@@ -10112,6 +10125,36 @@ async function grantXPByPlace(place) {
     console.warn("grantXPByPlace", e);
   }
 }
+async function submitGameResult(place) {
+  if (state.statsRecorded) return;
+  state.statsRecorded = true;
+  if (!state.user || !state.profile || !fb || !fb.db) return;
+  const g = state.gameStats || { captures: 0, goals: 0 };
+  try {
+    const fs = await fsModule();
+    const prevLevel = xpLevelFromTotal(state.xp || 0);
+    const r = await GreyxCore.submitGame({
+      fb, fs, uid: state.user.uid, profile: state.profile,
+      place, bots: Math.max(1, state.players.length - 1),
+      captures: g.captures, goals: g.goals,
+      durationMs: Date.now() - (state.gameStartedAt || Date.now())
+    });
+    if (!r) return;
+    state.stats = r.stats;
+    state.statsUid = state.user.uid;
+    state.xp = r.stats.xp;
+    state.xpLevel = xpLevelFromTotal(r.stats.xp);
+    state.xpLoaded = true;
+    state.gameResult = { delta: r.trophyDelta };
+    const up = state.xpLevel > prevLevel;
+    state.xpResult = { granted: r.xpGranted, leveledUp: up, newLevel: state.xpLevel, place };
+    if (r.xpGranted > 0) showXPPopup(r.xpGranted);
+    if (up) setTimeout(() => showLevelUp(state.xpLevel), 1200);
+  } catch (e) {
+    console.warn("submitGameResult", e);
+  }
+}
+
 async function endGameWithRanking() {
   state.ranking = state.finishedOrder.slice();
   state.winner = state.ranking[0] || null;
@@ -10120,10 +10163,8 @@ async function endGameWithRanking() {
   const humanPlace = humanIdx >= 0 ? humanIdx + 1 : 0;
 
   if (state.mode === "solo" && humanPlace > 0) {
-    await grantXPByPlace(humanPlace);
+    await submitGameResult(humanPlace);
   }
-
-  await recordGameResult();
 
   state.celebrating = true;
   state.roll = null;
@@ -10133,6 +10174,7 @@ async function endGameWithRanking() {
   state.phase = "winner";
   render();
 }
+
 async function recordGameResult() {
   if (state.mode !== "solo" || state.statsRecorded) return;
   state.statsRecorded = true;
