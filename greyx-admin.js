@@ -125,7 +125,7 @@
     if (!g || !g.state.isOwner || g.state.phase === "playing") return "";
     return `
       <button class="settings-option" data-action="admin-open" type="button">
-        <span class="settings-option-icon">🛡️</span>
+        <span class="settings-option-icon">${window.GXOwnerIcon ? window.GXOwnerIcon(24) : ""}</span>
         <span class="settings-option-text">
           <strong>Panel de administrador</strong>
           <small>Sanciones, registro y desbloqueos</small>
@@ -251,7 +251,7 @@
         <div class="gxa-owner">
           <span class="gxa-av">${g.avatarEmoji(p.avatar || "a1")}</span>
           <div>
-            <strong>@${esc(p.username || "owner")} ✔️👑</strong>
+            <strong>@${esc(p.username || "owner")}</strong>
             <small>OWNER</small>
           </div>
         </div>
@@ -325,7 +325,7 @@
       <div class="gxa-in">
         <div class="gxa-top">
           <button class="gxa-back" data-a="close" type="button" aria-label="Volver">←</button>
-          <div class="gxa-title"><span>🛡️</span><strong>Administrador</strong></div>
+          <div class="gxa-title">${window.GXOwnerIcon ? window.GXOwnerIcon(22) : ""}<strong>Administrador</strong></div>
           <span class="gxa-sp"></span>
         </div>
         <div class="gxa-tabs">
