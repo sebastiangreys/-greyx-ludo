@@ -1,0 +1,100 @@
+/* GREYX LUDO — TABLERO HD (cargar al final, después de todos los <style>) */
+
+/* ---------- Marco dorado con relieve ---------- */
+body .board-frame{
+  padding:12px;
+  border:0;
+  border-radius:34px;
+  background:linear-gradient(145deg,#fff0b0 0%,#d9a72f 28%,#8a5f12 52%,#e9c35a 78%,#fff0b0 100%);
+  box-shadow:
+    0 34px 80px #000c,
+    0 0 0 2px #3d2a06,
+    0 0 56px #fbbf2455,
+    inset 0 2px 2px #fff,
+    inset 0 -4px 8px #0007;
+}
+body .board{
+  border-radius:24px;
+  background:url("greyx-board.svg") center/100% 100% no-repeat,#e9edfa !important;
+  box-shadow:
+    inset 0 0 0 3px #4a3208,
+    inset 0 0 0 5px #f6d77a99,
+    inset 0 0 40px #0005;
+}
+
+/* ---------- Casas (las 4 siempre completas) ---------- */
+body .board .home{
+  padding:5%;
+  background:transparent !important;
+  box-shadow:none !important;
+  border-radius:16%;
+}
+body .board .home.red   {inset:1.5% 61.5% 61.5% 1.5%}
+body .board .home.blue  {inset:1.5% 1.5% 61.5% 61.5%}
+body .board .home.green {inset:61.5% 61.5% 1.5% 1.5%}
+body .board .home.yellow{inset:61.5% 1.5% 1.5% 61.5%}
+
+body .board .yard{
+  border:0;
+  border-radius:16%;
+  box-shadow:inset 0 3px 8px #0000002e;
+  background:
+    radial-gradient(circle closest-side,#e4e9f8 0 82%,#b9c3e3 88%,transparent 92%) 17.8% 17.8%/34% 34% no-repeat,
+    radial-gradient(circle closest-side,#e4e9f8 0 82%,#b9c3e3 88%,transparent 92%) 82.2% 17.8%/34% 34% no-repeat,
+    radial-gradient(circle closest-side,#e4e9f8 0 82%,#b9c3e3 88%,transparent 92%) 17.8% 82.2%/34% 34% no-repeat,
+    radial-gradient(circle closest-side,#e4e9f8 0 82%,#b9c3e3 88%,transparent 92%) 82.2% 82.2%/34% 34% no-repeat,
+    linear-gradient(#fff,#eef1fb);
+}
+
+/* ---------- Casillas con bisel ---------- */
+body .board .cell{
+  border:1px solid #c3cce6 !important;
+  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 3px #28326414 !important;
+}
+body .board .cell.track{background:linear-gradient(160deg,#fff,#e5eaf8)}
+
+body .board .cell.lane-red,   body .board .cell.start-red   {background:linear-gradient(160deg,#ff7a70,#c62828);border-color:#ffffff88 !important}
+body .board .cell.lane-green, body .board .cell.start-green {background:linear-gradient(160deg,#52d07e,#1b7a3a);border-color:#ffffff88 !important}
+body .board .cell.lane-yellow,body .board .cell.start-yellow{background:linear-gradient(160deg,#ffdc55,#d99a00);border-color:#ffffff88 !important}
+body .board .cell.lane-blue,  body .board .cell.start-blue  {background:linear-gradient(160deg,#6aa5ff,#1d4ed8);border-color:#ffffff88 !important}
+
+/* pasillos de colores siempre a todo color */
+.board:not(:has(.home.red))    :is(.cell.lane-red,.cell.start-red),
+.board:not(:has(.home.green))  :is(.cell.lane-green,.cell.start-green),
+.board:not(:has(.home.yellow)) :is(.cell.lane-yellow,.cell.start-yellow),
+.board:not(:has(.home.blue))   :is(.cell.lane-blue,.cell.start-blue){opacity:1}
+
+/* estrellas */
+body .cell.safe::before{
+  font-size:clamp(13px,3.6vw,24px);
+  color:#f5a623;
+  text-shadow:0 1px 0 #fff,0 0 10px #fbbf24aa;
+}
+body .cell[class*="start-"].safe::before{color:#fff;text-shadow:0 1px 2px #0006}
+
+/* ---------- Centro: 4 triángulos + corona ---------- */
+body .board .finish{
+  clip-path:none;
+  border:0;
+  border-radius:5%;
+  filter:none;
+  background:conic-gradient(from -45deg,#2f6fe0 0 25%,#f5b301 25% 50%,#2fa84f 50% 75%,#e53935 75% 100%);
+  box-shadow:inset 0 0 0 2px #fff,inset 0 0 18px #0004,0 0 20px #a78bfa88;
+}
+body .board .finish::after{
+  width:40%;height:40%;
+  background:radial-gradient(circle at 35% 30%,#3a3f7a,#0c0f1e 75%);
+  box-shadow:0 0 0 3px #fde68a,0 0 0 5px #8a5f12,0 0 16px #a78bfa,inset 0 0 8px #000a;
+}
+
+/* ---------- Fichas con más profundidad ---------- */
+body .board .token{filter:drop-shadow(0 4px 3px #0007)}
+body .board .token.valid{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px var(--c))}
+
+/* ---------- Celular: que nada se tape ---------- */
+@media (max-width:560px){
+  body .board-frame{padding:8px;border-radius:24px}
+  body .board{border-radius:16px}
+  .hint{position:static;margin:12px 0 0;padding:8px 12px;background:#ffffff0d;font-size:.78rem}
+  main:has(.dice-row){padding-bottom:210px}
+}
