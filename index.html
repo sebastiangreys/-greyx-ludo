@@ -9875,7 +9875,7 @@ function accountMarkup() {
     const out = state.confirmAction === "auth-logout";
     const p = state.profile;
     const avatar = p ? avatarEmoji(p.avatar) : "👤";
-    const title = p ? "@" + escHtml(p.username) : escHtml(state.user.email || "");
+    const title = (p ? "@" + escHtml(p.username) : escHtml(state.user.email || "")) + (state.isOwner ? " ✔️👑" : "");
     const status = state.user.emailVerified ? "Correo verificado ✓" : "Correo pendiente de verificar";
 
     let profileBtn = "";
@@ -11450,6 +11450,6 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
   sync();
 })();
 </script>
-
+<script src="greyx-admin.js"></script>
 </body>
 </html>
