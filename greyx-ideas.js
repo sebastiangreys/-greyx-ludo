@@ -1,5 +1,5 @@
 /* GREYX LUDO — Buzón de ideas
-   - Botón (bombilla dibujada en SVG) arriba a la izquierda del menú principal
+   - Botón (bombilla dibujada en SVG) pegado al menú principal, arriba a la izquierda
    - Todos los jugadores con perfil pueden enviar ideas
    - El admin ve la bandeja: quién la envió, cuándo, y puede marcarla o borrarla
    Requiere greyx-admin.js (comparte estilos de ventana) y la regla /ideas en Firestore. */
@@ -27,14 +27,14 @@
   /* ---------- Estilos ---------- */
   const st = document.createElement("style");
   st.textContent = `
-  .gxi-fab{position:fixed;z-index:999;top:calc(12px + env(safe-area-inset-top,0px));left:14px;width:46px;height:46px;
-    display:none;place-items:center;border-radius:50%;cursor:pointer;color:#fde68a;padding:0;
-    background:linear-gradient(145deg,#232a66,#0d1030);border:1px solid #fbbf2488;
-    box-shadow:0 0 18px #fbbf2444,0 6px 16px #000a}
-  .gxi-fab:active{transform:scale(.93)}
-  .gxi-dot{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;
-    background:#ef4444;color:#fff;font:900 .68rem Inter,system-ui,sans-serif;display:none;place-items:center;
-    border:2px solid #0d1030}
+  .gxi-row{width:100%;display:flex;justify-content:flex-start;margin:-32px 0 6px}
+  .gxi-btn{position:relative;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 11px;
+    border-radius:99px;border:1px solid #fbbf2477;background:linear-gradient(145deg,#232a66,#0d1030);color:#fde68a;
+    font:800 .74rem Inter,system-ui,sans-serif;letter-spacing:.04em;cursor:pointer;
+    box-shadow:0 0 16px #fbbf2433,0 6px 14px #0008}
+  .gxi-btn:active{transform:scale(.96)}
+  .gxi-dot{min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#ef4444;color:#fff;
+    font:900 .66rem Inter,system-ui,sans-serif;display:none;place-items:center}
   #gxIdeas textarea{height:150px}
   .gxi-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 4px}
   .gxi-chips button{padding:11px 4px;border-radius:13px;border:1.5px solid #ffffff1c;background:#ffffff08;
@@ -63,25 +63,40 @@
   `;
   document.head.appendChild(st);
 
-  /* ---------- Botón de arriba ---------- */
-  const fab = document.createElement("button");
-  fab.className = "gxi-fab";
-  fab.type = "button";
-  fab.setAttribute("aria-label", "Buzón de ideas");
-  fab.innerHTML = BULB(22) + `<span class="gxi-dot"></span>`;
-  document.body.appendChild(fab);
-  fab.addEventListener("click", openSheet);
-
-  function syncFab() {
-    const home = !!$(".gx6.on");
-    const blocked = !!$(".gxa, .settings-overlay, .gx-intro, .gx-gate, #gxx, .winner, .celebration");
-    fab.style.display = home && !blocked ? "grid" : "none";
-    const dot = $(".gxi-dot", fab);
+  /* ---------- Botón dentro del menú (parte del widget) ---------- */
+  function updateDot() {
+    const dot = $(".gxi-dot");
+    if (!dot) return;
     const admin = !!(G() && G().state.isOwner);
     dot.style.display = admin && unread > 0 ? "grid" : "none";
     dot.textContent = unread > 99 ? "99+" : unread;
   }
-  setInterval(syncFab, 400);
+
+  function mountRow() {
+    const inner = $(".gx6.on .gx6-in");
+    if (!inner || inner.querySelector(".gxi-row")) return;
+    const row = document.createElement("div");
+    row.className = "gxi-row";
+    row.innerHTML = `<button type="button" class="gxi-btn" aria-label="Buzón de ideas">${BULB(18)}<span>Buzón de ideas</span><span class="gxi-dot"></span></button>`;
+    inner.insertBefore(row, inner.firstChild);
+    $(".gxi-btn", row).addEventListener("click", openSheet);
+    updateDot();
+  }
+
+  function syncFab() {
+    mountRow();
+    updateDot();
+  }
+
+  // El menú principal se redibuja solo: se vuelve a poner la fila al instante
+  function watch() {
+    const box = $(".gx6");
+    if (box && !box._gxi) {
+      box._gxi = true;
+      new MutationObserver(syncFab).observe(box, { childList: true });
+    }
+  }
+  setInterval(() => { watch(); syncFab(); }, 400);
 
   /* ---------- Ventana ---------- */
   function openSheet() {
