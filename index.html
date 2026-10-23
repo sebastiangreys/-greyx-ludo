@@ -8140,6 +8140,7 @@ function friendsMarkup() {
       </div>
 
       ${resultsHtml}
+      ${requestsHtml}
 
       <div class="fx-stats">
         <div class="fx-stat fx-stat-friends">
@@ -9419,6 +9420,7 @@ async function loadProfile() {
     state.profile = snap.exists() ? snap.data() : null;
     state.profileLoaded = true;
     syncPublic();
+    ensureUsernameDoc();
     
     if (!state.profile && !state.profileSkipped && state.phase !== "playing") {
       state.showProfile = "create";
@@ -9507,6 +9509,10 @@ try {
   state.friendsResults = [];
   state.friendsSearchNote = "No se pudo buscar (" + (e.code || "error") + ")";
 }
+
+state.friendsSearchBusy = false;
+render();
+}   // <- cierra searchFriends
 
 function friendRequestId(fromUid, toUid) {
   return fromUid + "_" + toUid;
