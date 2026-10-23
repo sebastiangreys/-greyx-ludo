@@ -7867,6 +7867,8 @@ function friendsMarkup() {
 
   const av = (id, on) => `<span class="fr-av">${avatarEmoji(id)}${
     on === undefined ? "" : `<i class="fr-dot ${on ? "on" : ""}"></i>`}</span>`;
+const who = (uid, avHtml, info) =>
+  `<button class="fr-who" data-action="player-open" data-uid="${escHtml(uid)}" type="button">${avHtml}<div class="fr-info">${info}</div></button>`;
 
   const friendRows = list.map(f => `
     <div class="fr-row">
@@ -8063,7 +8065,9 @@ if (action === "settings-exit") {
   render();
   return;
 }
-
+if (action === "player-open") { openPlayer(button.dataset.uid); return; }
+if (action === "player-close") { state.viewPlayer = null; render(); return; }
+if (action === "player-copy") { copyPlayerId(button.dataset.uid); return; }
 if (action === "friends-tab") {
   state.friendsTab = button.dataset.tab;
   render();
@@ -9455,6 +9459,89 @@ async function loadFriendsList() {
 
   if (state.showFriends) render();
 }
+async function openPlayer(uid) {
+  if (!fb || !fb.db || !uid) return;
+  const known = [...(state.friendsResults || []), ...(state.friendsList || []),
+                 ...(state.friendsIncoming || [])].find(x => x.uid === uid) || {};
+  state.viewPlayer = {
+    uid, username: known.username || known.fromUsername || "jugador",
+    avatar: known.avatar || known.fromAvatar || "a1", loading: true
+  };
+  state.copied = false;
+  render();
+
+  try {
+    state.isAdmin = (await fb.getDoc(fb.doc(fb.db, "admins", state.user.uid))).exists();
+  } catch (e) { state.isAdmin = false; }
+
+  try {
+    const snap = await fb.getDoc(fb.doc(fb.db, "publicProfiles", uid));
+    if (!state.viewPlayer || state.viewPlayer.uid !== uid) return;
+    if (snap.exists()) Object.assign(state.viewPlayer, snap.data());
+    else state.viewPlayer.missing = true;
+  } catch (e) {
+    console.warn("openPlayer", e);
+    if (state.viewPlayer) state.viewPlayer.error = true;
+  }
+  if (state.viewPlayer) state.viewPlayer.loading = false;
+  render();
+}
+
+function copyPlayerId(uid) {
+  const done = () => {
+    state.copied = true; render();
+    setTimeout(() => { state.copied = false; render(); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(uid).then(done).catch(done);
+  } else {
+    const t = document.createElement("textarea");
+    t.value = uid; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    t.remove(); done();
+  }
+}
+
+function playerModalMarkup() {
+  const p = state.viewPlayer;
+  if (!p) return "";
+  const lv = xpLevelFromTotal(p.xp || 0);
+  const rate = p.played ? Math.round((p.wins || 0) * 100 / p.played) + "%" : "0%";
+
+  let body = "";
+  if (p.loading) body = `<p class="pl-note">Cargando…</p>`;
+  else if (p.error) body = `<p class="pl-note">No se pudo cargar el perfil.</p>`;
+  else if (p.missing) body = `<p class="pl-note">Este jugador aún no tiene estadísticas públicas.</p>`;
+  else body = `
+    <div class="pl-stats">
+      <div><b>${p.trophies || 0}</b><span>Trofeos</span></div>
+      <div><b>${p.wins || 0}</b><span>Victorias</span></div>
+      <div><b>${p.played || 0}</b><span>Partidas</span></div>
+      <div><b>${rate}</b><span>% Victorias</span></div>
+    </div>`;
+
+  const idBlock = state.isAdmin ? `
+    <div class="pl-id">
+      <small>ID DE USUARIO</small>
+      <code>${escHtml(p.uid)}</code>
+      <button class="pl-copy" data-action="player-copy" data-uid="${escHtml(p.uid)}" type="button">
+        ${state.copied ? "¡Copiado!" : "Copiar ID"}
+      </button>
+    </div>` : "";
+
+  return `
+  <div class="pl-overlay" data-key="pl">
+    <section class="pl-card">
+      <button class="pl-x" data-action="player-close" type="button" aria-label="Cerrar">✕</button>
+      <span class="pl-av">${avatarEmoji(p.avatar)}</span>
+      <h2>@${escHtml(p.username || "jugador")}</h2>
+      <span class="pl-lv">NV. ${lv}</span>
+      ${body}
+      ${idBlock}
+    </section>
+  </div>`;
+}
+
 async function acceptFriendRequest(reqId) {
   if (!fb || !fb.db || !state.user) return;
   state.friendsReqBusy = true;
