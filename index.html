@@ -8247,22 +8247,23 @@ if (handleAuthAction(action) || handleProfileAction(action) || handleOnlineActio
 if (action === "friends-open") {
   state.showFriends = true;
   state.settingsOpen = false;
-  state.friendMenuUid = null;
-  state.friendConfirmDelete = null;
+  state.friendsSearch = "";
+  state.friendsResults = [];
+  state.friendsSearchNote = "";
   render();
+  loadFriendRequests();
+  loadFriendsList();
   return;
 }
-
 if (action === "friends-back") {
   state.showFriends = false;
   state.friendsSearch = "";
   state.friendsResults = [];
   state.friendsSearchNote = "";
-  state.friendMenuUid = null;
-  state.friendConfirmDelete = null;
   render();
   return;
 }
+
 if (action === "friend-request") {
   const uid = button.dataset.uid;
   const name = button.dataset.username || "";
@@ -8372,13 +8373,6 @@ if (action === "settings-music") {
   render();
   loadFriendRequests();
   loadFriendsList();
-  return;
-}
-
-if (action === "friends-back") {
-
-  state.friendsSearchNote = "Las solicitudes se activan en la siguiente etapa.";
-  render();
   return;
 }
         /* =========================
@@ -9425,6 +9419,7 @@ async function loadProfile() {
     state.profile = snap.exists() ? snap.data() : null;
     state.profileLoaded = true;
     syncPublic();
+    
     if (!state.profile && !state.profileSkipped && state.phase !== "playing") {
       state.showProfile = "create";
       state.profileName = "";
@@ -9438,6 +9433,19 @@ async function loadProfile() {
   }
 }
 let friendsSearchTimer = null;
+async function ensureUsernameDoc() {
+  if (!fb || !fb.db || !state.user || !state.profile) return;
+  const p = state.profile;
+  const lower = (p.usernameLower || p.username || "").toLowerCase();
+  if (!lower) return;
+  try {
+    const ref = fb.doc(fb.db, "usernames", lower);
+    const snap = await fb.getDoc(ref);
+    const data = { uid: state.user.uid, username: p.username, avatar: p.avatar || "a1" };
+    if (!snap.exists()) await fb.setDoc(ref, data);
+    else if (snap.data().uid === state.user.uid) await fb.updateDoc(ref, data);
+  } catch (e) { console.warn("ensureUsernameDoc", e); }
+}
 
 async function searchFriends(raw) {
   const q = String(raw || "").trim().replace(/^@+/, "");
@@ -9479,50 +9487,27 @@ async function searchFriends(raw) {
   state.friendsSearchNote = "";
   render();
 
-  try {
-    let uid = null;
-
-    const nameSnap = await fb.getDoc(fb.doc(fb.db, "usernames", lower));
-    if (nameSnap.exists()) {
-      uid = nameSnap.data().uid;
-    } else if (q.length >= 20) {
-      const userSnap = await fb.getDoc(fb.doc(fb.db, "users", q));
-      if (userSnap.exists()) uid = q;
-    }
-
-    if (!uid || uid === state.user.uid) {
-      state.friendsResults = [];
-      state.friendsSearchNote = "No se encontró ese jugador.";
-      state.friendsSearchBusy = false;
-      render();
-      return;
-    }
-
-    const userSnap = await fb.getDoc(fb.doc(fb.db, "users", uid));
-    if (!userSnap.exists()) {
-      state.friendsResults = [];
-      state.friendsSearchNote = "No se encontró ese jugador.";
-      state.friendsSearchBusy = false;
-      render();
-      return;
-    }
-
-    const data = userSnap.data() || {};
-    state.friendsResults = [{
-      uid: uid,
-      username: data.username || q,
-      avatar: data.avatar || "a1"
-    }];
-    state.friendsSearchNote = "";
-  } catch (e) {
-    console.warn("searchFriends", e);
+try {
+  const nameSnap = await fb.getDoc(fb.doc(fb.db, "usernames", lower));
+  if (!nameSnap.exists()) {
     state.friendsResults = [];
-    state.friendsSearchNote = "No se pudo buscar. Intenta de nuevo.";
+    state.friendsSearchNote = "No se encontró ese jugador.";
+  } else {
+    const d = nameSnap.data();
+    if (d.uid === state.user.uid) {
+      state.friendsResults = [];
+      state.friendsSearchNote = "Ese eres tú.";
+    } else {
+      state.friendsResults = [{ uid: d.uid, username: d.username || q, avatar: d.avatar || "a1" }];
+      state.friendsSearchNote = "";
+    }
   }
-
-  state.friendsSearchBusy = false;
-  render();
+} catch (e) {
+  console.warn("searchFriends", e);
+  state.friendsResults = [];
+  state.friendsSearchNote = "No se pudo buscar (" + (e.code || "error") + ")";
 }
+
 function friendRequestId(fromUid, toUid) {
   return fromUid + "_" + toUid;
 }
@@ -9767,7 +9752,10 @@ async function saveProfile() {
     }
 
     const batch = fb.writeBatch(fb.db);
-    batch.set(fb.doc(fb.db, "usernames", lower), { uid: uid });
+    batch.set(fb.doc(fb.db, "usernames", lower), {
+  uid: uid, username: name, avatar: state.profileAvatar
+});
+
     batch.set(fb.doc(fb.db, "users", uid), {
       username: name,
       usernameLower: lower,
