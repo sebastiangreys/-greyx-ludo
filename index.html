@@ -7870,15 +7870,13 @@ function friendsMarkup() {
 const who = (uid, avHtml, info) =>
   `<button class="fr-who" data-action="player-open" data-uid="${escHtml(uid)}" type="button">${avHtml}<div class="fr-info">${info}</div></button>`;
 
-  const friendRows = list.map(f => `
-    <div class="fr-row">
-      ${av(f.avatar, f.online)}
-      <div class="fr-info">
-        <strong>${escHtml(f.nickname || "@" + f.username)}</strong>
-        <small class="${f.online ? "on" : ""}">${f.online ? "En línea" : "Desconectado"}</small>
-      </div>
-      ${f.starred ? `<span class="fr-star">⭐</span>` : ""}
-    </div>`).join("");
+const friendRows = list.map(f => `
+  <div class="fr-row">
+    ${who(f.uid, av(f.avatar, f.online),
+      `<strong>${escHtml(f.nickname || "@" + f.username)}</strong>
+       <small class="${f.online ? "on" : ""}">${f.online ? "En línea" : "Desconectado"}</small>`)}
+    ${f.starred ? `<span class="fr-star">⭐</span>` : ""}
+  </div>`).join("");
 
   const friendsTab = list.length ? friendRows : `
     <div class="fr-empty">
@@ -7888,15 +7886,12 @@ const who = (uid, avHtml, info) =>
     </div>`;
 
   const inRows = incoming.map(r => `
-    <div class="fr-row">
-      ${av(r.fromAvatar || "a1")}
-      <div class="fr-info">
-        <strong>@${escHtml(r.fromUsername || "jugador")}</strong>
-        <small>Quiere ser tu amigo</small>
-      </div>
-      <button class="fr-btn ok" data-action="friend-accept" data-id="${escHtml(r.id)}" type="button" aria-label="Aceptar">✓</button>
-      <button class="fr-btn no" data-action="friend-reject" data-id="${escHtml(r.id)}" type="button" aria-label="Rechazar">✕</button>
-    </div>`).join("");
+  <div class="fr-row">
+    ${who(r.from, av(r.fromAvatar || "a1"),
+      `<strong>@${escHtml(r.fromUsername || "jugador")}</strong><small>Quiere ser tu amigo</small>`)}
+    <button class="fr-btn ok" data-action="friend-accept" data-id="${escHtml(r.id)}" type="button" aria-label="Aceptar">✓</button>
+    <button class="fr-btn no" data-action="friend-reject" data-id="${escHtml(r.id)}" type="button" aria-label="Rechazar">✕</button>
+  </div>`).join("");
 
   const outRows = outgoing.map(r => `
     <div class="fr-row">
@@ -7921,13 +7916,12 @@ const who = (uid, avHtml, info) =>
     <h3 class="fr-sub">Resultados</h3>
     ${state.friendsSearchBusy ? `<p class="fr-note">Buscando…</p>` : ""}
     ${state.friendsSearchNote ? `<p class="fr-note">${escHtml(state.friendsSearchNote)}</p>` : ""}
-    ${results.map(r => `
-      <div class="fr-row">
-        ${av(r.avatar)}
-        <div class="fr-info"><strong>@${escHtml(r.username)}</strong><small>Jugador</small></div>
-        <button class="fr-add" data-action="friend-request" data-uid="${escHtml(r.uid)}"
-          data-username="${escHtml(r.username)}" type="button" ${state.friendsReqBusy ? "disabled" : ""}>+ Agregar</button>
-      </div>`).join("")}`;
+   ${results.map(r => `
+  <div class="fr-row">
+    ${who(r.uid, av(r.avatar), `<strong>@${escHtml(r.username)}</strong><small>Toca para ver perfil</small>`)}
+    <button class="fr-add" data-action="friend-request" data-uid="${escHtml(r.uid)}"
+      data-username="${escHtml(r.username)}" type="button" ${state.friendsReqBusy ? "disabled" : ""}>+ Agregar</button>
+  </div>`).join("")}
 
   return `
   <section class="fr-screen">
@@ -7963,6 +7957,8 @@ const who = (uid, avHtml, info) =>
         <div class="fr-body">${tab === "friends" ? friendsTab : requestsTab}</div>
       `}
     `}
+        `}
+    ${playerModalMarkup()}
   </section>`;
 }
 
@@ -11402,6 +11398,22 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
 .gx6-set{position:absolute;top:0;right:0;z-index:2;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(145deg,#232a66,#0d1030);border:1px solid #6d5cffaa;box-shadow:0 0 18px #4f46e577,0 6px 16px #000a}
 .gx6-set svg{width:22px;height:22px}
 .gx6-set:active{transform:scale(.93)}
+.fr-who{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:0;border:0;background:none;color:inherit;text-align:left}
+.pl-overlay{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:20px;background:rgba(5,6,12,.88)}
+.pl-card{position:relative;width:min(380px,100%);padding:26px 20px 20px;border-radius:28px;text-align:center;color:#fff;border:1px solid #a78bfa55;background:linear-gradient(160deg,#242a4d,#0f1326);box-shadow:0 30px 80px #000c,0 0 40px #6d28d933}
+.pl-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff12;color:#fff}
+.pl-av{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 10px;border-radius:50%;font-size:2.6rem;background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);border:3px solid #fde68a;box-shadow:0 0 24px #8b5cf688}
+.pl-card h2{margin:0 0 6px;font-size:1.3rem;font-weight:900}
+.pl-lv{display:inline-block;padding:4px 12px;border-radius:99px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);font:900 .72rem monospace;letter-spacing:.1em}
+.pl-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.pl-stats div{padding:12px;border-radius:16px;border:1px solid #ffffff14;background:#ffffff08}
+.pl-stats b{display:block;font-size:1.2rem}
+.pl-stats span{color:#94a3b8;font:700 .6rem monospace;letter-spacing:.08em;text-transform:uppercase}
+.pl-note{margin:18px 0 4px;color:#94a3b8;font-size:.85rem}
+.pl-id{margin-top:16px;padding:12px;border-radius:16px;border:1px dashed #fbbf2488;background:#fbbf240d}
+.pl-id small{display:block;color:#fbbf24;font:800 .6rem monospace;letter-spacing:.14em}
+.pl-id code{display:block;margin:6px 0 10px;font:700 .72rem monospace;word-break:break-all;color:#fde68a;user-select:all}
+.pl-copy{min-height:40px;padding:0 18px;border:0;border-radius:12px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3a2200;font:900 .8rem inherit;box-shadow:0 3px 0 #92600a}
 
 </style>
 
