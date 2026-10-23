@@ -154,3 +154,28 @@ body::before{animation:gxAurora 16s ease-in-out infinite alternate}
   .hint{position:static;margin:12px 0 0;padding:8px 12px;background:#ffffff0d;font-size:.78rem}
   main:has(.dice-row){padding-bottom:210px}
 }
+
+/* ================= AJUSTES V3 ================= */
+/* 1) Fichas sin números */
+body .board .token{font-size:0 !important;color:transparent !important;text-indent:-999px;overflow:visible}
+
+/* 2) Quitar marcador de la mesa (casa / tablero / meta) */
+.panel:has(.score-grid),.score-grid{display:none !important}
+
+/* 3) Botón de lanzar con el color del turno */
+main:has(.turn-chip.red-turn) .roll-button{
+  background:linear-gradient(135deg,#ff6a60,#c62828) !important;color:#fff !important;
+  box-shadow:0 8px 0 #7f1414,0 12px 26px #ef444488 !important}
+main:has(.turn-chip.blue-turn) .roll-button{
+  background:linear-gradient(135deg,#6aa5ff,#1d4ed8) !important;color:#fff !important;
+  box-shadow:0 8px 0 #0f2f86,0 12px 26px #3b82f688 !important}
+main:has(.turn-chip.green-turn) .roll-button{
+  background:linear-gradient(135deg,#52d07e,#1b7a3a) !important;color:#fff !important;
+  box-shadow:0 8px 0 #0e4a22,0 12px 26px #22c55e88 !important}
+main:has(.turn-chip.yellow-turn) .roll-button{
+  background:linear-gradient(135deg,#ffdc55,#d99a00) !important;color:#3a2600 !important;
+  box-shadow:0 8px 0 #8a5f00,0 12px 26px #fbbf2488 !important}
+.roll-button:disabled{filter:saturate(.7) brightness(.85)}
+
+/* 4) Botón de configuración: se mueve con la página, no flota en la pantalla */
+.gx-fab{position:absolute !important}
