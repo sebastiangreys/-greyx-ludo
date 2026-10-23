@@ -384,5 +384,16 @@
     if (!nav) return;
     const cur = activeSection();
     nav.querySelectorAll("button[data-go]").forEach(b => b.classList.toggle("on", b.dataset.go === cur));
-  }, 250);
+
+    // En Amigos, Ranking y Perfil la barra se fuerza visible (el menú principal la apaga solo)
+    if (cur === "home") {
+      nav.style.removeProperty("display");
+    } else {
+      nav.style.setProperty("display", "flex", "important");
+      nav.style.setProperty("z-index", "250", "important");
+      nav.style.setProperty("transform", "none", "important");
+      nav.style.setProperty("opacity", "1", "important");
+      nav.style.setProperty("visibility", "visible", "important");
+    }
+  }, 150);
 })();
