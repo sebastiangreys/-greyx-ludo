@@ -7050,323 +7050,161 @@ function showArrivalConfetti(color, pieces = 90) {
 
 function settingsMarkup() {
 
+  const SI = {
+  user:`<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c.8-4 3.7-6 8-6s7.2 2 8 6z"/></svg>`,
+  sound:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  music:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h10v3h-7v11a3.5 3.5 0 1 1-3-3.46z"/></svg>`,
+  globe:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9S9.5 5.8 12 3z"/></svg>`,
+  book:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>`,
+  info:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>`,
+  logout:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>`,
+  refresh:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L3 11h2.5v9h5v-6h3v6h5v-9H21z"/></svg>`,
+  back:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>`,
+  chev:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`
+};
+
+function stRow(action, icon, title, sub, o = {}) {
+  const right = o.right !== undefined ? o.right : `<span class="st-chev">${SI.chev}</span>`;
+  return `
+  <button class="st-row ${o.cls || ""}" data-action="${action}" ${o.view ? `data-view="${o.view}"` : ""} type="button">
+    <span class="st-ico">${icon}</span>
+    <span class="st-txt"><strong>${title}</strong><small>${sub}</small></span>
+    ${right}
+  </button>`;
+}
+
+function stPill(on) {
+  return `<span class="st-pill ${on ? "on" : ""}">${on ? "Activado" : "Desactivado"}</span>`;
+}
+
+function settingsViewMarkup(v) {
+  if (v === "sound" || v === "music") {
+    const on = v === "sound" ? state.sound : state.music;
+    return `
+    <div class="st-hero">
+      <span class="st-hero-ico ${on ? "on" : ""}">${v === "sound" ? SI.sound : SI.music}</span>
+      <strong>${on ? "Activado" : "Desactivado"}</strong>
+      <p>${v === "sound"
+        ? "Efectos al lanzar el dado, mover y capturar fichas."
+        : "Melodía de fondo en el menú y durante la partida."}</p>
+    </div>
+    <button class="st-switch ${on ? "on" : ""}" data-action="settings-${v}" type="button">
+      <span>${v === "sound" ? "Sonido" : "Música"}</span>
+      <i><b></b></i>
+    </button>`;
+  }
+
+  if (v === "lang") {
+    return `<div class="st-list">${["es","en","pt"].map(c => `
+      <button class="st-row ${state.lang === c ? "sel" : ""}" data-action="set-lang" data-lang="${c}" type="button">
+        <span class="st-txt"><strong>${LANGS[c]}</strong></span>
+        ${state.lang === c ? `<span class="st-chev ok">${SI.check}</span>` : ""}
+      </button>`).join("")}</div>`;
+  }
+
+  if (v === "howto") {
+    const rules = [
+      ["Lanza el dado", "Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido."],
+      ["Saca una ficha", "Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial."],
+      ["Captura fichas", "Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa."],
+      ["Casillas seguras", "Algunas casillas protegen las fichas y evitan que puedan ser capturadas."],
+      ["Llega a la meta", "Lleva tus fichas hasta el centro del tablero para completar el recorrido."]
+    ];
+    return `<div class="st-list">${rules.map((r, i) => `
+      <div class="st-rule">
+        <span class="st-num">${i + 1}</span>
+        <div><strong>${r[0]}</strong><p>${r[1]}</p></div>
+      </div>`).join("")}</div>`;
+  }
+
+  if (v === "about") {
+    return `
+    <div class="st-about">
+      <div class="st-about-logo">${greyxLogoMarkup()}</div>
+      <h3>LUDO GREYX</h3>
+      <p>Un clásico juego de mesa reinventado como una experiencia digital moderna, sencilla y divertida.</p>
+      <div class="st-about-card"><small>CREADOR</small><strong>Sebastián Greys</strong></div>
+      <div class="st-about-card"><small>CREADO CON</small><strong>HTML · CSS · JavaScript</strong></div>
+      <div class="st-about-ver">GREYX LUDO · PROYECTO INDEPENDIENTE</div>
+    </div>`;
+  }
+  return "";
+}
+
+function settingsMarkup() {
+  const view = state.settingsView || null;
+  const playing = state.phase === "playing";
+  const TITLES = { sound:"Sonido", music:"Música", lang:"Idioma", howto:"Cómo jugar", about:"Acerca de este juego" };
+
+  let main = "";
+
+  if (!playing) {
+    if (state.user) {
+      if (state.profileLoaded) {
+        main += state.profile
+          ? stRow("profile-open", SI.user, "Mi perfil", "@" + escHtml(state.profile.username))
+          : stRow("profile-create", SI.user, "Crear perfil", "Elige tu nombre de usuario y avatar");
+      }
+    } else if (!state.authOffline) {
+      main += stRow("auth-open", SI.user, "Iniciar sesión o crear cuenta", "Guarda tu progreso y estadísticas");
+    }
+    main += window.GXAdminEntry ? window.GXAdminEntry() : "";
+  }
+
+  main += stRow("settings-view", SI.sound, "Sonido", state.sound ? "Efectos activados" : "Efectos desactivados",
+    { view:"sound", right: stPill(state.sound) });
+  main += stRow("settings-view", SI.music, "Música", state.music ? "Música de fondo activada" : "Música de fondo desactivada",
+    { view:"music", right: stPill(state.music) });
+  main += stRow("settings-view", SI.globe, "Idioma", LANGS[state.lang], { view:"lang" });
+  main += stRow("settings-view", SI.book, "Cómo jugar", "Reglas y funcionamiento", { view:"howto" });
+  main += stRow("settings-view", SI.info, "Acerca de este juego", "Conoce el proyecto y su creador", { view:"about" });
+
+  if (playing) {
+    const a = state.confirmAction === "settings-new-game";
+    const b = state.confirmAction === "settings-menu";
+    main += `<div class="st-gap"></div>`;
+    main += stRow("settings-new-game", SI.refresh, a ? "¿Seguro? Toca otra vez" : "Nueva partida",
+      a ? "Se reiniciará la partida" : "Reiniciar con los mismos jugadores", { right:"" });
+    main += stRow("settings-menu", SI.home, b ? "¿Seguro? Toca otra vez" : "Salir al menú",
+      b ? "Se perderá la partida actual" : "Volver a la pantalla inicial", { right:"" });
+  }
+
+  if (!playing && state.user) {
+    const out = state.confirmAction === "auth-logout";
+    main += `<div class="st-gap"></div>`;
+    main += stRow("auth-logout", SI.logout, out ? "¿Seguro? Toca otra vez" : "Cerrar sesión",
+      out ? "Volverás a la pantalla de acceso" : "Salir de tu cuenta en este dispositivo",
+      { cls:"danger", right:"" });
+  }
+
   return `
 ${!state.showFriends ? `
-    <div class="top-actions">
-  <button
-    class="top-action-btn top-action-friends"
-    data-action="friends-open"
-    type="button"
-    aria-label="Amigos"
-  >
-    <svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true">
-      <circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
-      <circle cx="16.5" cy="9" r="2.5" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M3.5 18.5c.8-3.2 2.9-5 5.5-5s4.7 1.8 5.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M13.5 17.8c.6-2 1.9-3.2 3.5-3.2 1.4 0 2.5.8 3.2 2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-  </button>
-
-  <button
-    class="settings-button top-action-btn"
-    data-action="settings"
-    aria-label="Configuración"
-  >
-    ⚙️
-  </button>
-</div>
-` : ""}
-    ${
-      state.settingsOpen
-      ?
-      `
-
-      <div class="settings-overlay">
-
-        <section class="settings-panel">
-
-          <div class="settings-header">
-            <div class="settings-title">
-              <span>⚙️</span>
-              <strong>Configuración</strong>
-            </div>
-
-            <button class="settings-close" data-action="close-settings">
-              ✕
-            </button>
-          </div>
-           ${accountMarkup()}${window.GXAdminEntry ? window.GXAdminEntry() : ""}
-          <button class="settings-option" data-action="settings-sound">
-            <span class="settings-option-icon sound-setting-icon">
-              ${state.sound ? "🔊" : "🔇"}
-            </span>
-            <span class="settings-option-text">
-              <strong>Sonido</strong>
-              <small>
-                ${state.sound
-                  ? "Efectos de sonido activados"
-                  : "Efectos de sonido desactivados"}
-              </small>
-            </span>
-            <span class="settings-toggle ${state.sound ? "active" : ""}">
-              <span></span>
-            </span>
-          </button>
-<button class="settings-option" data-action="settings-music">
-  <span class="settings-option-icon">${state.music ? "🎵" : "🔇"}</span>
-  <span class="settings-option-text">
-    <strong>Música</strong>
-    <small>${state.music ? "Música de fondo activada" : "Música de fondo desactivada"}</small>
-  </span>
-  <span class="settings-toggle ${state.music ? "active" : ""}">
-    <span></span>
-  </span>
-</button>
-          <button class="settings-option" data-action="settings-language">
-            <span class="settings-option-icon">🌐</span>
-            <span class="settings-option-text">
-              <strong>Idioma</strong>
-              <small>${LANGS[state.lang]}</small>
-            </span>
-          </button>
-
-          ${
-            state.languageOpen
-            ?
-            `
-            <div class="how-to-play-panel">
-              <div class="how-to-play-header">
-                <div>
-                  <span class="how-to-play-kicker">GREYX LUDO</span>
-                  <h3>🌐 Idioma</h3>
-                </div>
-                <button
-                  class="how-to-play-close"
-                  data-action="close-language"
-                  aria-label="Cerrar"
-                >✕</button>
-              </div>
-
-              <div class="how-to-play-content">
-                ${["es","en","pt"].map(code => `
-                  <button
-                    class="lang-option ${state.lang === code ? "selected" : ""}"
-                    data-action="set-lang"
-                    data-lang="${code}"
-                  >
-                    <span>${LANGS[code]}</span>
-                    <span class="lang-check">${state.lang === code ? "✓" : ""}</span>
-                  </button>
-                `).join("")}
-              </div>
-            </div>
-            `
-            :
-            ""
-          }
-
-          ${
-            state.phase === "playing"
-            ?
-            `
-            <button class="settings-option" data-action="settings-new-game">
-              <span class="settings-option-icon">🔄</span>
-              <span class="settings-option-text">
-                <strong>${state.confirmAction === "settings-new-game" ? "¿Seguro? Toca otra vez" : "Nueva partida"}</strong>
-                <small>${state.confirmAction === "settings-new-game" ? "Se reiniciará la partida" : "Reiniciar con los mismos jugadores"}</small>
-              </span>
-            </button>
-
-            <button class="settings-option" data-action="settings-menu">
-              <span class="settings-option-icon">🏠</span>
-              <span class="settings-option-text">
-                <strong>${state.confirmAction === "settings-menu" ? "¿Seguro? Toca otra vez" : "Salir al menú"}</strong>
-                <small>${state.confirmAction === "settings-menu" ? "Se perderá la partida actual" : "Volver a la pantalla inicial"}</small>
-              </span>
-            </button>
-            `
-            :
-            ""
-          }
-
-          <button class="settings-option" data-action="how-to-play">
-            <span class="settings-option-icon">📖</span>
-            <span class="settings-option-text">
-              <strong>Cómo jugar</strong>
-              <small>Reglas y funcionamiento</small>
-            </span>
-          </button>
-
-          ${
-            state.howToPlayOpen
-            ?
-            `
-            <div class="how-to-play-panel">
-
-              <div class="how-to-play-header">
-                <div>
-                  <span class="how-to-play-kicker">GREYX LUDO</span>
-                  <h3>📖 Cómo jugar</h3>
-                </div>
-                <button
-                  class="how-to-play-close"
-                  data-action="close-how-to-play"
-                  aria-label="Cerrar cómo jugar"
-                >✕</button>
-              </div>
-
-              <div class="how-to-play-content">
-
-                <div class="how-to-play-rule">
-                  <span>🎲</span>
-                  <div>
-                    <strong>Lanza el dado</strong>
-                    <p>Tira el dado cuando sea tu turno y mueve una ficha según el número obtenido.</p>
-                  </div>
-                </div>
-
-                <div class="how-to-play-rule">
-                  <span>🏠</span>
-                  <div>
-                    <strong>Saca una ficha</strong>
-                    <p>Necesitas sacar un 6 para sacar una ficha de casa y colocarla en la casilla inicial.</p>
-                  </div>
-                </div>
-
-                <div class="how-to-play-rule">
-                  <span>💥</span>
-                  <div>
-                    <strong>Captura fichas</strong>
-                    <p>Si caes sobre una ficha rival en una casilla válida, la capturas y vuelve a su casa.</p>
-                  </div>
-                </div>
-
-                <div class="how-to-play-rule">
-                  <span>🛡️</span>
-                  <div>
-                    <strong>Casillas seguras</strong>
-                    <p>Algunas casillas protegen las fichas y evitan que puedan ser capturadas.</p>
-                  </div>
-                </div>
-
-                <div class="how-to-play-rule">
-                  <span>🏆</span>
-                  <div>
-                    <strong>Llega a la meta</strong>
-                    <p>Lleva tus fichas hasta el centro del tablero para completar el recorrido.</p>
-                  </div>
-                </div>
-
-              </div>
-
-              <button class="how-to-play-back" data-action="close-how-to-play">
-                ← Volver a configuración
-              </button>
-
-            </div>
-            `
-            :
-            ""
-          }
-
-          <button class="settings-option" data-action="about-greyx">
-            <span class="settings-option-icon">👤</span>
-            <span class="settings-option-text">
-              <strong>Acerca de Greyx Ludo</strong>
-              <small>Conoce el proyecto y su creador</small>
-            </span>
-          </button>
-
-          ${
-            state.aboutGreyxOpen
-            ?
-            `
-            <div class="about-greyx-panel">
-
-              <div class="about-greyx-header">
-                <div class="about-greyx-logo">🎲</div>
-                <div class="about-greyx-title">
-                  <span>GREYX STUDIOS</span>
-                  <h3>LUDO GREYX</h3>
-                </div>
-                <button
-                  class="about-greyx-close"
-                  data-action="close-about-greyx"
-                  aria-label="Cerrar"
-                >✕</button>
-              </div>
-
-              <div class="about-greyx-description">
-                <p>
-                  Un clásico juego de mesa reinventado como una
-                  experiencia digital moderna, sencilla y divertida.
-                </p>
-              </div>
-
-              <div class="about-greyx-info">
-
-                <div class="about-greyx-info-row">
-                  <span>🎮</span>
-                  <div>
-                    <strong>Proyecto</strong>
-                    <small>Greyx Ludo</small>
-                  </div>
-                </div>
-
-                <div class="about-greyx-info-row">
-                  <span>🧠</span>
-                  <div>
-                    <strong>Creado con</strong>
-                    <small>HTML · CSS · JavaScript</small>
-                  </div>
-                </div>
-
-                <div class="about-greyx-info-row">
-                  <span>✨</span>
-                  <div>
-                    <strong>Concepto</strong>
-                    <small>Un Ludo hecho para jugar y compartir</small>
-                  </div>
-                </div>
-
-              </div>
-
-              <div class="about-greyx-divider"></div>
-
-              <div class="about-greyx-creator">
-                <span class="about-greyx-creator-icon">👤</span>
-                <div>
-                  <span>CREADOR</span>
-                  <strong>Sebastián Greys</strong>
-                </div>
-              </div>
-
-              <div class="about-greyx-version">
-                GREYX LUDO · PROYECTO INDEPENDIENTE
-              </div>
-
-              <button class="about-greyx-back" data-action="close-about-greyx">
-                ← Volver a configuración
-              </button>
-
-            </div>
-            `
-            :
-            ""
-          }
-
-        </section>
-
+  <div class="top-actions">
+    <button class="top-action-btn top-action-friends" data-action="friends-open" type="button" aria-label="Amigos">👥</button>
+    <button class="settings-button top-action-btn" data-action="settings" aria-label="Configuración">⚙</button>
+  </div>` : ""}
+${state.settingsOpen ? `
+  <div class="settings-overlay">
+    <section class="settings-panel">
+      <header class="st-top">
+        <button class="st-back" data-action="${view ? "settings-back" : "settings-exit"}" type="button" aria-label="Volver">${SI.back}</button>
+        <h2>${view ? TITLES[view] : "Configuración"}</h2>
+        <span></span>
+      </header>
+      <div class="st-body" data-key="st-${view || "main"}">
+        ${view ? settingsViewMarkup(view) : `<div class="st-list">${main}</div>`}
       </div>
-
-      `
-      :
-      ""
-    }
-
+    </section>
+  </div>` : ""}
   `;
-
 }
+
+try {
+  Object.assign(DICT.en, { "Acerca de este juego":"About this game", "Activado":"On", "Desactivado":"Off" });
+  Object.assign(DICT.pt, { "Acerca de este juego":"Sobre este jogo", "Activado":"Ativado", "Desactivado":"Desativado" });
+} catch (e) {}
 
 function celebrationMarkup() {
   return `
@@ -8211,6 +8049,24 @@ if (action === "friend-request") {
   if (uid) sendFriendRequest(uid, name);
   return;
 }
+if (action === "settings-view") {
+  state.settingsView = button.dataset.view;
+  render();
+  return;
+}
+if (action === "settings-back") {
+  state.settingsView = null;
+  render();
+  return;
+}
+if (action === "settings-exit") {
+  state.settingsOpen = false;
+  state.settingsView = null;
+  state.confirmAction = null;
+  render();
+  return;
+}
+
 if (action === "friends-tab") {
   state.friendsTab = button.dataset.tab;
   render();
@@ -11193,11 +11049,13 @@ body .settings-panel{overscroll-behavior:contain}
              g: b[0] ? b[0].textContent : "0", w: b[1] ? b[1].textContent : "0",
              xp: q(".gx-xp-bar i") ? q(".gx-xp-bar i").style.width : "0%" };
   }
+const GEAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
   function draw(s) {
     const pct = Math.max(0, Math.min(100, parseInt(s.xp) || 0));
     box.innerHTML = `
     <div class="gx6-in">
+      <button class="gx6-set" data-go="settings" type="button" aria-label="Configuración">${GEAR}</button>
       <div class="gx6-st">GREYX STUDIOS</div>
       <div class="gx6-t"><span class="gx6-t1">LUDO</span><span class="gx6-t2">GREYX</span></div>
       <div class="gx6-hero">${logo(true, "c")}</div>
@@ -11238,6 +11096,7 @@ body .settings-panel{overscroll-behavior:contain}
     else if (g === "profile") click("settings");
     else if (g === "local") click("local");
     else if (g === "bot") click("mode");
+    else if (g === "settings") click("settings");
     else if (g === "online") click("online-open");
     else if (g === "rank") toast("Ranking: próximamente");
   };
@@ -11407,6 +11266,58 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
 .fr-empty strong{color:#f8fafc;font-size:1rem}
 .fr-empty p{margin:0;font-size:.82rem;line-height:1.4}
 .fr-empty .primary-button{margin-top:14px;max-width:240px}
+.st-top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin-bottom:18px}
+.st-top h2{margin:0;text-align:center;font-size:1.3rem;font-weight:900;color:#fff}
+.st-back{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;border:1px solid #ffffff22;background:linear-gradient(145deg,#1e1b4bcc,#0f172acc);color:#fff;box-shadow:0 6px 16px #00000055}
+.st-back svg{width:20px;height:20px}
+.st-body{animation:gxIn .3s cubic-bezier(.2,.8,.2,1) both}
+.st-list{display:grid;gap:10px}
+.st-gap{height:8px}
+.st-row{display:flex;align-items:center;gap:13px;width:100%;padding:12px;border-radius:20px;border:1px solid #ffffff14;background:linear-gradient(160deg,#1c2250cc,#0e1226cc);color:#fff;text-align:left}
+.st-row:active{transform:scale(.98)}
+.st-row.sel{border-color:#8b5cf6;background:linear-gradient(100deg,#8b5cf633,#22d3ee1a)}
+.st-ico{flex:0 0 44px;width:44px;height:44px;display:grid;place-items:center;border-radius:14px;color:#c4b5fd;background:linear-gradient(145deg,#8b5cf644,#ffffff0d);border:1px solid #ffffff14}
+.st-ico svg{width:22px;height:22px}
+.st-txt{flex:1;min-width:0}
+.st-txt strong{display:block;font-size:.95rem;font-weight:900}
+.st-txt small{display:block;margin-top:2px;color:#94a3b8;font-size:.72rem}
+.st-chev{flex:0 0 auto;color:#64748b}
+.st-chev svg{width:18px;height:18px;display:block}
+.st-chev.ok{color:#a78bfa}
+.st-pill{flex:0 0 auto;padding:5px 10px;border-radius:99px;background:#ffffff10;color:#94a3b8;font:800 .66rem inherit}
+.st-pill.on{background:#22c55e26;color:#4ade80}
+.st-row.danger{border-color:#ef444477;background:linear-gradient(160deg,#4a1218cc,#1c0a0dcc)}
+.st-row.danger .st-ico{color:#fca5a5;background:#ef444433;border-color:#ef444455}
+.st-row.danger .st-txt strong{color:#fca5a5}
+.st-hero{display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 10px 22px;text-align:center}
+.st-hero-ico{width:96px;height:96px;display:grid;place-items:center;border-radius:50%;color:#64748b;background:#ffffff0d;border:2px dashed #ffffff22}
+.st-hero-ico svg{width:44px;height:44px}
+.st-hero-ico.on{color:#c4b5fd;border:2px solid #a78bfa;background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);box-shadow:0 0 30px #8b5cf666}
+.st-hero strong{font-size:1.1rem;color:#fff}
+.st-hero p{margin:0;max-width:280px;color:#94a3b8;font-size:.82rem;line-height:1.45}
+.st-switch{display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px;border-radius:20px;border:1px solid #ffffff14;background:linear-gradient(160deg,#1c2250cc,#0e1226cc);color:#fff;font:900 .95rem inherit}
+.st-switch i{width:56px;height:32px;padding:4px;border-radius:99px;background:#ffffff1f;transition:background .2s}
+.st-switch i b{display:block;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.st-switch.on i{background:#7b68e8;box-shadow:0 0 14px #7b68e866}
+.st-switch.on i b{transform:translateX(24px)}
+.st-rule{display:flex;gap:13px;padding:13px;border-radius:18px;border:1px solid #ffffff14;background:linear-gradient(160deg,#1c2250cc,#0e1226cc)}
+.st-num{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6d28d9);font:900 .9rem inherit;color:#fff}
+.st-rule strong{display:block;margin-bottom:3px;color:#fff;font-size:.9rem}
+.st-rule p{margin:0;color:#a3abbd;font-size:.78rem;line-height:1.45}
+.st-about{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding-top:6px}
+.st-about-logo svg{width:150px;height:auto;filter:drop-shadow(0 0 20px #6d28d9aa)}
+.st-about h3{margin:4px 0 0;font:700 1.2rem Syncopate,Arial Black,sans-serif;letter-spacing:.14em;color:#fff}
+.st-about p{margin:0;color:#a3abbd;font-size:.82rem;line-height:1.5}
+.st-about-card{width:100%;padding:13px;border-radius:18px;border:1px solid #ffffff14;background:#ffffff08}
+.st-about-card small{display:block;color:#9f91ff;font:800 .6rem monospace;letter-spacing:.14em}
+.st-about-card strong{color:#fff;font-size:.92rem}
+.st-about-ver{margin-top:6px;color:#6f788b;font:700 .6rem monospace;letter-spacing:.08em}
+
+/* botón de configuración dentro del menú */
+.gx6-in{position:relative}
+.gx6-set{position:absolute;top:0;right:0;z-index:2;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(145deg,#232a66,#0d1030);border:1px solid #6d5cffaa;box-shadow:0 0 18px #4f46e577,0 6px 16px #000a}
+.gx6-set svg{width:22px;height:22px}
+.gx6-set:active{transform:scale(.93)}
 
 </style>
 
@@ -11416,7 +11327,7 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
   fab.className = "gx-fab";
   fab.type = "button";
   fab.setAttribute("aria-label", "Configuración");
-  fab.textContent = "⚙️";
+  fab.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>`;
   document.body.appendChild(fab);
 
   fab.addEventListener("click", () => {
@@ -11427,7 +11338,8 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
   const sync = () => {
     const ok = !!document.querySelector('.top-actions [data-action="settings"]');
     const blocked = !!document.querySelector(".settings-overlay,.gx-intro,.gx-gate");
-    fab.style.display = ok && !blocked ? "grid" : "none";
+    const onMenu = !!document.querySelector(".gx6.on");
+fab.style.display = ok && !blocked && !onMenu ? "grid" : "none";
   };
 
   new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
