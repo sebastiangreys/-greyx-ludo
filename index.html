@@ -7916,14 +7916,15 @@ const friendRows = list.map(f => `
     <h3 class="fr-sub">Resultados</h3>
     ${state.friendsSearchBusy ? `<p class="fr-note">Buscando…</p>` : ""}
     ${state.friendsSearchNote ? `<p class="fr-note">${escHtml(state.friendsSearchNote)}</p>` : ""}
-   ${results.map(r => `
+      ${results.map(r => `
   <div class="fr-row">
     ${who(r.uid, av(r.avatar), `<strong>@${escHtml(r.username)}</strong><small>Toca para ver perfil</small>`)}
     <button class="fr-add" data-action="friend-request" data-uid="${escHtml(r.uid)}"
       data-username="${escHtml(r.username)}" type="button" ${state.friendsReqBusy ? "disabled" : ""}>+ Agregar</button>
-  </div>`).join("")}
+  </div>`).join("")}`;
 
   return `
+  
   <section class="fr-screen">
     <header class="fr-top">
       <button class="fr-back" data-action="friends-back" type="button" aria-label="Volver">←</button>
@@ -7957,7 +7958,6 @@ const friendRows = list.map(f => `
         <div class="fr-body">${tab === "friends" ? friendsTab : requestsTab}</div>
       `}
     `}
-        `}
     ${playerModalMarkup()}
   </section>`;
 }
