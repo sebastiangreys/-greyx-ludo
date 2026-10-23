@@ -1,38 +1,32 @@
-/* GREYX LUDO — TABLERO HD (cargar al final, después de todos los <style>) */
+/* GREYX LUDO — TABLERO CLÁSICO HD + ANIMACIONES
+   Cargar AL FINAL del HTML, después de todos los <style>. Autónomo: no necesita otros archivos. */
 
-/* ---------- Marco dorado con relieve ---------- */
+/* ================= MARCO ================= */
 body .board-frame{
   padding:12px;
   border:0;
   border-radius:34px;
   background:linear-gradient(145deg,#fff0b0 0%,#d9a72f 28%,#8a5f12 52%,#e9c35a 78%,#fff0b0 100%);
-  box-shadow:
-    0 34px 80px #000c,
-    0 0 0 2px #3d2a06,
-    0 0 56px #fbbf2455,
-    inset 0 2px 2px #fff,
-    inset 0 -4px 8px #0007;
+  box-shadow:0 34px 80px #000c,0 0 0 2px #3d2a06,0 0 56px #fbbf2455,inset 0 2px 2px #fff,inset 0 -4px 8px #0007;
+  animation:gxBoardIn .65s cubic-bezier(.2,.9,.3,1.1) both;
 }
 body .board{
   border-radius:24px;
-  background:url("greyx-board.svg") center/100% 100% no-repeat,#e9edfa !important;
-  box-shadow:
-    inset 0 0 0 3px #4a3208,
-    inset 0 0 0 5px #f6d77a99,
-    inset 0 0 40px #0005;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff6a60%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23c62828%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%236aa5ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2352d07e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231b7a3a%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22y%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffdc55%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d99a00%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22gl%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.38%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22yd%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23eef1fb%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23fffdf6%22%2F%3E%3Crect%20x%3D%2260%22%20y%3D%2260%22%20width%3D%2230%22%20height%3D%2230%22%20fill%3D%22%2314183a%22%2F%3E%3Cg%20transform%3D%22translate%280%2C0%29%22%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22url%28%23r%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2227%22%20rx%3D%229%22%20fill%3D%22url%28%23gl%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.7%22%20stroke-width%3D%22.8%22%2F%3E%3Crect%20x%3D%229.75%22%20y%3D%229.75%22%20width%3D%2240.5%22%20height%3D%2240.5%22%20rx%3D%226.5%22%20fill%3D%22url%28%23yd%29%22%20stroke%3D%22%23c62828%22%20stroke-opacity%3D%22.35%22%20stroke-width%3D%22.6%22%2F%3E%3Cg%20fill%3D%22%23fbd9d6%22%20stroke%3D%22%23c62828%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%22.6%22%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate%2890%2C0%29%22%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22url%28%23b%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2227%22%20rx%3D%229%22%20fill%3D%22url%28%23gl%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.7%22%20stroke-width%3D%22.8%22%2F%3E%3Crect%20x%3D%229.75%22%20y%3D%229.75%22%20width%3D%2240.5%22%20height%3D%2240.5%22%20rx%3D%226.5%22%20fill%3D%22url%28%23yd%29%22%20stroke%3D%22%231d4ed8%22%20stroke-opacity%3D%22.35%22%20stroke-width%3D%22.6%22%2F%3E%3Cg%20fill%3D%22%23d5e3ff%22%20stroke%3D%22%231d4ed8%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%22.6%22%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate%280%2C90%29%22%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2227%22%20rx%3D%229%22%20fill%3D%22url%28%23gl%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.7%22%20stroke-width%3D%22.8%22%2F%3E%3Crect%20x%3D%229.75%22%20y%3D%229.75%22%20width%3D%2240.5%22%20height%3D%2240.5%22%20rx%3D%226.5%22%20fill%3D%22url%28%23yd%29%22%20stroke%3D%22%231b7a3a%22%20stroke-opacity%3D%22.35%22%20stroke-width%3D%22.6%22%2F%3E%3Cg%20fill%3D%22%23d3f3de%22%20stroke%3D%22%231b7a3a%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%22.6%22%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate%2890%2C90%29%22%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22url%28%23y%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2227%22%20rx%3D%229%22%20fill%3D%22url%28%23gl%29%22%2F%3E%3Crect%20x%3D%222.25%22%20y%3D%222.25%22%20width%3D%2255.5%22%20height%3D%2255.5%22%20rx%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.7%22%20stroke-width%3D%22.8%22%2F%3E%3Crect%20x%3D%229.75%22%20y%3D%229.75%22%20width%3D%2240.5%22%20height%3D%2240.5%22%20rx%3D%226.5%22%20fill%3D%22url%28%23yd%29%22%20stroke%3D%22%23d99a00%22%20stroke-opacity%3D%22.35%22%20stroke-width%3D%22.6%22%2F%3E%3Cg%20fill%3D%22%23fff0bd%22%20stroke%3D%22%23d99a00%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%22.6%22%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2221.39%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2221.39%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3Ccircle%20cx%3D%2238.61%22%20cy%3D%2238.61%22%20r%3D%226.2%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/100% 100% no-repeat,#fffdf6 !important;
+  box-shadow:inset 0 0 0 3px #4a3208,inset 0 0 0 5px #f6d77a99,inset 0 0 40px #0004;
+  text-rendering:geometricPrecision;
 }
 
-/* ---------- Casas (las 4 siempre completas) ---------- */
+/* ================= CASAS ================= */
 body .board .home{
   padding:5%;
-  background:transparent !important;
-  box-shadow:none !important;
   border-radius:16%;
+  box-shadow:inset 0 0 0 1px #fff9;
 }
-body .board .home.red   {inset:1.5% 61.5% 61.5% 1.5%}
-body .board .home.blue  {inset:1.5% 1.5% 61.5% 61.5%}
-body .board .home.green {inset:61.5% 61.5% 1.5% 1.5%}
-body .board .home.yellow{inset:61.5% 1.5% 1.5% 61.5%}
+body .board .home.red   {inset:1.5% 61.5% 61.5% 1.5%;  background:linear-gradient(145deg,#ff6a60,#c62828);--hc:#ff6a60}
+body .board .home.blue  {inset:1.5% 1.5% 61.5% 61.5%;  background:linear-gradient(145deg,#6aa5ff,#1d4ed8);--hc:#6aa5ff}
+body .board .home.green {inset:61.5% 61.5% 1.5% 1.5%;  background:linear-gradient(145deg,#52d07e,#1b7a3a);--hc:#52d07e}
+body .board .home.yellow{inset:61.5% 1.5% 1.5% 61.5%;  background:linear-gradient(145deg,#ffdc55,#d99a00);--hc:#ffdc55}
 
 body .board .yard{
   border:0;
@@ -46,52 +40,114 @@ body .board .yard{
     linear-gradient(#fff,#eef1fb);
 }
 
-/* ---------- Casillas con bisel ---------- */
-body .board .cell{
-  border:1px solid #c3cce6 !important;
-  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 3px #28326414 !important;
+/* ================= CASILLAS ================= */
+body .board .cell{border:0 !important;box-shadow:none !important}
+body .board .cell.track,
+body .board .cell[class*="lane-"]{
+  border:1px solid #28305a55 !important;
+  box-shadow:inset 0 1px 0 #ffffffcc,inset 0 -2px 3px #1e285a1a !important;
 }
-body .board .cell.track{background:linear-gradient(160deg,#fff,#e5eaf8)}
+body .board .cell.track{background:linear-gradient(160deg,#fff,#e9edf9)}
 
-body .board .cell.lane-red,   body .board .cell.start-red   {background:linear-gradient(160deg,#ff7a70,#c62828);border-color:#ffffff88 !important}
-body .board .cell.lane-green, body .board .cell.start-green {background:linear-gradient(160deg,#52d07e,#1b7a3a);border-color:#ffffff88 !important}
-body .board .cell.lane-yellow,body .board .cell.start-yellow{background:linear-gradient(160deg,#ffdc55,#d99a00);border-color:#ffffff88 !important}
-body .board .cell.lane-blue,  body .board .cell.start-blue  {background:linear-gradient(160deg,#6aa5ff,#1d4ed8);border-color:#ffffff88 !important}
+body .board .cell.lane-red,   body .board .cell.start-red   {background:linear-gradient(160deg,#ff7a70,#c62828)}
+body .board .cell.lane-green, body .board .cell.start-green {background:linear-gradient(160deg,#52d07e,#1b7a3a)}
+body .board .cell.lane-yellow,body .board .cell.start-yellow{background:linear-gradient(160deg,#ffdc55,#d99a00)}
+body .board .cell.lane-blue,  body .board .cell.start-blue  {background:linear-gradient(160deg,#6aa5ff,#1d4ed8)}
 
-/* pasillos de colores siempre a todo color */
 .board:not(:has(.home.red))    :is(.cell.lane-red,.cell.start-red),
 .board:not(:has(.home.green))  :is(.cell.lane-green,.cell.start-green),
 .board:not(:has(.home.yellow)) :is(.cell.lane-yellow,.cell.start-yellow),
 .board:not(:has(.home.blue))   :is(.cell.lane-blue,.cell.start-blue){opacity:1}
 
-/* estrellas */
+/* estrellas con brillo */
 body .cell.safe::before{
   font-size:clamp(13px,3.6vw,24px);
   color:#f5a623;
   text-shadow:0 1px 0 #fff,0 0 10px #fbbf24aa;
+  animation:gxTwinkle 2.6s ease-in-out infinite;
 }
+body .cell.safe:nth-child(odd)::before{animation-delay:-1.3s}
 body .cell[class*="start-"].safe::before{color:#fff;text-shadow:0 1px 2px #0006}
 
-/* ---------- Centro: 4 triángulos + corona ---------- */
+/* destello que recorre los pasillos de color */
+body .board .cell[class*="lane-"]::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,#ffffff88 50%,transparent 65%) 150% 0/300% 100% no-repeat;
+  animation:gxSweep 3.4s ease-in-out infinite;
+}
+
+/* ================= CENTRO ================= */
 body .board .finish{
-  clip-path:none;
-  border:0;
-  border-radius:5%;
-  filter:none;
+  clip-path:none;border:0;border-radius:5%;filter:none;
   background:conic-gradient(from -45deg,#2f6fe0 0 25%,#f5b301 25% 50%,#2fa84f 50% 75%,#e53935 75% 100%);
   box-shadow:inset 0 0 0 2px #fff,inset 0 0 18px #0004,0 0 20px #a78bfa88;
 }
+body .board .finish::before{
+  content:"";position:absolute;inset:-60%;
+  background:conic-gradient(from 0deg,transparent 0 78%,#ffffff66 90%,transparent 100%);
+  animation:gxSpin 6s linear infinite;
+}
 body .board .finish::after{
-  width:40%;height:40%;
+  position:relative;width:40%;height:40%;
   background:radial-gradient(circle at 35% 30%,#3a3f7a,#0c0f1e 75%);
   box-shadow:0 0 0 3px #fde68a,0 0 0 5px #8a5f12,0 0 16px #a78bfa,inset 0 0 8px #000a;
 }
 
-/* ---------- Fichas con más profundidad ---------- */
+/* ================= FICHAS ================= */
 body .board .token{filter:drop-shadow(0 4px 3px #0007)}
 body .board .token.valid{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px var(--c))}
+body .board .token:not(.valid):not(.hop):not(.arrived):not(.captured):not(.capture-flying){
+  animation:gxBreath 3.2s ease-in-out infinite;
+}
+body .board .token:nth-child(2){animation-delay:-.8s !important}
+body .board .token:nth-child(3){animation-delay:-1.6s !important}
+body .board .token:nth-child(4){animation-delay:-2.4s !important}
 
-/* ---------- Celular: que nada se tape ---------- */
+/* turno activo: su casa late con su color */
+main:has(.turn-chip.red-turn)    .home.red,
+main:has(.turn-chip.green-turn)  .home.green,
+main:has(.turn-chip.yellow-turn) .home.yellow,
+main:has(.turn-chip.blue-turn)   .home.blue{animation:gxHomeGlow 1.5s ease-in-out infinite}
+
+/* ================= DADO 3D ================= */
+.dice-row{perspective:700px}
+body .die.rolling{animation:gxTumble .6s linear infinite}
+body .die.result{animation:gxLand .5s cubic-bezier(.2,.9,.3,1.3)}
+body .die.six{animation:gxLand .5s cubic-bezier(.2,.9,.3,1.3),gxGold 1.4s ease-in-out .5s infinite}
+
+.roll-button{overflow:hidden}
+.roll-button:not(:disabled)::after{
+  content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,#ffffff99,transparent);
+  transform:skewX(-20deg);
+  animation:gxShine 2.8s ease-in-out infinite;
+}
+
+/* ================= DETALLES ================= */
+.turn-chip::before{animation:gxDot 1.4s ease-in-out infinite}
+body::before{animation:gxAurora 16s ease-in-out infinite alternate}
+
+/* ================= KEYFRAMES ================= */
+@keyframes gxBoardIn{from{opacity:0;transform:translateY(22px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes gxTwinkle{0%,100%{transform:scale(1) rotate(0);opacity:1}50%{transform:scale(1.22) rotate(14deg);opacity:.75}}
+@keyframes gxSweep{0%,55%{background-position:150% 0}100%{background-position:-50% 0}}
+@keyframes gxSpin{to{transform:rotate(360deg)}}
+@keyframes gxBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(-4%)}}
+@keyframes gxHomeGlow{0%,100%{box-shadow:inset 0 0 0 1px #fff9,0 0 0 0 #fff0}50%{box-shadow:inset 0 0 0 1px #fff,0 0 0 4px #ffffffcc,0 0 28px 8px var(--hc)}}
+@keyframes gxTumble{
+  0%{transform:rotate3d(1,1,0,0deg) translateY(0) scale(1)}
+  25%{transform:rotate3d(1,1,0,120deg) translateY(-10px) scale(1.12)}
+  50%{transform:rotate3d(1,0,1,240deg) translateY(0) scale(1.05)}
+  75%{transform:rotate3d(0,1,1,300deg) translateY(-8px) scale(1.1)}
+  100%{transform:rotate3d(1,1,1,360deg) translateY(0) scale(1)}
+}
+@keyframes gxLand{0%{transform:translateY(-16px) rotate(-14deg) scale(.84)}55%{transform:translateY(0) rotate(5deg) scale(1.12)}100%{transform:none}}
+@keyframes gxGold{0%,100%{box-shadow:0 0 0 3px #fbbf24aa,0 0 22px #fbbf24aa,0 12px 24px #0008}50%{box-shadow:0 0 0 5px #fde68a,0 0 38px #fbbf24,0 12px 24px #0008}}
+@keyframes gxShine{0%,55%{left:-60%}100%{left:140%}}
+@keyframes gxDot{0%,100%{transform:scale(1)}50%{transform:scale(1.55)}}
+@keyframes gxAurora{from{transform:translate3d(-2%,-1%,0) scale(1.05)}to{transform:translate3d(2%,1%,0) scale(1.14)}}
+
+/* ================= CELULAR ================= */
 @media (max-width:560px){
   body .board-frame{padding:8px;border-radius:24px}
   body .board{border-radius:16px}
