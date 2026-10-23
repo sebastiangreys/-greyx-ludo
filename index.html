@@ -11448,5 +11448,43 @@ fab.style.display = ok && !blocked && !onMenu ? "grid" : "none";
 <script src="greyx-ranking.js"></script>
 <script src="greyx-ideas.js"></script>
 <link rel="stylesheet" href="greyx-board-hd.css?v=3">
+<style>
+  html, body { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  input, textarea { -webkit-user-select: text; user-select: text; }
+  img, svg { -webkit-user-drag: none; }
+</style>
+<script>
+  ["contextmenu", "dragstart"].forEach(t =>
+    document.addEventListener(t, e => e.preventDefault(), true));
+  document.addEventListener("auxclick", e => { if (e.button === 2) e.preventDefault(); }, true);
+</script>
+<style>
+  /* Tamaño del tablero según el alto de la ventana */
+  :root { --bs: max(280px, calc(100vh - 175px)); }
+  @supports (height: 100dvh) {
+    :root { --bs: max(280px, calc(100dvh - 175px)); }
+  }
+
+  .shell:has(.game-layout) {
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+    padding-bottom: 16px;
+  }
+  .board-wrap { display: flex; justify-content: center; }
+  .board-frame { width: min(100%, var(--bs)); }
+
+  @media (min-width: 561px) {
+    .game-intro { padding: 12px 16px; margin-bottom: 16px; }
+    .game-intro p { display: none; }
+  }
+
+  /* Panel lateral con su propio scroll si la ventana es baja */
+  @media (min-width: 921px) {
+    .sidebar { max-height: calc(100vh - 140px); overflow-y: auto; }
+  }
+
+  /* Barra de abajo: no se estira en pantallas anchas */
+  .gx6-nav { max-width: 520px; margin: 0 auto; }
+</style>
+
 </body>
 </html>
