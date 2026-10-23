@@ -9449,9 +9449,11 @@ async function ensureUsernameDoc() {
   } catch (e) { console.warn("ensureUsernameDoc", e); }
 }
 
+let friendsSearchSeq = 0;
+
 async function searchFriends(raw) {
   const q = String(raw || "").trim().replace(/^@+/, "");
-  state.friendsSearch = q;
+  const seq = ++friendsSearchSeq;
 
   if (!q) {
     state.friendsResults = [];
@@ -9460,14 +9462,12 @@ async function searchFriends(raw) {
     render();
     return;
   }
-
   if (!state.user || !state.profile) {
     state.friendsResults = [];
     state.friendsSearchNote = "Inicia sesión para buscar jugadores.";
     render();
     return;
   }
-
   if (!fb || !fb.db) {
     state.friendsResults = [];
     state.friendsSearchNote = "Sin conexión con Firebase.";
@@ -9476,43 +9476,51 @@ async function searchFriends(raw) {
   }
 
   const lower = q.toLowerCase();
-
-  if (state.profile.usernameLower === lower || state.user.uid === q) {
-    state.friendsResults = [];
-    state.friendsSearchNote = "Ese eres tú.";
-    state.friendsSearchBusy = false;
-    render();
-    return;
-  }
-
   state.friendsSearchBusy = true;
   state.friendsSearchNote = "";
   render();
 
-try {
-  const nameSnap = await fb.getDoc(fb.doc(fb.db, "usernames", lower));
-  if (!nameSnap.exists()) {
-    state.friendsResults = [];
-    state.friendsSearchNote = "No se encontró ese jugador.";
-  } else {
-    const d = nameSnap.data();
-    if (d.uid === state.user.uid) {
-      state.friendsResults = [];
-      state.friendsSearchNote = "Ese eres tú.";
-    } else {
-      state.friendsResults = [{ uid: d.uid, username: d.username || q, avatar: d.avatar || "a1" }];
-      state.friendsSearchNote = "";
-    }
-  }
-} catch (e) {
-  console.warn("searchFriends", e);
-  state.friendsResults = [];
-  state.friendsSearchNote = "No se pudo buscar (" + (e.code || "error") + ")";
-}
+  try {
+    const fs = await fsModule();
 
-state.friendsSearchBusy = false;
-render();
-}   // <- cierra searchFriends
+    const [exact, prefix] = await Promise.all([
+      fb.getDoc(fb.doc(fb.db, "usernames", lower)).catch(() => null),
+      fs.getDocs(fs.query(
+        fs.collection(fb.db, "publicProfiles"),
+        fs.where("usernameLower", ">=", lower),
+        fs.where("usernameLower", "<=", lower + "\uf8ff"),
+        fs.limit(8)
+      )).catch(e => { console.warn("prefix", e); return null; })
+    ]);
+
+    if (seq !== friendsSearchSeq) return; // llegó una búsqueda más nueva
+
+    const map = new Map();
+    if (exact && exact.exists()) {
+      const d = exact.data();
+      map.set(d.uid, { uid: d.uid, username: d.username || q, avatar: d.avatar || "a1" });
+    }
+    if (prefix) {
+      prefix.docs.forEach(doc => {
+        if (map.has(doc.id)) return;
+        const d = doc.data();
+        map.set(doc.id, { uid: doc.id, username: d.username, avatar: d.avatar || "a1" });
+      });
+    }
+    map.delete(state.user.uid); // quítate a ti mismo
+
+    state.friendsResults = [...map.values()];
+    state.friendsSearchNote = state.friendsResults.length ? "" : "No se encontró ese jugador.";
+  } catch (e) {
+    if (seq !== friendsSearchSeq) return;
+    console.warn("searchFriends", e);
+    state.friendsResults = [];
+    state.friendsSearchNote = "No se pudo buscar (" + (e.code || "error") + ")";
+  }
+
+  state.friendsSearchBusy = false;
+  render();
+}
 
 function friendRequestId(fromUid, toUid) {
   return fromUid + "_" + toUid;
@@ -9725,7 +9733,7 @@ function queueFriendsSearch(value) {
   clearTimeout(friendsSearchTimer);
   friendsSearchTimer = setTimeout(() => {
     searchFriends(value);
-  }, 400);
+  }, 250);
 }
 async function saveProfile() {
   if (state.profileBusy || !fb || !fb.db || !state.user) return;
