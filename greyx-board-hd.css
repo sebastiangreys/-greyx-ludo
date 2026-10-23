@@ -157,10 +157,10 @@ body::before{animation:gxAurora 16s ease-in-out infinite alternate}
 
 /* ================= AJUSTES V3 ================= */
 /* 1) Fichas sin números */
-body .board .token{font-size:0 !important;color:transparent !important;text-indent:-999px;overflow:visible}
+body .board .token{font-size:0 !important;color:transparent !important;text-shadow:none !important}
 
 /* 2) Quitar marcador de la mesa (casa / tablero / meta) */
-.panel:has(.score-grid),.score-grid{display:none !important}
+.score-grid,h3:has(+ .score-grid){display:none !important}
 
 /* 3) Botón de lanzar con el color del turno */
 main:has(.turn-chip.red-turn) .roll-button{
