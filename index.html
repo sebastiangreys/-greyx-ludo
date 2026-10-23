@@ -8021,172 +8021,112 @@ function startAuth() {
 }
 function friendsMarkup() {
   const logged = !!(state.user && state.profile);
-  const results = state.friendsResults || [];
-    const incoming = state.friendsIncoming || [];
+  const tab = state.friendsTab || "friends";
+  const list = (state.friendsList || []).slice()
+    .sort((a, b) => (b.starred - a.starred) || (b.online - a.online));
+  const incoming = state.friendsIncoming || [];
   const outgoing = state.friendsOutgoing || [];
+  const results = state.friendsResults || [];
+  const online = list.filter(f => f.online).length;
+  const searching = !!(state.friendsSearch || "").trim();
 
-  const requestsHtml = `
-    <section class="fx-panel">
-      <div class="fx-panel-head">
-        <h2>Solicitudes recibidas ${incoming.length ? "(" + incoming.length + ")" : ""}</h2>
+  const av = (id, on) => `<span class="fr-av">${avatarEmoji(id)}${
+    on === undefined ? "" : `<i class="fr-dot ${on ? "on" : ""}"></i>`}</span>`;
+
+  const friendRows = list.map(f => `
+    <div class="fr-row">
+      ${av(f.avatar, f.online)}
+      <div class="fr-info">
+        <strong>${escHtml(f.nickname || "@" + f.username)}</strong>
+        <small class="${f.online ? "on" : ""}">${f.online ? "En línea" : "Desconectado"}</small>
       </div>
-      ${incoming.length === 0
-        ? `<p class="friends-hint fx-empty-inline">No tienes solicitudes pendientes.</p>`
-        : incoming.map(r => `
-          <div class="friend-result-card">
-            <span class="friend-result-avatar">${avatarEmoji(r.fromAvatar || "a1")}</span>
-            <div class="friend-result-info">
-              <strong>@${escHtml(r.fromUsername || "jugador")}</strong>
-              <small>Quiere ser tu amigo</small>
-            </div>
-            <button class="friend-result-btn" data-action="friend-accept" data-id="${escHtml(r.id)}" type="button">Aceptar</button>
-            <button class="friend-result-btn friend-result-btn-ghost" data-action="friend-reject" data-id="${escHtml(r.id)}" type="button">Rechazar</button>
-          </div>
-        `).join("")}
-    </section>
+      ${f.starred ? `<span class="fr-star">⭐</span>` : ""}
+    </div>`).join("");
 
-    <section class="fx-panel">
-      <div class="fx-panel-head">
-        <h2>Solicitudes enviadas ${outgoing.length ? "(" + outgoing.length + ")" : ""}</h2>
+  const friendsTab = list.length ? friendRows : `
+    <div class="fr-empty">
+      <div class="fr-empty-ico">👥</div>
+      <strong>Aún no tienes amigos</strong>
+      <p>Busca a un jugador por su nombre y envíale una solicitud.</p>
+    </div>`;
+
+  const inRows = incoming.map(r => `
+    <div class="fr-row">
+      ${av(r.fromAvatar || "a1")}
+      <div class="fr-info">
+        <strong>@${escHtml(r.fromUsername || "jugador")}</strong>
+        <small>Quiere ser tu amigo</small>
       </div>
-      ${outgoing.length === 0
-        ? `<p class="friends-hint fx-empty-inline">No has enviado solicitudes.</p>`
-        : outgoing.map(r => `
-          <div class="friend-result-card">
-            <span class="friend-result-avatar">⏳</span>
-            <div class="friend-result-info">
-              <strong>@${escHtml(r.toUsername || "jugador")}</strong>
-              <small>Pendiente</small>
-            </div>
-          </div>
-        `).join("")}
-    </section>
-  `;
-  const list = state.friendsList || [];
-  const starred = list.filter(f => f.starred);
-  const onlineCount = list.filter(f => f.online).length;
-  const total = list.length;
-  const favs = starred.length;
+      <button class="fr-btn ok" data-action="friend-accept" data-id="${escHtml(r.id)}" type="button" aria-label="Aceptar">✓</button>
+      <button class="fr-btn no" data-action="friend-reject" data-id="${escHtml(r.id)}" type="button" aria-label="Rechazar">✕</button>
+    </div>`).join("");
 
-  const resultsHtml = `
-    <div class="friends-results">
-      ${state.friendsSearchBusy ? `<p class="friends-hint">Buscando…</p>` : ""}
-      ${state.friendsSearchNote ? `<p class="friends-hint">${escHtml(state.friendsSearchNote)}</p>` : ""}
-      ${results.map(r => `
-        <div class="friend-result-card">
-          <span class="friend-result-avatar">${avatarEmoji(r.avatar)}</span>
-          <div class="friend-result-info">
-            <strong>@${escHtml(r.username)}</strong>
-            <small>ID: ${escHtml(r.uid.slice(0, 8))}…</small>
-          </div>
-          <button
-  class="friend-result-btn"
-  data-action="friend-request"
-  data-uid="${escHtml(r.uid)}"
-  data-username="${escHtml(r.username)}"
-  type="button"
-  ${state.friendsReqBusy ? "disabled" : ""}
->Agregar</button>
-        </div>
-      `).join("")}
-    </div>
-  `;
+  const outRows = outgoing.map(r => `
+    <div class="fr-row">
+      ${av("a1")}
+      <div class="fr-info">
+        <strong>@${escHtml(r.toUsername || "jugador")}</strong>
+        <small>Esperando respuesta</small>
+      </div>
+      <span class="fr-chip">⏳ Pendiente</span>
+    </div>`).join("");
 
-  const starredHtml = starred.length
-    ? starred.map(f => `
-        <button class="fx-avatar-card" data-action="friend-open" data-uid="${escHtml(f.uid)}" type="button">
-          <span class="fx-avatar-ring">
-            <span class="fx-avatar-emoji">${avatarEmoji(f.avatar)}</span>
-            ${f.starred ? `<span class="fx-star">⭐</span>` : ""}
-            <span class="fx-online-dot ${f.online ? "on" : ""}"></span>
-          </span>
-          <strong>${escHtml(f.nickname || f.username)}</strong>
-          <small class="${f.online ? "on" : ""}">${f.online ? "En línea" : "Desconectado"}</small>
-        </button>
-      `).join("")
-    : `<p class="friends-hint fx-empty-inline">Aún no tienes amigos destacados.</p>`;
+  const requestsTab = (!incoming.length && !outgoing.length)
+    ? `<div class="fr-empty">
+         <div class="fr-empty-ico">📨</div>
+         <strong>Sin solicitudes</strong>
+         <p>Aquí verás las solicitudes que envíes y recibas.</p>
+       </div>`
+    : `${incoming.length ? `<h3 class="fr-sub">Recibidas</h3>${inRows}` : ""}
+       ${outgoing.length ? `<h3 class="fr-sub">Enviadas</h3>${outRows}` : ""}`;
+
+  const resultsView = `
+    <h3 class="fr-sub">Resultados</h3>
+    ${state.friendsSearchBusy ? `<p class="fr-note">Buscando…</p>` : ""}
+    ${state.friendsSearchNote ? `<p class="fr-note">${escHtml(state.friendsSearchNote)}</p>` : ""}
+    ${results.map(r => `
+      <div class="fr-row">
+        ${av(r.avatar)}
+        <div class="fr-info"><strong>@${escHtml(r.username)}</strong><small>Jugador</small></div>
+        <button class="fr-add" data-action="friend-request" data-uid="${escHtml(r.uid)}"
+          data-username="${escHtml(r.username)}" type="button" ${state.friendsReqBusy ? "disabled" : ""}>+ Agregar</button>
+      </div>`).join("")}`;
 
   return `
-  <section class="friends-screen fx-screen">
-    <header class="fx-top">
-      <button class="fx-icon-btn" data-action="friends-back" type="button" aria-label="Volver">←</button>
-      <div class="fx-title-wrap">
-        <div class="fx-title-icon" aria-hidden="true">👥</div>
-        <h1>Amigos</h1>
-      </div>
-      <span class="fx-top-spacer"></span>
+  <section class="fr-screen">
+    <header class="fr-top">
+      <button class="fr-back" data-action="friends-back" type="button" aria-label="Volver">←</button>
+      <h1>Amigos</h1>
+      <span class="fr-count"><i class="fr-dot on"></i>${online}/${list.length}</span>
     </header>
 
     ${!logged ? `
-      <div class="friends-empty">
-        <p>Inicia sesión y crea tu perfil para usar el sistema de amigos.</p>
+      <div class="fr-empty">
+        <div class="fr-empty-ico">🔒</div>
+        <strong>Inicia sesión</strong>
+        <p>Necesitas una cuenta y un perfil para usar amigos.</p>
         <button class="primary-button" data-action="auth-open" type="button">Iniciar sesión</button>
       </div>
     ` : `
-      <div class="fx-search-row">
-        <div class="fx-search-wrap">
-          <span class="fx-search-ico" aria-hidden="true">🔍</span>
-          <input
-            class="friends-search fx-search"
-            type="search"
-            data-friends-search="1"
-            placeholder="Buscar amigos..."
-            value="${escHtml(state.friendsSearch || "")}"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-          >
-        </div>
+      <div class="fr-search">
+        <span aria-hidden="true">🔍</span>
+        <input type="search" data-friends-search="1" placeholder="Buscar jugador…"
+          value="${escHtml(state.friendsSearch || "")}" autocomplete="off" autocapitalize="off" spellcheck="false">
       </div>
 
-      ${resultsHtml}
-      ${requestsHtml}
-
-      <div class="fx-stats">
-        <div class="fx-stat fx-stat-friends">
-          <div class="fx-stat-top"><span>👥</span><strong>${total}</strong></div>
-          <small>Amigos</small>
+      ${searching ? `<div class="fr-body">${resultsView}</div>` : `
+        <div class="fr-tabs">
+          <button class="fr-tab ${tab === "friends" ? "on" : ""}" data-action="friends-tab" data-tab="friends" type="button">
+            Amigos <b>${list.length}</b>
+          </button>
+          <button class="fr-tab ${tab === "requests" ? "on" : ""}" data-action="friends-tab" data-tab="requests" type="button">
+            Solicitudes ${incoming.length ? `<b class="alert">${incoming.length}</b>` : ""}
+          </button>
         </div>
-        <div class="fx-stat fx-stat-online">
-          <div class="fx-stat-top"><span class="fx-dot-green"></span><strong>${onlineCount}</strong></div>
-          <small>En línea</small>
-        </div>
-        <div class="fx-stat fx-stat-fav">
-          <div class="fx-stat-top"><span>⭐</span><strong>${favs}</strong></div>
-          <small>Favoritos</small>
-        </div>
-      </div>
-
-      <section class="fx-panel">
-        <div class="fx-panel-head">
-          <h2>⭐ Amigos destacados</h2>
-        </div>
-        <div class="fx-avatar-row">
-          ${starredHtml}
-        </div>
-      </section>
-
-      <section class="fx-panel">
-        <div class="fx-panel-head">
-          <h2>👥 Otros amigos</h2>
-        </div>
-        ${
-          list.filter(f => !f.starred).length === 0
-            ? `<p class="friends-hint fx-empty-inline">Cuando agregues amigos, se mostrarán aquí.</p>`
-            : list.filter(f => !f.starred).map(f => `
-              <div class="friend-result-card" data-action="friend-open" data-uid="${escHtml(f.uid)}">
-                <span class="friend-result-avatar">${avatarEmoji(f.avatar)}</span>
-                <div class="friend-result-info">
-                  <strong>${escHtml(f.nickname || ("@" + f.username))}</strong>
-                  <small class="${f.online ? "on" : ""}">${f.online ? "🟢 En línea" : "⚪ Desconectado"}</small>
-                </div>
-              </div>
-            `).join("")
-        }
-      </section>
+        <div class="fr-body">${tab === "friends" ? friendsTab : requestsTab}</div>
+      `}
     `}
-  </section>
-  `;
+  </section>`;
 }
 
 function render() {
@@ -8269,6 +8209,11 @@ if (action === "friend-request") {
   const uid = button.dataset.uid;
   const name = button.dataset.username || "";
   if (uid) sendFriendRequest(uid, name);
+  return;
+}
+if (action === "friends-tab") {
+  state.friendsTab = button.dataset.tab;
+  render();
   return;
 }
 
@@ -11425,6 +11370,44 @@ body .board .token.valid{animation:gxBob .8s ease-in-out infinite}
   .dice-row{grid-template-columns:66px 1fr}
   .die{width:66px;height:66px}
 }
+.fr-screen{width:min(440px,100%);margin:0 auto;padding:4px 10px 40px;color:#f8fafc}
+.fr-top{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;margin-bottom:14px}
+.fr-top h1{margin:0;text-align:center;font-size:1.3rem;font-weight:900}
+.fr-back{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff22;background:linear-gradient(145deg,#1e1b4bcc,#0f172acc);color:#fff;font-size:1.15rem}
+.fr-count{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:#0d1030;border:1px solid #22c55e66;font:800 .72rem monospace}
+.fr-search{display:flex;align-items:center;gap:10px;padding:0 14px;height:48px;border-radius:16px;border:1.5px solid #7c3aed66;background:#0b1020ee;margin-bottom:14px}
+.fr-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:600 .95rem inherit}
+.fr-search:focus-within{border-color:#a78bfa;box-shadow:0 0 0 3px #7c3aed33}
+.fr-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:16px;background:#0b1020cc;border:1px solid #ffffff12;margin-bottom:14px}
+.fr-tab{display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;border:0;border-radius:12px;background:transparent;color:#94a3b8;font:800 .85rem inherit}
+.fr-tab.on{color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 4px 0 #3b1d8f}
+.fr-tab b{padding:1px 8px;border-radius:99px;background:#ffffff1f;font-size:.7rem}
+.fr-tab b.alert{background:#ef4444;color:#fff}
+.fr-body{display:grid;gap:8px}
+.fr-sub{margin:8px 2px 2px;color:#a78bfa;font:800 .68rem monospace;letter-spacing:.14em;text-transform:uppercase}
+.fr-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;border:1px solid #ffffff14;background:linear-gradient(160deg,#1c2250cc,#0e1226cc)}
+.fr-av{position:relative;flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;font-size:1.5rem;background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);border:2px solid #a78bfa88}
+.fr-dot{position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;background:#64748b;border:2px solid #0f172a}
+.fr-dot.on{background:#22c55e;box-shadow:0 0 8px #22c55e}
+.fr-count .fr-dot{position:static;width:9px;height:9px;border:0}
+.fr-info{flex:1;min-width:0}
+.fr-info strong{display:block;font-size:.92rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-info small{color:#94a3b8;font-size:.7rem;font-weight:700}
+.fr-info small.on{color:#4ade80}
+.fr-star{font-size:1.1rem}
+.fr-btn{flex:0 0 40px;height:40px;border-radius:12px;border:0;font-size:1.05rem;font-weight:900;color:#fff}
+.fr-btn.ok{background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 3px 0 #065f46}
+.fr-btn.no{background:#334155;box-shadow:0 3px 0 #1e293b}
+.fr-btn:active,.fr-add:active{transform:translateY(2px)}
+.fr-add{flex:0 0 auto;min-height:38px;padding:0 14px;border-radius:12px;border:0;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 3px 0 #3b1d8f;color:#fff;font:900 .75rem inherit}
+.fr-chip{padding:6px 10px;border-radius:99px;background:#ffffff10;color:#cbd5e1;font:800 .66rem inherit;white-space:nowrap}
+.fr-note{margin:4px 2px;color:#94a3b8;font-size:.8rem;text-align:center}
+.fr-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:44px 20px;text-align:center;color:#94a3b8}
+.fr-empty-ico{display:grid;place-items:center;width:84px;height:84px;margin-bottom:6px;border-radius:50%;font-size:2.4rem;background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);border:2px dashed #a78bfa88}
+.fr-empty strong{color:#f8fafc;font-size:1rem}
+.fr-empty p{margin:0;font-size:.82rem;line-height:1.4}
+.fr-empty .primary-button{margin-top:14px;max-width:240px}
+
 </style>
 
 <script>
