@@ -1,8 +1,9 @@
-/* GREYX LUDO — Perfiles
-   - Insignia de Creador (SVG) junto al nombre del owner, visible para todos
+/* GREYX LUDO — Perfiles v2
+   - Sello de "Verificado" dibujado por código (SVG) junto al nombre del owner, visible para todos
+   - Pantalla Perfil más limpia: sin Ranking / Panel admin / Ajustes en la lista (ajustes pasa a un engranaje)
+   - Tarjeta de perfil rediseñada
    - Solo el owner puede cambiar su nombre de usuario
-   - Tarjeta de perfil mejorada para todos (nivel, título, barra de XP)
-   Requiere greyx-admin.js (comparte estilos de ventana) y las reglas nuevas de Firestore. */
+   Requiere greyx-admin.js (comparte estilos de ventana) y las reglas de Firestore con /badges. */
 (() => {
   "use strict";
 
@@ -13,19 +14,46 @@
   const owners = new Map();      // username en minúsculas -> uid
   let badgesFor = null, lastLoad = 0, badgeSynced = "", running = false;
 
-  /* ---------- Insignia (SVG propio) ---------- */
-  const shape = id => `
-    <path d="M12 1.6l8.2 3v6.3c0 4.9-3.3 9.1-8.2 11.2C7.1 20 3.8 15.8 3.8 10.9V4.6z" fill="url(#${id})" stroke="#7c4a03" stroke-width="1.1" stroke-linejoin="round"/>
-    <path d="M7.4 14.2l-.9-5.1 3.1 2.6L12 7.4l2.4 4.3 3.1-2.6-.9 5.1z" fill="#fff" stroke="#7c4a03" stroke-width=".7" stroke-linejoin="round"/>
-    <rect x="7.6" y="15" width="8.8" height="1.6" rx=".6" fill="#fff" stroke="#7c4a03" stroke-width=".6"/>`;
+  /* ---------- Formas generadas por código ---------- */
+  // Sello festoneado (n puntas alternando dos radios)
+  function sealPath(n, r1, r2) {
+    let d = "";
+    for (let i = 0; i < n * 2; i++) {
+      const a = Math.PI * i / n - Math.PI / 2;
+      const r = i % 2 ? r2 : r1;
+      d += (i ? "L" : "M") + (12 + r * Math.cos(a)).toFixed(2) + " " + (12 + r * Math.sin(a)).toFixed(2);
+    }
+    return d + "Z";
+  }
+  // Engranaje (dientes alrededor + agujero central)
+  function gearPath(teeth, ro, ri) {
+    const step = Math.PI * 2 / teeth;
+    const pts = [[ri, -.30], [ro, -.17], [ro, .17], [ri, .30]];
+    let d = "";
+    for (let t = 0; t < teeth; t++) {
+      const base = t * step - Math.PI / 2;
+      pts.forEach(([r, f], k) => {
+        const a = base + f * step;
+        d += (t === 0 && k === 0 ? "M" : "L") + (12 + r * Math.cos(a)).toFixed(2) + " " + (12 + r * Math.sin(a)).toFixed(2);
+      });
+    }
+    return d + "Z M12 8.6a3.4 3.4 0 1 0 0 6.8a3.4 3.4 0 1 0 0-6.8z";
+  }
+
+  const SEAL = sealPath(10, 11.2, 9.4);
+  const GEAR = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="${gearPath(8, 10.4, 7.8)}" fill="currentColor" fill-rule="evenodd"/></svg>`;
+
   const GRAD = id => `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#fff1a8"/><stop offset=".5" stop-color="#fbbf24"/><stop offset="1" stop-color="#b45309"/></linearGradient>`;
+    <stop offset="0" stop-color="#9bd7ff"/><stop offset=".5" stop-color="#3b9bff"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>`;
+  const shape = id => `
+    <path d="${SEAL}" fill="url(#${id})" stroke="#1e40af" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M7.6 12.4l3 3 5.9-6.3" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`;
 
   document.body.insertAdjacentHTML("beforeend",
     `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>${GRAD("gxbG")}</defs></svg>`);
 
   const badge = (s = 16) =>
-    `<svg class="gxb" viewBox="0 0 24 24" width="${s}" height="${s}" role="img" aria-label="Creador">${shape("gxbG")}</svg>`;
+    `<svg class="gxb" viewBox="0 0 24 24" width="${s}" height="${s}" role="img" aria-label="Verificado">${shape("gxbG")}</svg>`;
   window.GXOwnerIcon = badge;
 
   const badgeUri = "url('data:image/svg+xml;utf8," + encodeURIComponent(
@@ -33,7 +61,7 @@
 
   /* ---------- Niveles ---------- */
   function tier(lv, owner) {
-    if (owner) return { n:"Creador del juego", c:"#fbbf24", c2:"#f59e0b", g:"#fbbf2433" };
+    if (owner) return { n:"Creador del juego", c:"#60a5fa", c2:"#6d28d9", g:"#3b82f633" };
     if (lv >= 100) return { n:"Gran maestro", c:"#fbbf24", c2:"#fb923c", g:"#fbbf2433" };
     if (lv >= 75)  return { n:"Leyenda",  c:"#f472b6", c2:"#a78bfa", g:"#f472b633" };
     if (lv >= 50)  return { n:"Maestro",  c:"#a78bfa", c2:"#6d28d9", g:"#a78bfa33" };
@@ -44,21 +72,49 @@
 
   /* ---------- Estilos ---------- */
   const css = `
-  .gxb{display:inline-block;vertical-align:-3px;margin-left:6px;filter:drop-shadow(0 0 5px #fbbf2499)}
-  .gx-oname{background:linear-gradient(90deg,#fff1a8,#fbbf24 60%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:none!important}
+  .gxb{display:inline-block;vertical-align:-3px;margin-left:6px;filter:drop-shadow(0 0 5px #3b82f699);flex:none}
+  .pc h2 .gxb,.gxh-name .gxb{width:22px;height:22px;vertical-align:-4px}
 
-  body.gx-owner .account-avatar{position:relative;border:2px solid #fbbf24;
-    background:linear-gradient(145deg,#6d28d9,#2a1580);box-shadow:0 0 0 3px #fbbf2433,0 0 20px #fbbf2488}
+  body:has(#gxx) .gx-fab{display:none!important}
+
+  body.gx-owner .account-avatar{position:relative;border:2px solid #60a5fa;
+    background:linear-gradient(145deg,#6d28d9,#2a1580);box-shadow:0 0 0 3px #3b82f633,0 0 20px #3b82f688}
   body.gx-owner .account-avatar::after{content:"";position:absolute;right:-7px;top:-9px;width:22px;height:22px;
     background:${badgeUri} center/contain no-repeat;filter:drop-shadow(0 2px 3px #0009)}
-  body.gx-owner .account-info small::before{content:"CREADOR · ";color:#fbbf24;font-weight:900;letter-spacing:.06em}
+  body.gx-owner .account-info small::before{content:"CREADOR · ";color:#7dd3fc;font-weight:900;letter-spacing:.06em}
 
+  /* ===== Perfil (pantalla principal) ===== */
+  .gxh-gear{width:42px;height:42px;border-radius:14px;border:1px solid #ffffff22;background:#263B7899;color:#fff;
+    display:grid;place-items:center;padding:0}
+  .gxh-gear:active{transform:scale(.94)}
+  #gxx.gx-hub .pc{position:relative;padding:26px 16px 18px;border-radius:30px;overflow:hidden}
+  #gxx.gx-hub .pc::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 70% at 50% 0,#ffffff26,transparent 60%)}
+  #gxx.gx-hub .pc>*{position:relative}
+  #gxx.gx-hub .pc .gxav{box-shadow:0 0 0 4px #0003,0 10px 30px #0008}
+  #gxx.gx-hub .pc h2{display:flex;align-items:center;justify-content:center;margin:14px 0 4px;
+    font-size:1.45rem;letter-spacing:-.01em;word-break:break-all}
+  #gxx.gx-hub .pc .plv{display:inline-block;padding:5px 14px;border-radius:99px;background:#0007;
+    border:1px solid #ffffff2a;color:#fff;letter-spacing:.14em}
+  #gxx.gx-hub .sg{gap:10px;margin-top:16px}
+  #gxx.gx-hub .sg div{background:linear-gradient(160deg,#ffffff1c,#0000003a);border:1px solid #ffffff1c;
+    border-radius:16px;padding:12px 4px}
+  #gxx.gx-hub .sg b{font-size:1.1rem}
+  body.gx-owner #gxx.gx-hub .pc{border-color:#60a5fa88;box-shadow:0 0 36px #3b82f633,0 14px 34px #000a}
+
+  #gxx.gx-hub .mn{gap:10px}
+  #gxx.gx-hub .mn button{padding:14px 16px;border-radius:18px;font-size:1.6rem;
+    background:linear-gradient(160deg,#ffffff12,#ffffff06);border:1px solid #ffffff1c}
+  #gxx.gx-hub .mn button span{font-size:.95rem;line-height:1.2}
+  #gxx.gx-hub .mn button::after{content:"›";margin-left:auto;color:#8e97aa;font-size:1.5rem;font-weight:400}
+  #gxx.gx-hub .mn button:active{transform:scale(.98)}
+
+  /* ===== Perfil (pantalla de avatar) ===== */
   .gxh{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;
     padding:22px 14px 18px;margin:0 0 16px;border-radius:24px;border:1px solid #ffffff18;overflow:hidden;
     background:radial-gradient(120% 90% at 50% 0,var(--tg),transparent 70%),linear-gradient(160deg,#1c2142,#0e1226);
     box-shadow:inset 0 1px 0 #ffffff1a,0 14px 30px #0007}
-  .gxh.owner{border-color:#fbbf2477;box-shadow:inset 0 1px 0 #fff3,0 0 34px #fbbf2433,0 14px 30px #0007}
-  .gxh-crown{margin-bottom:-6px;filter:drop-shadow(0 0 12px #fbbf24aa)}
+  .gxh.owner{border-color:#60a5fa77;box-shadow:inset 0 1px 0 #fff3,0 0 34px #3b82f633,0 14px 30px #0007}
   .gxh-ring{position:relative;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;padding:4px;
     background:conic-gradient(from 200deg,var(--tc),#ffffffaa,var(--tc2),var(--tc));filter:drop-shadow(0 0 14px var(--tc))}
   .gxh-av{width:100%;height:100%;display:grid;place-items:center;border-radius:50%;font-size:2.9rem;
@@ -72,10 +128,8 @@
   .gxh-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--tc),var(--tc2));box-shadow:0 0 10px var(--tc)}
   .gxh-xp{margin-top:6px;color:#8e97aa;font-size:.7rem}
 
-  body.gx-owner .setup-card-modern:has(.gxh.owner){border-color:#fbbf2455!important;box-shadow:0 30px 80px #000a,0 0 50px #fbbf2422,inset 0 1px 0 #ffffff1a!important}
-
   .gxa-ren{position:relative;z-index:2;width:100%;min-height:44px;margin:-4px 0 14px;border-radius:14px;
-    border:1.5px solid #fbbf2477;background:linear-gradient(135deg,#fbbf2422,#ffffff08);color:#fde68a;
+    border:1.5px solid #60a5fa77;background:linear-gradient(135deg,#3b82f622,#ffffff08);color:#bfe3ff;
     font:800 .82rem Inter,system-ui,sans-serif}
   .gxa-ren:active{transform:scale(.98)}
   `;
@@ -130,6 +184,7 @@
   const app = document.getElementById("app");
   let queued = false;
   const obs = new MutationObserver(schedule);
+  const OPTS = { childList: true, subtree: true, characterData: true };
 
   function schedule() {
     if (queued) return;
@@ -143,28 +198,56 @@
       const g = G();
       if (g) {
         document.body.classList.toggle("gx-owner", !!g.state.isOwner);
+        hubTweaks();
         profileHero(g);
         renameButton(g);
         if (g.state.phase !== "playing") scan();
       }
     } catch (e) { console.warn("gx-profile", e); }
-    obs.observe(app, { childList:true, subtree:true, characterData:true });
+    obs.observe(document.body, OPTS);
   }
-  obs.observe(app, { childList:true, subtree:true, characterData:true });
+  obs.observe(document.body, OPTS);
+
+  // Pantalla Perfil: quita Ranking / Panel admin / Ajustes de la lista y pone el engranaje arriba
+  function hubTweaks() {
+    const gx = document.getElementById("gxx");
+    if (!gx) return;
+    const h1 = gx.querySelector(".gxx-top h1");
+    const hub = !!h1 && h1.textContent.trim() === "Perfil";
+    gx.classList.toggle("gx-hub", hub);
+    if (!hub) return;
+
+    gx.querySelectorAll('.mn [data-x="go:rank"], .mn [data-x="go:adm"], .mn [data-x="settings"]')
+      .forEach(b => b.remove());
+
+    const top = gx.querySelector(".gxx-top");
+    if (top && !top.querySelector(".gxh-gear")) {
+      const btn = document.createElement("button");
+      btn.className = "gxh-gear";
+      btn.type = "button";
+      btn.dataset.x = "settings";
+      btn.setAttribute("aria-label", "Configuración");
+      btn.innerHTML = GEAR;
+      const last = top.lastElementChild;
+      if (last && last.tagName === "SPAN") last.replaceWith(btn); else top.appendChild(btn);
+    }
+  }
 
   function scan() {
     if (!owners.size) return;
-    const w = document.createTreeWalker(app, NodeFilter.SHOW_TEXT);
+    const roots = [app, document.getElementById("gxx")].filter(Boolean);
     const hits = [];
-    while (w.nextNode()) {
-      const t = w.currentNode.nodeValue.trim();
-      if (t.length < 4 || t[0] !== "@") continue;
-      if (owners.has(t.slice(1).toLowerCase())) hits.push(w.currentNode.parentElement);
-    }
+    roots.forEach(root => {
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      while (w.nextNode()) {
+        const t = w.currentNode.nodeValue.trim();
+        if (t.length < 4 || t[0] !== "@") continue;
+        if (owners.has(t.slice(1).toLowerCase())) hits.push(w.currentNode.parentElement);
+      }
+    });
     hits.forEach(el => {
-      if (!el) return;
-      el.classList.add("gx-oname");
-      if (!el.querySelector(":scope > .gxb")) el.insertAdjacentHTML("beforeend", badge(16));
+      if (!el || el.querySelector(":scope > .gxb")) return;
+      el.insertAdjacentHTML("beforeend", badge(16));
     });
   }
 
@@ -186,7 +269,6 @@
     const xpText = lv >= 100 ? "Nivel máximo" : g.xpToNext(s.xp) + " XP para el nivel " + (lv + 1);
     const html = `
       <div class="gxh ${owner ? "owner" : ""}" data-sig="${esc(sig)}" style="--tc:${t.c};--tc2:${t.c2};--tg:${t.g}">
-        ${owner ? `<span class="gxh-crown">${badge(44)}</span>` : ""}
         <div class="gxh-ring">
           <div class="gxh-av">${g.avatarEmoji(avatar)}</div>
           <b class="gxh-lv">${lv}</b>
