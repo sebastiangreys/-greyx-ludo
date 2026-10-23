@@ -7095,7 +7095,7 @@ ${!state.showFriends ? `
               ✕
             </button>
           </div>
-           ${accountMarkup()}
+           ${accountMarkup()}${window.GXAdminEntry ? window.GXAdminEntry() : ""}
           <button class="settings-option" data-action="settings-sound">
             <span class="settings-option-icon sound-setting-icon">
               ${state.sound ? "🔊" : "🔇"}
