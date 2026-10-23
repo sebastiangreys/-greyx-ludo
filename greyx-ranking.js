@@ -30,7 +30,7 @@
   /* ---------- Estilos ---------- */
   const st = document.createElement("style");
   st.textContent = `
-  .gx6-nav{z-index:250!important}
+  .gx6-nav{z-index:950!important}
   body:has(.friends-screen) .gx6-nav{display:flex}
   .friends-screen{padding-bottom:130px!important}
   body:has(#gxRank) .gx-fab{display:none!important}
@@ -324,6 +324,18 @@
   }
 
   /* ---------- Barra inferior ---------- */
+  // La pantalla de Amigos se detecta por su título, no por el nombre de su clase
+  function friendsTitle() {
+    return Array.from(document.querySelectorAll("h1")).find(
+      h => h.textContent.trim() === "Amigos" && h.getClientRects().length && !h.closest(".gx6"));
+  }
+  const friendsOpen = () => !!friendsTitle();
+  function friendsBackButton() {
+    const h = friendsTitle();
+    if (!h) return null;
+    return $('[data-action="friends-back"]') || (h.parentElement && h.parentElement.querySelector("button"));
+  }
+
   // Cierra la capa de perfil de greyx-extras.js usando su propio botón de volver
   function closeExtras() {
     for (let i = 0; i < 10 && $("#gxx"); i++) {
@@ -338,7 +350,7 @@
   function goHome() {
     closeRank();
     closeExtras();
-    const back = $('.friends-screen [data-action="friends-back"]');
+    const back = friendsBackButton();
     if (back) back.click();
   }
 
@@ -362,7 +374,7 @@
     if (to === "friends") {
       closeRank();
       closeExtras();
-      if ($(".friends-screen")) { e.preventDefault(); e.stopImmediatePropagation(); }
+      if (friendsOpen()) { e.preventDefault(); e.stopImmediatePropagation(); }
       return;
     }
     if (to === "profile") closeRank();   // el perfil lo abre greyx-extras.js
@@ -375,7 +387,7 @@
       return /^(Ranking|Jugador)$/.test(t) ? "rank" : "profile";
     }
     if ($("#gxRank")) return "rank";
-    if ($(".friends-screen")) return "friends";
+    if (friendsOpen()) return "friends";
     return "home";
   }
 
@@ -390,7 +402,7 @@
       nav.style.removeProperty("display");
     } else {
       nav.style.setProperty("display", "flex", "important");
-      nav.style.setProperty("z-index", "250", "important");
+      nav.style.setProperty("z-index", "950", "important");
       nav.style.setProperty("transform", "none", "important");
       nav.style.setProperty("opacity", "1", "important");
       nav.style.setProperty("visibility", "visible", "important");
