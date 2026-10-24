@@ -1,5 +1,6 @@
 /* GREYX LUDO — Partida online sincronizada (Fase 2B)
-   Conecta la sala con el servidor de Cloudflare y dibuja el tablero con su estado. */
+   Conecta la sala con el servidor de Cloudflare y dibuja el tablero con su estado.
+   v2: animación del dado + entrega de XP y trofeos al terminar. */
 (() => {
   "use strict";
 
@@ -12,7 +13,8 @@
   const O = {
     ws: null, room: null, you: null, snap: null, v: -1,
     q: Promise.resolve(), retry: 0, timer: null, closing: false,
-    lastRoll: null, note: "", finished: false
+    lastRoll: null, note: "", finished: false,
+    cap: 0, goal: 0
   };
 
   const ERR = {
@@ -97,7 +99,10 @@
     if (O.ws) { try { O.ws.close(); } catch (e) {} }
     O.ws = null; O.room = null; O.snap = null; O.v = -1;
     O.finished = false; O.note = ""; O.lastRoll = null;
+    O.cap = 0; O.goal = 0; O.result = null;
     O.closing = false;
+    const g = G();
+    if (g && g.state) g.state.online = false;
   }
 
   document.addEventListener("visibilitychange", () => {
@@ -122,6 +127,8 @@
       enqueue(() => handleEv(m));
     } else if (m.t === "err") {
       if (ERR[m.code]) toast(ERR[m.code]);
+      // si el dado quedó girando por un error, lo paramos
+      if (g.state.rolling) { g.state.rolling = false; g.render(); }
     }
   }
 
@@ -148,7 +155,7 @@
     });
     s.players.forEach(c => { tk[c] = s.tokens[c].map((p, i) => ({ id: i, progress: p })); });
 
-    st.mode = "local"; st.humanColor = me;
+    st.mode = "local"; st.humanColor = me; st.online = true;
     st.players = s.players.slice(); st.count = s.players.length;
     st.tokens = tk; st.active = s.turn;
     st.playerNames = { red: "", green: "", yellow: "", blue: "" };
@@ -175,10 +182,21 @@
     if (!s || s.phase === "over") return;
     const st = G().state;
     O.note = ""; O.lastRoll = null; O.finished = false; O.v = -1;
+    O.cap = 0; O.goal = 0; O.result = null;
     st.settingsOpen = false; st.showFriends = false; st.showOnline = false;
     st.showAuth = false; st.showProfile = null; st.celebrating = false;
     st.winner = null; st.ranking = null;
     st.phase = "playing"; st.setupStep = 1;
+
+    // datos que usa el guardado de XP y trofeos
+    st.online = true;
+    st.statsRecorded = false;
+    st.gameResult = null;
+    st.xpResult = null;
+    st.gameId = "r" + (O.room || "x") + "-" + (s.startedAt || Date.now());
+    st.gameStartedAt = s.startedAt || Date.now();
+    st.gameStats = { captures: 0, goals: 0 };
+
     if (window.GreyxRooms) GreyxRooms.hide();
     applySnap(s);
   }
@@ -197,18 +215,35 @@
     st.hop = null;
   }
 
+  /* El dado gira ~0.7 s y luego muestra el número real que decidió el servidor */
+  async function rollAnim(n) {
+    const g = G(), st = g.state;
+    st.rolling = true; g.render();
+    await wait(700);
+    st.rolling = false; st.lastRoll = n; g.render();
+    await wait(350);
+  }
+
   async function handleEv(m) {
     const g = G(), st = g.state, s = m.snap;
     if (st.phase !== "playing") { O.snap = s; O.v = s.v; return; }
     const nm = c => (s.names[c] || c);
+    const me = O.you && O.you.color;
     for (const e of m.evs) {
-      if (e.type === "roll" || e.type === "pass") { O.lastRoll = e.n; st.lastRoll = e.n; }
+      if (e.type === "roll" || e.type === "pass") {
+        O.lastRoll = e.n;
+        await rollAnim(e.n);
+      }
       if (e.type === "pass") O.note = nm(e.color) + " sacó " + e.n + ": sin movimientos.";
       if (e.type === "timeout") {
         O.note = e.left ? nm(e.color) + " abandonó la partida." : nm(e.color) + " se tardó: jugó el servidor.";
       }
       if (e.type === "move") {
         O.note = e.captured && e.captured.length ? "¡Captura!" : (e.goal ? "¡Ficha en la meta!" : "");
+        if (e.color === me) {
+          O.cap += (e.captured || []).length;
+          if (e.goal) O.goal += 1;
+        }
         await animateMove(e);
       }
       if (e.type === "finish") O.note = nm(e.color) + " terminó en " + e.place + "º lugar.";
@@ -216,17 +251,105 @@
     applySnap(s);
   }
 
-  function showResult(s) {
+  /* ---------- Fin de partida: podio + XP + trofeos ---------- */
+  function popXP(n) {
+    const el = document.createElement("div");
+    el.className = "xp-popup";
+    el.style.cssText = "left:50%;top:55%;transform:translateX(-50%)";
+    el.innerHTML = `<div class="xp-popup-badge">+${n} XP</div><div class="xp-popup-label">EXPERIENCIA</div>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  function popTrophy(delta, total) {
+    const el = document.createElement("div");
+    el.className = "trophy-popup " + (delta >= 0 ? "up" : "down");
+    el.innerHTML = `<div class="trophy-popup-badge">🏆 ${delta > 0 ? "+" : ""}${delta}</div><div class="trophy-popup-label">TROFEOS · ${total}</div>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  function popLevel(lv) {
+    const el = document.createElement("div");
+    el.className = "levelup-overlay";
+    el.innerHTML = `<div class="levelup-card"><div class="levelup-star">⭐</div><div class="levelup-title">¡SUBISTE DE NIVEL!</div><div class="levelup-num">${lv}</div><div class="levelup-sub">Sigue jugando para subir más.</div></div>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3300);
+  }
+
+  /* Línea con saldo de trofeos, nivel y XP que falta, dentro del podio */
+  function injectBalance() {
+    const r = O.result;
+    const card = document.querySelector(".winner-card");
+    if (!r || !card || card.querySelector(".ol-bal")) return;
+    const g = G();
+    const lv = g.xpLevelFromTotal(r.stats.xp);
+    const next = lv >= 100 ? "Nivel máximo" : g.xpToNext(r.stats.xp) + " XP para NV. " + (lv + 1);
+    const d = r.trophyDelta;
+    const p = document.createElement("p");
+    p.className = "ol-bal";
+    p.style.cssText = "margin:12px 0 0;padding:10px;border-radius:14px;background:#ffffff0d;color:#fde68a;font-weight:800;font-size:.85rem;line-height:1.5";
+    p.innerHTML = `🏆 ${d > 0 ? "+" : ""}${d} · Saldo: ${r.stats.trophies}<br>NV. ${lv} · ${next}`;
+    const actions = card.querySelector(".winner-actions");
+    if (actions) card.insertBefore(p, actions); else card.appendChild(p);
+  }
+  new MutationObserver(injectBalance).observe(document.getElementById("app"), { childList: true, subtree: true });
+
+  /* Guarda tu resultado (XP + trofeos) con la lógica de greyx-core.js */
+  async function submitMine(s) {
+    const g = G(), st = g.state, core = window.GreyxCore;
+    const me = O.you && O.you.color;
+    const row = s.ranking.find(r => r.color === me);
+    if (!row || !core || !st.user || !st.profile || !g.fb || !g.fb.db) return;
+
+    const started = s.startedAt || st.gameStartedAt || Date.now();
+    const dur = (s.endedAt || Date.now()) - started;
+    if (dur < core.CONFIG.MIN_GAME_MS) { toast("Partida muy corta: no da recompensas."); return; }
+
+    const fs = await g.fsModule();
+    const prevLv = g.xpLevelFromTotal(st.xp || 0);
+    const r = await core.submitGame({
+      fb: g.fb, fs, uid: st.user.uid, profile: st.profile,
+      place: row.place, players: s.players.length, gameId: st.gameId,
+      captures: Math.min(O.cap, 40), goals: Math.min(O.goal, 4),
+      durationMs: dur
+    });
+    if (!r) return;
+
+    O.result = r;
+    st.stats = r.stats; st.statsUid = st.user.uid;
+    st.xp = r.stats.xp; st.xpLevel = g.xpLevelFromTotal(r.stats.xp); st.xpLoaded = true;
+    st.gameResult = { delta: r.trophyDelta };
+    const up = st.xpLevel > prevLv;
+    st.xpResult = { granted: r.xpGranted, leveledUp: up, newLevel: st.xpLevel, place: row.place };
+
+    if (r.xpGranted > 0) popXP(r.xpGranted);
+    if (r.trophyDelta !== 0) setTimeout(() => popTrophy(r.trophyDelta, r.stats.trophies), 1100);
+    if (up) setTimeout(() => popLevel(st.xpLevel), r.trophyDelta !== 0 ? 3600 : 1200);
+  }
+
+  async function showResult(s) {
     const g = G(), st = g.state;
     const order = s.ranking.map(r => r.color);
     st.ranking = order; st.finishedOrder = order.slice();
     st.winner = order[0]; st.valid = new Set(); st.roll = null;
     st.phase = "winner";
+    st.mode = "solo"; // así el podio muestra tu XP y tus trofeos
     g.render();
-    if (!O.finished) {
-      O.finished = true;
-      if (window.GreyxRooms) GreyxRooms.finish();
+
+    if (O.finished) return;
+    O.finished = true;
+
+    // libera la sala (no espera al guardado)
+    if (window.GreyxRooms) GreyxRooms.finish();
+
+    try {
+      await submitMine(s);
+    } catch (e) {
+      console.warn("online submit", e);
+      toast("No se pudo guardar tu resultado.");
     }
+    if (st.phase === "winner") { g.render(); injectBalance(); }
   }
 
   /* ---------- Tus toques: ahora se mandan al servidor ---------- */
@@ -238,7 +361,11 @@
     if (st.phase === "playing") {
       if (a === "roll") {
         e.preventDefault(); e.stopImmediatePropagation();
-        if (mineNow(s) && s.phase === "roll") send({ t: "roll" });
+        if (mineNow(s) && s.phase === "roll") {
+          // el dado empieza a girar al instante, sin esperar al servidor
+          if (!st.rolling) { st.rolling = true; G().render(); }
+          send({ t: "roll" });
+        }
         return;
       }
       if (a === "token") {
