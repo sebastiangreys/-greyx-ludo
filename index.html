@@ -9008,7 +9008,7 @@ if (state.tokens[color].every(token => token.progress === 57)) {
 // En modo IA, si el humano terminó, la partida acaba ya
 const humanDone = state.mode === "solo" && color === state.humanColor;
 
-if (stillPlaying.length <= 1 || humanDone) {
+const humanDone = state.mode === "solo" && color === state.humanColor && state.finishedOrder.length === 1;
   // Los que faltan se ordenan por cuánto avanzaron
   const score = c => state.tokens[c].reduce((s, t) => s + Math.max(t.progress, 0), 0);
   const rest = stillPlaying.slice().sort((a, b) => score(b) - score(a));
