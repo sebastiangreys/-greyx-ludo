@@ -8517,11 +8517,18 @@ function chooseBotMove(color) {
     const landing = trackIndex(color, finalProgress);
 
     if (landing !== null && !safe.has(landing)) {
-      state.players
-        .filter(opponent => opponent !== color)
-        .forEach(opponent => {
-          state.tokens[opponent].forEach(enemy => {
-            if (trackIndex(opponent, enemy.progress) === landing) {
+  state.players
+    .filter(c => c !== color)
+    .forEach(opponent => {
+
+      // Si hay 2 o más fichas del mismo color aquí, es un bloqueo: nadie las captura
+      const sameCell = updated[opponent].filter(
+        t => trackIndex(opponent, t.progress) === landing
+      );
+      if (sameCell.length >= 2) return;
+
+      updated[opponent] = updated[opponent].map(t => {
+        if (trackIndex(opponent, t.progress) === landing) {
               score += 100;
             }
           });
