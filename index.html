@@ -5448,43 +5448,36 @@ if (type === "goal") {
     return;
   }
   if (type === "whoosh") { sweep(250, 1400, 1.2, "sine", 0.03); return; }
+  
+    if (type === "introHit") {
+    tone(100, 0.85, "triangle", 0.045);
+    tone(220, 0.6, "sine", 0.025, 0.08);
+    return;
+  }
+  if (type === "letter") {
+    tone(1320, 0.055, "square", 0.014);
+    return;
+  }
+  if (type === "letterX") {
+    // Sonido gamer solo para la X
+    tone(180, 0.18, "sawtooth", 0.03);
+    tone(720, 0.22, "square", 0.025, 0.04);
+    tone(1100, 0.35, "sine", 0.04, 0.08);
+    tone(1600, 0.25, "sine", 0.02, 0.18);
+    return;
+  }
+  if (type === "whoosh") {
+    sweep(200, 1500, 1.0, "sine", 0.03);
+    return;
+  }
   if (type === "ready") {
-    tone(523, 0.12, "sine", 0.04);
-    tone(784, 0.28, "sine", 0.045, 0.12);
+    tone(523, 0.1, "sine", 0.035);
+    tone(659, 0.12, "sine", 0.04, 0.1);
+    tone(784, 0.28, "sine", 0.045, 0.22);
+    return;
   }
 }
-if (type === "letter") {
-  tone(1320, 0.055, "square", 0.014);
-  return;
-}
-
-if (type === "letterX") {
-  // Sonido más gamer / impactante solo para la X
-  tone(180, 0.18, "sawtooth", 0.03);
-  tone(720, 0.22, "square", 0.025, 0.04);
-  tone(1100, 0.35, "sine", 0.04, 0.08);
-  tone(1600, 0.25, "sine", 0.02, 0.18);
-  return;
-}
-
-if (type === "introHit") {
-  tone(100, 0.85, "triangle", 0.045);
-  tone(220, 0.6, "sine", 0.025, 0.08);
-  return;
-}
-
-if (type === "whoosh") {
-  sweep(200, 1500, 1.0, "sine", 0.03);
-  return;
-}
-
-if (type === "ready") {
-  tone(523, 0.1, "sine", 0.035);
-  tone(659, 0.12, "sine", 0.04, 0.1);
-  tone(784, 0.28, "sine", 0.045, 0.22);
-  return;
-}
-
+  
 function playUiSound(action) {
   if (action === "roll" || action === "token") return;
   if (action === "back-setup" || action.startsWith("close-")) { playSound("back"); return; }
