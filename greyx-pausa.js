@@ -55,8 +55,8 @@ body.gx-playing .gx-fab,
 body.gx-playing .top-actions{display:none!important}
 
 .gxp-btn-open{
-  position:fixed;z-index:999;
-  top:calc(12px + env(safe-area-inset-top,0px));right:14px;
+  position:absolute;z-index:999;
+  top:0;left:0;
   width:46px;height:46px;display:none;place-items:center;
   border-radius:50%;cursor:pointer;color:#fff;padding:0;
   background:linear-gradient(145deg,#232a66,#0d1030);
@@ -213,8 +213,22 @@ body.gx-playing .top-actions{display:none!important}
 
   openBtn.addEventListener("click", pause);
 
+  /* ---------- Pegado al juego (esquina del área de juego, se mueve con ella) ---------- */
+  function place() {
+    const shell = document.querySelector(".shell");
+    if (!shell) return;
+    const r = shell.getBoundingClientRect();
+    const x = r.right + window.scrollX - 46 - 4;
+    const y = r.top + window.scrollY + 8;
+    openBtn.style.left = Math.max(0, x) + "px";
+    openBtn.style.top = "calc(" + Math.max(0, y) + "px + env(safe-area-inset-top,0px))";
+  }
+  window.addEventListener("resize", place);
+  window.addEventListener("orientationchange", place);
+
   /* ---------- Mostrar el botón solo durante la partida ---------- */
   function sync() {
+    place();
     const playing =
       phase() === "playing" &&
       !(GX.state.celebrating) &&
