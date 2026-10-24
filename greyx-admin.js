@@ -29,7 +29,7 @@
 
   let checkedUid = null;
   let syncing = false;
-  const view = { tab:"home", q:"", target:null, type:"warning", cat:"other", days:"7",
+  const view = { tab:"home", q:"", target:null, list:null, type:"warning", cat:"other", days:"7",
                  reason:"", msg:"", ok:false, busy:false, log:null, confirm:null };
 
   async function ctx() {
@@ -251,6 +251,15 @@
   .gxa-chip.expired{background:#64748b40;color:#cbd5e1}
   .gxa-chip.lifted{background:#10b98133;color:#6ee7b7}
   .gxa-chip.warn{background:#fbbf2433;color:#fde68a}
+  .gxa-prow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;margin-bottom:8px;border-radius:16px;
+    border:1px solid #ffffff14;background:#ffffff08;color:#fff;text-align:left}
+  .gxa-prow:active{transform:scale(.98)}
+  .gxa-av.sm{width:42px;height:42px;font-size:1.35rem;flex:0 0 42px;border-color:#a78bfa88}
+  .gxa-pi{flex:1;min-width:0}
+  .gxa-pi strong{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gxa-pi small{color:#8e97aa;font-size:.68rem}
+  .gxa-chev{color:#64748b;font-size:1.2rem}
+  .gxa-player small{word-break:break-all}
   .gxa-toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
     z-index:1000003;padding:12px 20px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;
     font-weight:800;font-size:.85rem;box-shadow:0 10px 30px #000c}
@@ -271,11 +280,16 @@
   function openPanel() {
     if (document.getElementById("gxAdm")) return;
     Object.assign(view, { tab:"home", q:"", target:null, type:"warning", cat:"other",
-                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null });
+                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null, list:null });
     const el = document.createElement("div");
     el.id = "gxAdm";
     el.className = "gxa";
     el.addEventListener("click", onClick);
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" && e.target && e.target.id === "gxaQ") {
+        e.preventDefault(); grab(); doSearch();
+      }
+    });
     document.body.appendChild(el);
     draw();
   }
@@ -340,29 +354,62 @@
     }).join("");
   }
 
+  function rowHtml(p) {
+    const g = G();
+    const lv = g.xpLevelFromTotal(p.xp || 0);
+    return `
+      <button class="gxa-prow" data-a="pick" data-uid="${esc(p.uid)}" type="button">
+        <span class="gxa-av sm">${g.avatarEmoji(p.avatar || "a1")}</span>
+        <span class="gxa-pi"><strong>@${esc(p.username || "jugador")}</strong>
+          <small>NV. ${lv} · 🏆 ${p.trophies || 0} · ${p.played || 0} partidas</small></span>
+        <span class="gxa-chev">›</span>
+      </button>`;
+  }
+
+  function directoryHtml() {
+    const L = view.list || newList();
+    const searching = L.mode === "search";
+    let rows;
+    if (L.error) rows = `<p style="margin:0;color:#fca5a5;font-size:.8rem">No se pudo cargar (${esc(L.error)}).</p>`;
+    else if (!L.items.length && L.loading) rows = `<p style="margin:0;color:#9aa3b8;font-size:.8rem">Cargando…</p>`;
+    else if (!L.items.length) rows = `<p style="margin:0;color:#9aa3b8;font-size:.8rem">${searching ? "No se encontró ningún jugador." : "Aún no hay jugadores."}</p>`;
+    else rows = L.items.map(rowHtml).join("");
+    return `
+      <div class="gxa-card">
+        <h3>Buscar jugador</h3>
+        <p>Escribe su nombre, el inicio de su nombre o su UID.</p>
+        <div class="gxa-row">
+          <input id="gxaQ" type="text" placeholder="@usuario" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(view.q)}">
+          <button class="gxa-btn" data-a="search" type="button">Buscar</button>
+        </div>
+        ${searching ? `<div style="height:10px"></div><button class="gxa-btn ghost" data-a="clear" type="button">Ver todos los jugadores</button>` : ""}
+      </div>
+      <div class="gxa-card">
+        <h3>${searching ? "Resultados" : "Todos los jugadores"}</h3>
+        <p>${searching ? "Toca un jugador para ver su ficha." : "Ordenados por nombre. Toca uno para ver su ficha."}</p>
+        ${rows}
+        ${!L.done && L.items.length ? `<div style="height:6px"></div><button class="gxa-btn ghost" data-a="more" type="button" ${L.loading ? "disabled" : ""}>${L.loading ? "Cargando…" : "Cargar más"}</button>` : ""}
+      </div>`;
+  }
+
   function banHtml() {
     const t = view.target;
-    let card = "";
-    if (t) {
-      const b = t.ban;
-      const active = isActive(b);
-      let status;
-      if (active) {
-        status = `<div class="gxa-status banned">Sanción activa: ${esc(b.type)}${b.until ? " · quedan " + esc(left(b.until)) + " (hasta " + esc(fmt(b.until)) + ")" : " · permanente"}<br>${esc(b.reason || "")}</div>`;
-      } else if (b && b.type !== "warning") {
-        status = `<div class="gxa-status expired">Última sanción vencida el ${esc(fmt(b.until))}</div>`;
-      } else {
-        status = `<div class="gxa-status clean">Sin sanciones activas</div>`;
-      }
-      const applyLbl = view.confirm === "apply" ? "¿Confirmas? Toca otra vez" : "Aplicar sanción";
-      const liftLbl = view.confirm === "lift" ? "¿Confirmas? Toca otra vez" : "Retirar sanción";
-      card = `
-        <div class="gxa-card">
-          <div class="gxa-player">
-            <span class="gxa-av">${G().avatarEmoji(t.avatar)}</span>
-            <div><strong>@${esc(t.username)}</strong><small>${esc(t.uid.slice(0, 10))}…</small></div>
-          </div>
-          ${status}
+    if (!t) return directoryHtml();
+
+    const b = t.ban;
+    const active = isActive(b);
+    let status;
+    if (active) {
+      status = `<div class="gxa-status banned">Sanción activa: ${esc(b.type)}${b.until ? " · quedan " + esc(left(b.until)) + " (hasta " + esc(fmt(b.until)) + ")" : " · permanente"}<br>${esc(b.reason || "")}</div>`;
+    } else if (b && b.type !== "warning") {
+      status = `<div class="gxa-status expired">Última sanción vencida el ${esc(fmt(b.until))}</div>`;
+    } else {
+      status = `<div class="gxa-status clean">Sin sanciones activas</div>`;
+    }
+    const applyLbl = view.confirm === "apply" ? "¿Confirmas? Toca otra vez" : "Aplicar sanción";
+    const liftLbl = view.confirm === "lift" ? "¿Confirmas? Toca otra vez" : "Retirar sanción";
+
+    const form = canMod() ? `
           <span class="gxa-lbl">Tipo</span>
           <div class="gxa-seg" style="margin-top:0">
             <button type="button" data-a="type" data-v="warning" class="t-warning ${view.type === "warning" ? "on" : ""}">Advertencia</button>
@@ -377,23 +424,24 @@
           <textarea id="gxaR" maxlength="200" placeholder="Motivo obligatorio (3 a 200 caracteres)">${esc(view.reason)}</textarea>
           <div style="height:12px"></div>
           <button class="gxa-btn ${view.confirm === "apply" ? "confirm" : "red"}" data-a="apply" type="button" ${view.busy ? "disabled" : ""}>${applyLbl}</button>
-          ${active ? `<div style="height:10px"></div><button class="gxa-btn ${view.confirm === "lift" ? "confirm" : "ghost"}" data-a="lift" type="button" ${view.busy ? "disabled" : ""}>${liftLbl}</button>` : ""}
-        </div>
-        <div class="gxa-card">
-          <h3>Historial de @${esc(t.username)}</h3>
-          <p>Todas las advertencias y sanciones, de la más reciente a la más antigua.</p>
-          ${historyHtml(t)}
-        </div>`;
-    }
+          ${active ? `<div style="height:10px"></div><button class="gxa-btn ${view.confirm === "lift" ? "confirm" : "ghost"}" data-a="lift" type="button" ${view.busy ? "disabled" : ""}>${liftLbl}</button>` : ""}`
+      : "";
+
     return `
+      <button class="gxa-btn ghost" data-a="unpick" type="button" style="margin-bottom:12px">← Volver a la lista</button>
       <div class="gxa-card">
-        <h3>Buscar jugador</h3>
-        <p>Escribe su nombre de usuario o su UID.</p>
-        <div class="gxa-row">
-          <input id="gxaQ" type="text" placeholder="@usuario" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(view.q)}">
-          <button class="gxa-btn" data-a="search" type="button">Buscar</button>
+        <div class="gxa-player">
+          <span class="gxa-av">${G().avatarEmoji(t.avatar)}</span>
+          <div><strong>@${esc(t.username)}</strong><small>${esc(t.uid)}</small></div>
         </div>
-      </div>${card}`;
+        ${status}
+        ${form}
+      </div>
+      <div class="gxa-card">
+        <h3>Historial de @${esc(t.username)}</h3>
+        <p>Todas las advertencias y sanciones, de la más reciente a la más antigua.</p>
+        ${historyHtml(t)}
+      </div>`;
   }
 
   function logHtml() {
@@ -411,7 +459,7 @@
     const el = document.getElementById("gxAdm");
     if (!el) return;
     const tabs = [["home", "Resumen"]];
-    if (canMod()) tabs.push(["ban", "Sanciones"]);
+    tabs.push(["ban", "Jugadores"]);
     tabs.push(["log", "Registro"]);
     if (!tabs.some(t => t[0] === view.tab)) view.tab = "home";
     const body = view.tab === "home" ? homeHtml() : view.tab === "ban" ? banHtml() : logHtml();
@@ -443,6 +491,7 @@
     if (a === "tab") {
       view.tab = b.dataset.v; view.msg = "";
       if (view.tab === "log") loadLog();
+      if (view.tab === "ban" && !view.list) { view.list = newList(); loadList(true); }
       draw(); return;
     }
     if (a === "type") { view.type = b.dataset.v; draw(); return; }
@@ -452,7 +501,11 @@
       const r = await syncOwner(false);
       view.busy = false; say(r.text, r.changed || /Ya tienes/.test(r.text)); return;
     }
-    if (a === "search") { await findPlayer(); return; }
+    if (a === "search") { await doSearch(); return; }
+    if (a === "clear") { view.q = ""; view.list = newList(); loadList(true); draw(); return; }
+    if (a === "more") { loadList(false); return; }
+    if (a === "pick") { await pickPlayer(b.dataset.uid); return; }
+    if (a === "unpick") { view.target = null; view.msg = ""; view.confirm = null; draw(); return; }
     if (!canMod()) return;
 
     if (a === "apply") {
@@ -497,33 +550,100 @@
     catch (e) { console.warn("history", e); t.history = []; }
   }
 
-  async function findPlayer() {
-    const q = view.q.trim().replace(/^@+/, "");
-    if (!q) return say("Escribe un nombre de usuario o UID.", false);
+  const PAGE = 20;
+  function newList() {
+    return { mode:"dir", items:[], last:null, done:false, loading:false, error:"" };
+  }
+  const toItem = (id, d) => ({
+    uid: id, username: d.username || "jugador", avatar: d.avatar || "a1",
+    xp: d.xp || 0, trophies: d.trophies || 0, played: d.played || 0
+  });
+
+  // Directorio: todos los jugadores, 20 por página, ordenados por nombre
+  async function loadList(reset) {
+    if (!view.list) view.list = newList();
+    const L = view.list;
+    if (L.loading || L.mode !== "dir") return;
+    if (reset) { L.items = []; L.last = null; L.done = false; }
+    if (L.done) return;
+    L.loading = true; L.error = ""; draw();
     try {
       const { fs, db } = await ctx();
-      let uid = null;
-      const n = await fs.getDoc(fs.doc(db, "usernames", q.toLowerCase()));
-      if (n.exists()) uid = n.data().uid;
-      else if (q.length >= 20) uid = q;
-      if (!uid) { view.target = null; return say("No se encontró ese jugador.", false); }
-
-      const p = await fs.getDoc(fs.doc(db, "publicProfiles", uid));
-      const pd = p.exists() ? p.data() : {};
-      view.target = {
-        uid,
-        username: pd.username || (n.exists() ? q : "jugador"),
-        avatar: pd.avatar || "a1",
-        ban: null,
-        history: null
-      };
-      view.msg = ""; view.confirm = null; draw();
-      await refreshTarget(view.target);
-      draw();
+      const col = fs.collection(db, "publicProfiles");
+      const q = L.last
+        ? fs.query(col, fs.orderBy("usernameLower"), fs.startAfter(L.last), fs.limit(PAGE))
+        : fs.query(col, fs.orderBy("usernameLower"), fs.limit(PAGE));
+      const sn = await fs.getDocs(q);
+      sn.docs.forEach(d => L.items.push(toItem(d.id, d.data())));
+      if (sn.docs.length) L.last = sn.docs[sn.docs.length - 1];
+      if (sn.docs.length < PAGE) L.done = true;
     } catch (e) {
-      console.warn(e);
-      say("No se pudo buscar (" + (e.code || "error") + ").", false);
+      console.warn("loadList", e);
+      L.error = e.code || "error";
     }
+    L.loading = false;
+    if (view.tab === "ban") draw();
+  }
+
+  // Búsqueda: por inicio del nombre, nombre exacto o UID
+  async function doSearch() {
+    const raw = view.q.trim().replace(/^@+/, "");
+    if (!raw) { view.list = newList(); loadList(true); draw(); return; }
+    const L = { mode:"search", items:[], last:null, done:true, loading:true, error:"" };
+    view.list = L; view.target = null; view.msg = ""; draw();
+    try {
+      const { fs, db } = await ctx();
+      const lower = raw.toLowerCase();
+      const map = new Map();
+
+      // 1) Por UID
+      if (raw.length >= 20 && /^[A-Za-z0-9]+$/.test(raw)) {
+        const p = await fs.getDoc(fs.doc(db, "publicProfiles", raw)).catch(() => null);
+        if (p && p.exists()) map.set(p.id, toItem(p.id, p.data()));
+      }
+
+      // 2) Por inicio del nombre (devuelve varios)
+      try {
+        const sn = await fs.getDocs(fs.query(
+          fs.collection(db, "publicProfiles"),
+          fs.where("usernameLower", ">=", lower),
+          fs.where("usernameLower", "<=", lower + "\uf8ff"),
+          fs.limit(30)
+        ));
+        sn.docs.forEach(d => { if (!map.has(d.id)) map.set(d.id, toItem(d.id, d.data())); });
+      } catch (e) { console.warn("prefix", e); }
+
+      // 3) Nombre exacto en /usernames (por si no tiene perfil público)
+      const n = await fs.getDoc(fs.doc(db, "usernames", lower)).catch(() => null);
+      if (n && n.exists() && !map.has(n.data().uid)) {
+        const d = n.data();
+        map.set(d.uid, toItem(d.uid, { username: d.username || raw, avatar: d.avatar }));
+      }
+
+      // 4) UID sin perfil público
+      if (!map.size && raw.length >= 20 && /^[A-Za-z0-9]+$/.test(raw)) {
+        map.set(raw, toItem(raw, { username: "jugador" }));
+      }
+
+      L.items = [...map.values()];
+    } catch (e) {
+      console.warn("doSearch", e);
+      L.error = e.code || "error";
+    }
+    L.loading = false;
+    draw();
+  }
+
+  async function pickPlayer(uid) {
+    const L = view.list;
+    const it = L && L.items.find(x => x.uid === uid);
+    if (!it) return;
+    view.target = { uid: it.uid, username: it.username, avatar: it.avatar, ban: null, history: null };
+    view.msg = ""; view.confirm = null; view.reason = "";
+    draw();
+    try { await refreshTarget(view.target); }
+    catch (e) { console.warn(e); say("No se pudo cargar la ficha (" + (e.code || "error") + ").", false); return; }
+    draw();
   }
 
   async function applySanction() {
