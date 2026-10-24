@@ -1,4 +1,4 @@
-/* GREYX LUDO — Salas con amigos (Fase 1)
+/* GREYX LUDO — Salas con amigos (Fase 1 + conexión a la Fase 2)
    Salas, invitaciones y sala de espera en tiempo real.
    Requiere window.GX (HTML principal) y las reglas de rooms/roomInvites/userRoom. */
 (() => {
@@ -17,10 +17,10 @@
   const NAMES = { red: "CORAL", green: "PRADERA", yellow: "SOL", blue: "PUERTO" };
   const HEX = { red: "#ef4444", green: "#10b981", yellow: "#f59e0b", blue: "#3b82f6" };
 
-  const INVITE_MS = 4 * 60 * 1000;     // vigencia de la invitación
-  const BEAT_MS = 30000;               // latido de conexión
-  const ONLINE_MS = 75000;             // "conectado" si hubo latido reciente
-  const MAX_AGE = 2 * 3600 * 1000;     // una sala vieja se descarta al volver
+  const INVITE_MS = 4 * 60 * 1000;
+  const BEAT_MS = 30000;
+  const ONLINE_MS = 75000;
+  const MAX_AGE = 2 * 3600 * 1000;
 
   const R = {
     uid: null, fs: null, db: null,
@@ -183,6 +183,7 @@
     }, e => console.warn("members", e)));
 
     R.hb = setInterval(beat, BEAT_MS);
+    if (window.GreyxOnline) GreyxOnline.attach(roomId);
   }
 
   function stopRoom() {
@@ -200,6 +201,7 @@
 
   function closedRoom(msg) {
     stopRoom();
+    if (window.GreyxOnline) GreyxOnline.detach(false);
     const { fs, db, uid } = R;
     if (uid) fs.deleteDoc(fs.doc(db, "userRoom", uid)).catch(() => {});
     R.roomId = null; R.color = null; R.room = null; R.members = {};
@@ -312,8 +314,9 @@
     const roomId = R.roomId, color = R.color;
     const isHost = R.room && R.room.host === uid;
     const others = Object.keys(R.members).filter(c => c !== color);
+    if (window.GreyxOnline) GreyxOnline.detach(true);
 
-    stopRoom();                       // evita el aviso de "saliste" al borrarnos
+    stopRoom();
     try {
       const batch = fs.writeBatch(db);
       if (isHost) {
@@ -327,7 +330,7 @@
     } catch (e) {
       console.warn("leaveRoom", e);
       toast("No se pudo salir. Intenta de nuevo.");
-      enterRoom(roomId, color);       // seguimos dentro
+      enterRoom(roomId, color);
       R.busy = false; return;
     }
     R.roomId = null; R.color = null; R.room = null; R.members = {};
@@ -403,7 +406,7 @@
         ${R.busy ? "CREANDO…" : "CREAR SALA"}
       </button>
       ${R.msg ? `<p class="rm-msg">${esc(R.msg)}</p>` : ""}
-      <p class="rm-hint">Fase 1: sala de espera e invitaciones. La partida sincronizada llega en la Fase 2.</p>`;
+      <p class="rm-hint">Invita a tus amigos y juega en tiempo real. Por ahora estas partidas no dan trofeos ni XP.</p>`;
   }
 
   function roomHtml() {
@@ -440,7 +443,7 @@
     const startBlock = isHost
       ? `<button class="rm-main" data-k="start" type="button" ${full ? "" : "disabled"}>INICIAR PARTIDA</button>
          <p class="rm-hint">${full
-           ? "Sala completa ✓ El inicio sincronizado llega en la Fase 2."
+           ? "Sala completa ✓ Todos deben estar conectados (punto verde)."
            : `Faltan ${missing} jugador${missing > 1 ? "es" : ""}.`}</p>`
       : `<p class="rm-hint">Esperando a que el anfitrión inicie la partida.</p>`;
 
@@ -510,7 +513,7 @@
       const host = R.room && R.room.host === R.uid;
       if (confirm(host ? "¿Cerrar la sala para todos?" : "¿Salir de la sala?")) leaveRoom();
     }
-    else if (k === "start") toast("La partida sincronizada llega en la Fase 2.");
+    else if (k === "start") { if (window.GreyxOnline) GreyxOnline.start(); else toast("Servidor no disponible."); }
     else if (k === "invite-open") loadFriends();
     else if (k === "invite-back") { R.view = "room"; draw(); }
     else if (k === "invite") invite(b.dataset.uid);
@@ -550,13 +553,36 @@
     draw();
   }
 
-  // "Jugar con amigos" del menú online abre estas salas en vez de la maqueta local
   window.addEventListener("click", e => {
     const b = e.target.closest && e.target.closest('[data-action="online-friends"]');
     if (!b) return;
     e.preventDefault(); e.stopImmediatePropagation();
     open();
   }, true);
+
+  /* ---------- Al terminar la partida: libera la sala ---------- */
+  async function finish() {
+    if (!R.roomId) return;
+    const { fs, db, uid } = R;
+    const roomId = R.roomId, color = R.color;
+    const isHost = R.room && R.room.host === uid;
+    stopRoom();
+    try {
+      if (isHost) await new Promise(r => setTimeout(r, 4000));
+      const batch = fs.writeBatch(db);
+      if (isHost) batch.update(fs.doc(db, "rooms", roomId), { status: "closed", updatedAt: fs.serverTimestamp() });
+      batch.delete(fs.doc(db, "rooms", roomId, "members", color));
+      batch.delete(fs.doc(db, "userRoom", uid));
+      await batch.commit();
+    } catch (e) { console.warn("finish", e); }
+    R.roomId = null; R.color = null; R.room = null; R.members = {};
+    R.view = "hidden"; draw();
+  }
+
+  window.GreyxRooms = {
+    hide() { R.view = "hidden"; draw(); },
+    finish
+  };
 
   /* ---------- Arranque ---------- */
   let starting = false;
@@ -572,8 +598,13 @@
     }
   }, 1000);
 
-  setInterval(() => {            // vence invitaciones y refresca el estado de conexión
+  setInterval(() => {
     drawBanner();
     if (R.view === "room") draw();
   }, 15000);
+
+  /* Carga el módulo de la partida online */
+  const s2 = document.createElement("script");
+  s2.src = "greyx-online.js?v=1";
+  document.head.appendChild(s2);
 })();
