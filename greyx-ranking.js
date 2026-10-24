@@ -120,7 +120,9 @@
     try {
       const fs = await g.fsModule(), db = g.fb.db, uid = g.state.user.uid;
       const sn = await fs.getDocs(fs.query(fs.collection(db, "publicProfiles"),
-        fs.orderBy("trophies", "desc"), fs.limit(100)));
+  fs.where("trophies", ">=", 1),
+  fs.orderBy("trophies", "desc"), fs.limit(100)));
+      
       rk.rows = sn.docs.map(d => Object.assign({ uid: d.id }, d.data()));
 
       const idx = rk.rows.findIndex(p => p.uid === uid);
@@ -130,9 +132,11 @@
       if (idx < 0) {
         try {
           const m = await fs.getDoc(fs.doc(db, "publicProfiles", uid));
-          if (m.exists()) {
-            rk.mine = Object.assign({ uid }, m.data());
-            const c = await fs.getCountFromServer(fs.query(fs.collection(db, "publicProfiles"),
+          if (m.exists() && (m.data().trophies || 0) >= 1) {
+  rk.mine = Object.assign({ uid }, m.data());
+
+          
+          const c = await fs.getCountFromServer(fs.query(fs.collection(db, "publicProfiles"),
               fs.where("trophies", ">", rk.mine.trophies || 0)));
             rk.pos = c.data().count + 1;
           }
