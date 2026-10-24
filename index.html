@@ -9003,16 +9003,19 @@ if (state.tokens[color].every(token => token.progress === 57)) {
   state.roll = null;
   state.message = `🏆 ${playerLabel(color)} queda en ${placeLabel} lugar!`;
 
-  // ¿Ya hay podio completo? (solo queda 1 o 0 jugando)
   const stillPlaying = state.players.filter(c => !state.finishedOrder.includes(c));
 
-  if (stillPlaying.length <= 1) {
-    if (stillPlaying.length === 1) {
-      state.finishedOrder.push(stillPlaying[0]);
-    }
-    await endGameWithRanking();
-    return;
-  }
+// En modo IA, si el humano terminó, la partida acaba ya
+const humanDone = state.mode === "solo" && color === state.humanColor;
+
+if (stillPlaying.length <= 1 || humanDone) {
+  // Los que faltan se ordenan por cuánto avanzaron
+  const score = c => state.tokens[c].reduce((s, t) => s + Math.max(t.progress, 0), 0);
+  const rest = stillPlaying.slice().sort((a, b) => score(b) - score(a));
+  state.finishedOrder.push(...rest);
+  await endGameWithRanking();
+  return;
+}
 
   // Sigue la partida por los puestos restantes
   state.celebrating = true;
