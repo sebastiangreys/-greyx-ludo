@@ -9924,6 +9924,9 @@ function resetGameStats() {
   state.gameStartedAt = Date.now();
   state.statsRecorded = false;
   state.gameResult = null;
+  state.gameId = (window.crypto && crypto.randomUUID)
+  ? crypto.randomUUID()
+  : Date.now() + "-" + Math.random().toString(36).slice(2);
 }
 
 function trackMoveStats(color, capturedCount, finalProgress) {
@@ -10027,12 +10030,12 @@ async function submitGameResult(place) {
   try {
     const fs = await fsModule();
     const prevLevel = xpLevelFromTotal(state.xp || 0);
-    const r = await GreyxCore.submitGame({
-      fb, fs, uid: state.user.uid, profile: state.profile,
-      place, bots: Math.max(1, state.players.length - 1),
-      captures: g.captures, goals: g.goals,
-      durationMs: Date.now() - (state.gameStartedAt || Date.now())
-    });
+const r = await GreyxCore.submitGame({
+  fb, fs, uid: state.user.uid, profile: state.profile,
+  place, players: state.players.length, gameId: state.gameId,
+  captures: g.captures, goals: g.goals,
+  durationMs: Date.now() - (state.gameStartedAt || Date.now())
+});
     if (!r) return;
     state.stats = r.stats;
     state.statsUid = state.user.uid;
