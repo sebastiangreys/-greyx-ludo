@@ -8516,24 +8516,17 @@ function chooseBotMove(color) {
 
     const landing = trackIndex(color, finalProgress);
 
-    if (landing !== null && !safe.has(landing)) {
+if (landing !== null && !safe.has(landing)) {
   state.players
-    .filter(c => c !== color)
+    .filter(opponent => opponent !== color)
     .forEach(opponent => {
-
-      // Si hay 2 o más fichas del mismo color aquí, es un bloqueo: nadie las captura
-      const sameCell = updated[opponent].filter(
-        t => trackIndex(opponent, t.progress) === landing
+      const here = state.tokens[opponent].filter(
+        enemy => trackIndex(opponent, enemy.progress) === landing
       );
-      if (sameCell.length >= 2) return;
-
-      updated[opponent] = updated[opponent].map(t => {
-        if (trackIndex(opponent, t.progress) === landing) {
-              score += 100;
-            }
-          });
-        });
-    }
+      // Solo vale la pena si hay UNA ficha (dos juntas son bloqueo)
+      if (here.length === 1) score += 100;
+    });
+}
 
     options.push({ id: token.id, score });
   });
@@ -8751,9 +8744,15 @@ state.hop = { color, id };
 
   if (landing !== null && !safe.has(landing)) {
     state.players
-      .filter(c => c !== color)
-      .forEach(opponent => {
-        updated[opponent] = updated[opponent].map(t => {
+  .filter(c => c !== color)
+  .forEach(opponent => {
+    // Dos o más fichas del mismo color juntas = bloqueo, no se capturan
+    const sameCell = updated[opponent].filter(
+      t => trackIndex(opponent, t.progress) === landing
+    );
+    if (sameCell.length >= 2) return;
+
+    updated[opponent] = updated[opponent].map(t => {
           if (trackIndex(opponent, t.progress) === landing) {
             capturedTokens.push({
               color: opponent,
@@ -9010,12 +9009,12 @@ if (state.tokens[color].every(token => token.progress === 57)) {
   state.roll = null;
   state.message = `🏆 ${playerLabel(color)} queda en ${placeLabel} lugar!`;
 
-  const stillPlaying = state.players.filter(c => !state.finishedOrder.includes(c));
+const stillPlaying = state.players.filter(c => !state.finishedOrder.includes(c));
 
 // En modo IA, si el humano terminó, la partida acaba ya
 const humanDone = state.mode === "solo" && color === state.humanColor;
 
-const humanDone = state.mode === "solo" && color === state.humanColor && state.finishedOrder.length === 1;
+if (stillPlaying.length <= 1 || humanDone) {
   // Los que faltan se ordenan por cuánto avanzaron
   const score = c => state.tokens[c].reduce((s, t) => s + Math.max(t.progress, 0), 0);
   const rest = stillPlaying.slice().sort((a, b) => score(b) - score(a));
