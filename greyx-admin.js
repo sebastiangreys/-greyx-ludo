@@ -363,10 +363,6 @@
     if (view.tab === "home") draw();
   }
 
-
-  /* ---------- Conectados en tiempo real ---------- */
-  const live = { unsubs: [], timer: null, tm: null, peakBusy: false };
-
   function liveList() {
     const now = Date.now(), P = window.GXPresence;
     const stale = (P && P.stale) || 150000;
@@ -481,16 +477,29 @@
     let body;
     if (!D || D.loading) body = `<p style="margin:0">Cargando datos…</p>`;
     else if (D.error) body = `<p style="margin:0;color:#fca5a5">No se pudieron cargar (${esc(D.error)}).</p>`;
-    else body = `
+        else {
+      const online = view.liveRaw ? liveList().length : null;
+      const off = (online === null || D.players === null || D.players === undefined)
+        ? null : Math.max(D.players - online, 0);
+      body = `
       <div class="gxa-stats">
         <div class="gxa-stat"><b>${v(D.players)}</b><span>Jugadores registrados</span></div>
+        <div class="gxa-stat"><b>${v(online)}</b><span>Conectados ahora</span></div>
+        <div class="gxa-stat"><b>${v(off)}</b><span>Desconectados</span></div>
         <div class="gxa-stat"><b>${v(D.banned)}</b><span>Sancionados ahora</span></div>
+        <div class="gxa-stat"><b>${v(D.regToday)}</b><span>Registros hoy</span></div>
+        <div class="gxa-stat"><b>${v(D.reg7)}</b><span>Registros (7 días)</span></div>
+        <div class="gxa-stat"><b>${v(D.reg30)}</b><span>Registros (30 días)</span></div>
+        <div class="gxa-stat"><b>${v(D.act1)}</b><span>Activos 24 h</span></div>
+        <div class="gxa-stat"><b>${v(D.act7)}</b><span>Activos 7 días</span></div>
+        <div class="gxa-stat"><b>${v(D.act30)}</b><span>Activos 30 días</span></div>
         <div class="gxa-stat"><b>${v(D.warns)}</b><span>Advertencias emitidas</span></div>
         <div class="gxa-stat"><b>${v(D.sanc)}</b><span>Sanciones en historial</span></div>
         <div class="gxa-stat"><b>${v(D.sancToday)}</b><span>Sanciones hoy</span></div>
         <div class="gxa-stat"><b>${v(D.logToday)}</b><span>Acciones admin hoy</span></div>
-      </div>
-`;
+      </div>`;
+    }
+
     return `
       <div class="gxa-card">
         <h3>Dashboard</h3>
