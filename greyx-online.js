@@ -3,7 +3,7 @@
 (() => {
   "use strict";
 
-  const RAW = "PEGA_AQUI_TU_DIRECCION";
+  const RAW = "https://greyx-server.izturriagasebastian.workers.dev";
   const SERVER = (/^https?:/.test(RAW) ? RAW : "https://" + RAW).replace(/\/+$/, "");
   const WS_BASE = SERVER.replace(/^http/, "ws");
 
