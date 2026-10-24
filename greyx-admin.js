@@ -20,6 +20,13 @@
   const ROLE_NAME = { owner:"OWNER", moderator:"MODERADOR", analyst:"ANALISTA", auditor:"AUDITOR" };
 
   const G = () => window.GX;
+
+  // Carga el sistema de presencia (greyx-presence.js) si index.html no lo incluye
+  if (!document.querySelector('script[src*="greyx-presence"]')) {
+    const sc = document.createElement("script");
+    sc.src = "greyx-presence.js?v=1";
+    document.head.appendChild(sc);
+  }
   const esc = s => String(s).replace(/[&<>"']/g, c =>
     ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -29,7 +36,7 @@
 
   let checkedUid = null;
   let syncing = false;
-  const view = { tab:"home", q:"", target:null, list:null, dash:null, type:"warning", cat:"other", days:"7",
+  const view = { tab:"home", q:"", target:null, list:null, dash:null, live:null, liveRaw:null, peak:null, peakLoaded:false, type:"warning", cat:"other", days:"7",
                  reason:"", msg:"", ok:false, busy:false, log:null, confirm:null };
 
   async function ctx() {
@@ -260,6 +267,10 @@
   .gxa-pi small{color:#8e97aa;font-size:.68rem}
   .gxa-chev{color:#64748b;font-size:1.2rem}
   .gxa-player small{word-break:break-all}
+  .gxa-dot{display:inline-block;width:10px;height:10px;margin-right:8px;border-radius:50%;background:#22c55e;
+    box-shadow:0 0 10px #22c55e;animation:gxaPulse 1.6s ease-in-out infinite}
+  @keyframes gxaPulse{50%{opacity:.35}}
+  .gxa-big{font-size:3rem;font-weight:900;line-height:1;margin:2px 0 8px;color:#4ade80;text-shadow:0 0 18px #22c55e66}
   .gxa-toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
     z-index:1000003;padding:12px 20px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;
     font-weight:800;font-size:.85rem;box-shadow:0 10px 30px #000c}
@@ -280,7 +291,7 @@
   function openPanel() {
     if (document.getElementById("gxAdm")) return;
     Object.assign(view, { tab:"home", q:"", target:null, type:"warning", cat:"other",
-                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null, list:null, dash:null });
+                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null, list:null, dash:null, live:null, liveRaw:null, peak:null, peakLoaded:false });
     const el = document.createElement("div");
     el.id = "gxAdm";
     el.className = "gxa";
@@ -293,9 +304,11 @@
     document.body.appendChild(el);
     draw();
     loadDash();
+    startLive();
   }
 
   function closePanel() {
+    stopLive();
     const el = document.getElementById("gxAdm");
     if (el) el.remove();
   }
@@ -341,6 +354,117 @@
     if (view.tab === "home") draw();
   }
 
+  /* ---------- Conectados en tiempo real ---------- */
+  const live = { unsubs: [], timer: null, tm: null, peakBusy: false };
+
+  function liveList() {
+    const now = Date.now(), P = window.GXPresence;
+    const stale = (P && P.stale) || 150000;
+    return (view.liveRaw || []).filter(x => now - (x.last || 0) < stale);
+  }
+
+  function stopLive() {
+    live.unsubs.forEach(u => { try { u(); } catch (e) {} });
+    live.unsubs = [];
+    clearInterval(live.timer); clearTimeout(live.tm);
+    view.liveRaw = null; view.live = null; view.peakLoaded = false;
+  }
+
+  async function startLive() {
+    stopLive();
+    const P = window.GXPresence;
+    if (!P) { view.live = { error: "nofile" }; return; }
+    try {
+      const { db, mod } = await P.get();
+      if (!db) { view.live = { error: "nodb" }; if (view.tab === "home") draw(); return; }
+
+      const q = mod.query(mod.ref(db, "presence"), mod.orderByChild("state"), mod.equalTo("online"));
+      live.unsubs.push(mod.onValue(q, snap => {
+        const arr = [];
+        snap.forEach(c => { const v = c.val(); if (v) arr.push(Object.assign({ uid: c.key }, v)); });
+        view.liveRaw = arr; view.live = { ok: true };
+        maybePeak();
+        if (view.tab === "home") draw();
+      }, err => {
+        view.live = { error: err && err.code ? err.code : "error" };
+        if (view.tab === "home") draw();
+      }));
+
+      live.unsubs.push(mod.onValue(mod.ref(db, "meta/peak"), s => {
+        view.peak = s.val(); view.peakLoaded = true;
+        maybePeak();
+        if (view.tab === "home") draw();
+      }, () => {}));
+
+      live.timer = setInterval(() => { if (view.tab === "home" && view.liveRaw) draw(); }, 30000);
+      live.tm = setTimeout(() => {
+        if (!view.liveRaw && !(view.live && view.live.error)) {
+          view.live = { error: "timeout" };
+          if (view.tab === "home") draw();
+        }
+      }, 8000);
+    } catch (e) {
+      console.warn("live", e);
+      view.live = { error: e.code || "error" };
+    }
+  }
+
+  // Récord de jugadores simultáneos (se actualiza mientras algún staff tiene el panel abierto)
+  async function maybePeak() {
+    if (!view.peakLoaded || live.peakBusy || !view.liveRaw) return;
+    const n = liveList().length;
+    const best = (view.peak && view.peak.count) || 0;
+    if (n < 1 || n <= best) return;
+    live.peakBusy = true;
+    try {
+      const { db, mod } = await window.GXPresence.get();
+      await mod.set(mod.ref(db, "meta/peak"), { count: n, at: mod.serverTimestamp() });
+    } catch (e) { console.warn("peak", e); }
+    live.peakBusy = false;
+  }
+
+  function liveHtml() {
+    const L = view.live;
+    const MSG = {
+      nofile: "Falta subir greyx-presence.js a tu repositorio.",
+      nodb: "No se pudo abrir Realtime Database.",
+      timeout: "No se pudo conectar. Revisa que la base de datos exista y que la URL en greyx-presence.js sea la correcta.",
+      permission: "Sin permiso: agrega tu UID en staff dentro de Realtime Database."
+    };
+    let inner;
+    if (L && L.error) {
+      const k = /permission/i.test(L.error) ? "permission" : L.error;
+      inner = `<p style="margin:0;color:#fca5a5">${esc(MSG[k] || "Error: " + L.error)}</p>`;
+    } else if (!view.liveRaw) {
+      inner = `<p style="margin:0">Conectando…</p>`;
+    } else {
+      const list = liveList();
+      const game = list.filter(x => x.screen === "game").length;
+      const pk = view.peak && view.peak.count
+        ? `${view.peak.count} · ${esc(new Date(view.peak.at).toLocaleString())}` : "—";
+      const rows = list.slice(0, 30).map(x => `
+        <button class="gxa-prow" data-a="pickc" data-uid="${esc(x.uid)}" type="button">
+          <span class="gxa-av sm">${G().avatarEmoji(x.avatar || "a1")}</span>
+          <span class="gxa-pi"><strong>@${esc(x.name || "jugador")}</strong>
+            <small>${x.screen === "game" ? "En partida" : "En el menú"}</small></span>
+          <span class="gxa-chev">›</span>
+        </button>`).join("");
+      inner = `
+        <div class="gxa-big">${list.length}</div>
+        <p style="margin:0 0 10px">En partida: <b>${game}</b> · En el menú: <b>${list.length - game}</b><br>
+          Récord de simultáneos: <b>${pk}</b></p>
+        ${rows}
+        ${list.length > 30 ? `<p style="margin:4px 0 0">y ${list.length - 30} más…</p>` : ""}
+        ${!list.length ? `<p style="margin:0">Nadie conectado ahora mismo.</p>` : ""}
+        <p style="margin:10px 0 0;font-size:.7rem">Solo cuenta jugadores con sesión iniciada. Se actualiza solo.</p>`;
+    }
+    return `
+      <div class="gxa-card">
+        <h3><span class="gxa-dot"></span>Conectados ahora</h3>
+        ${inner}
+      </div>`;
+  }
+
   function dashHtml() {
     const D = view.dash;
     const v = x => (x === null || x === undefined) ? "—" : x;
@@ -356,7 +480,7 @@
         <div class="gxa-stat"><b>${v(D.sancToday)}</b><span>Sanciones hoy</span></div>
         <div class="gxa-stat"><b>${v(D.logToday)}</b><span>Acciones admin hoy</span></div>
       </div>
-      <p style="margin:0 0 4px">Conectados en tiempo real: disponible cuando activemos el sistema de presencia.</p>`;
+`;
     return `
       <div class="gxa-card">
         <h3>Dashboard</h3>
@@ -371,7 +495,7 @@
     const g = G(), s = g.state, p = s.profile || {};
     const lv = s.xpLoaded ? s.xpLevel : "—";
     const owner = isOwnerRole();
-    return dashHtml() + `
+    return liveHtml() + dashHtml() + `
       <div class="gxa-card">
         <div class="gxa-owner">
           <span class="gxa-av">${g.avatarEmoji(p.avatar || "a1")}</span>
@@ -566,6 +690,14 @@
     if (a === "clear") { view.q = ""; view.list = newList(); loadList(true); draw(); return; }
     if (a === "more") { loadList(false); return; }
     if (a === "pick") { await pickPlayer(b.dataset.uid); return; }
+    if (a === "pickc") {
+      const it = liveList().find(x => x.uid === b.dataset.uid);
+      if (!it) return;
+      view.tab = "ban"; view.q = "";
+      view.list = newList(); view.list.mode = "search"; view.list.done = true;
+      view.list.items = [{ uid: it.uid, username: it.name || "jugador", avatar: it.avatar || "a1", xp: 0, trophies: 0, played: 0 }];
+      await pickPlayer(it.uid); return;
+    }
     if (a === "unpick") { view.target = null; view.msg = ""; view.confirm = null; draw(); return; }
     if (!canMod()) return;
 
