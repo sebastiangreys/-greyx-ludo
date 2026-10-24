@@ -322,7 +322,6 @@
     if (d) view.days = d.value;
   }
 
-  /* ---------- Dashboard (contadores baratos: 1 lectura por cada 1000 docs) ---------- */
   async function loadDash() {
     view.dash = { loading: true };
     if (view.tab === "home") draw();
@@ -333,17 +332,27 @@
       const now = fs.Timestamp.now();
       const d0 = new Date(); d0.setHours(0, 0, 0, 0);
       const today = fs.Timestamp.fromDate(d0);
-      const [players, perm, temp, warns, sanc, sancToday, logToday] = await Promise.all([
+      const ago = d => fs.Timestamp.fromMillis(Date.now() - d * 864e5);
+      const since = (c, f, t) => n(fs.query(col(c), fs.where(f, ">=", t)));
+      const [players, perm, temp, warns, sanc, sancToday, logToday,
+             regToday, reg7, reg30, act1, act7, act30] = await Promise.all([
         n(col("publicProfiles")),
         n(fs.query(col("bans"), fs.where("permanent", "==", true))),
         n(fs.query(col("bans"), fs.where("until", ">", now))),
         n(fs.query(col("sanctions"), fs.where("type", "==", "warning"))),
         n(col("sanctions")),
-        n(fs.query(col("sanctions"), fs.where("at", ">=", today))),
-        n(fs.query(col("adminLog"), fs.where("at", ">=", today)))
+        since("sanctions", "at", today),
+        since("adminLog", "at", today),
+        since("users", "createdAt", today),
+        since("users", "createdAt", ago(7)),
+        since("users", "createdAt", ago(30)),
+        since("stats", "updatedAt", ago(1)),
+        since("stats", "updatedAt", ago(7)),
+        since("stats", "updatedAt", ago(30))
       ]);
       view.dash = {
         players, warns, sanc, sancToday, logToday,
+        regToday, reg7, reg30, act1, act7, act30,
         banned: (perm === null || temp === null) ? null : perm + temp,
         at: Date.now()
       };
@@ -353,6 +362,7 @@
     }
     if (view.tab === "home") draw();
   }
+
 
   /* ---------- Conectados en tiempo real ---------- */
   const live = { unsubs: [], timer: null, tm: null, peakBusy: false };
