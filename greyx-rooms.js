@@ -406,7 +406,7 @@
         ${R.busy ? "CREANDO…" : "CREAR SALA"}
       </button>
       ${R.msg ? `<p class="rm-msg">${esc(R.msg)}</p>` : ""}
-      <p class="rm-hint">Invita a tus amigos y juega en tiempo real. Por ahora estas partidas no dan trofeos ni XP.</p>`;
+      <p class="rm-hint">Invita a tus amigos y juega en tiempo real. Estas partidas dan trofeos y XP.</p>`;
   }
 
   function roomHtml() {
