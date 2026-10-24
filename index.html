@@ -10245,12 +10245,16 @@ function profileMarkup() {
 function winnerMarkup() {
   const rank = state.ranking || state.finishedOrder || [];
   const lines = rank.map((c, i) => {
-    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "4️⃣";
-    const xp = XP_BY_PLACE[i + 1] || 0;
-    const you = c === state.humanColor ? " (tú)" : "";
-    ${c === state.humanColor && state.gameResult ? ` · 🏆 ${state.gameResult.delta > 0 ? "+" : ""}${state.gameResult.delta}` : ""}
-    return `<p style="margin:4px 0">${medal} ${i + 1}º — ${playerLabel(c)}${you}${state.mode === "solo" && c === state.humanColor ? ` · +${(state.xpResult && state.xpResult.granted) || xp} XP` : ""}</p>`;
-  }).join("");
+  const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "4️⃣";
+  const xp = XP_BY_PLACE[i + 1] || 0;
+  const you = c === state.humanColor ? " (tú)" : "";
+  const isMe = state.mode === "solo" && c === state.humanColor;
+  const xpTxt = isMe ? ` · +${(state.xpResult && state.xpResult.granted) || xp} XP` : "";
+  const trTxt = isMe && state.gameResult
+    ? ` · 🏆 ${state.gameResult.delta > 0 ? "+" : ""}${state.gameResult.delta}`
+    : "";
+  return `<p style="margin:4px 0">${medal} ${i + 1}º — ${playerLabel(c)}${you}${xpTxt}${trTxt}</p>`;
+}).join("");
 
   return `
   <div class="winner">
