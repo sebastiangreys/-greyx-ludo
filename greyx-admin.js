@@ -29,7 +29,7 @@
 
   let checkedUid = null;
   let syncing = false;
-  const view = { tab:"home", q:"", target:null, list:null, type:"warning", cat:"other", days:"7",
+  const view = { tab:"home", q:"", target:null, list:null, dash:null, type:"warning", cat:"other", days:"7",
                  reason:"", msg:"", ok:false, busy:false, log:null, confirm:null };
 
   async function ctx() {
@@ -280,7 +280,7 @@
   function openPanel() {
     if (document.getElementById("gxAdm")) return;
     Object.assign(view, { tab:"home", q:"", target:null, type:"warning", cat:"other",
-                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null, list:null });
+                          days:"7", reason:"", msg:"", ok:false, busy:false, log:null, confirm:null, list:null, dash:null });
     const el = document.createElement("div");
     el.id = "gxAdm";
     el.className = "gxa";
@@ -292,6 +292,7 @@
     });
     document.body.appendChild(el);
     draw();
+    loadDash();
   }
 
   function closePanel() {
@@ -308,11 +309,69 @@
     if (d) view.days = d.value;
   }
 
+  /* ---------- Dashboard (contadores baratos: 1 lectura por cada 1000 docs) ---------- */
+  async function loadDash() {
+    view.dash = { loading: true };
+    if (view.tab === "home") draw();
+    try {
+      const { fs, db } = await ctx();
+      const n = q => fs.getCountFromServer(q).then(r => r.data().count).catch(e => { console.warn("count", e); return null; });
+      const col = x => fs.collection(db, x);
+      const now = fs.Timestamp.now();
+      const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      const today = fs.Timestamp.fromDate(d0);
+      const [players, perm, temp, warns, sanc, sancToday, logToday] = await Promise.all([
+        n(col("publicProfiles")),
+        n(fs.query(col("bans"), fs.where("permanent", "==", true))),
+        n(fs.query(col("bans"), fs.where("until", ">", now))),
+        n(fs.query(col("sanctions"), fs.where("type", "==", "warning"))),
+        n(col("sanctions")),
+        n(fs.query(col("sanctions"), fs.where("at", ">=", today))),
+        n(fs.query(col("adminLog"), fs.where("at", ">=", today)))
+      ]);
+      view.dash = {
+        players, warns, sanc, sancToday, logToday,
+        banned: (perm === null || temp === null) ? null : perm + temp,
+        at: Date.now()
+      };
+    } catch (e) {
+      console.warn("dash", e);
+      view.dash = { error: e.code || "error" };
+    }
+    if (view.tab === "home") draw();
+  }
+
+  function dashHtml() {
+    const D = view.dash;
+    const v = x => (x === null || x === undefined) ? "—" : x;
+    let body;
+    if (!D || D.loading) body = `<p style="margin:0">Cargando datos…</p>`;
+    else if (D.error) body = `<p style="margin:0;color:#fca5a5">No se pudieron cargar (${esc(D.error)}).</p>`;
+    else body = `
+      <div class="gxa-stats">
+        <div class="gxa-stat"><b>${v(D.players)}</b><span>Jugadores registrados</span></div>
+        <div class="gxa-stat"><b>${v(D.banned)}</b><span>Sancionados ahora</span></div>
+        <div class="gxa-stat"><b>${v(D.warns)}</b><span>Advertencias emitidas</span></div>
+        <div class="gxa-stat"><b>${v(D.sanc)}</b><span>Sanciones en historial</span></div>
+        <div class="gxa-stat"><b>${v(D.sancToday)}</b><span>Sanciones hoy</span></div>
+        <div class="gxa-stat"><b>${v(D.logToday)}</b><span>Acciones admin hoy</span></div>
+      </div>
+      <p style="margin:0 0 4px">Conectados en tiempo real: disponible cuando activemos el sistema de presencia.</p>`;
+    return `
+      <div class="gxa-card">
+        <h3>Dashboard</h3>
+        <p>Cifras reales de tu base de datos.</p>
+        ${body}
+        <div style="height:10px"></div>
+        <button class="gxa-btn ghost" data-a="refresh" type="button" ${D && D.loading ? "disabled" : ""}>Actualizar</button>
+      </div>`;
+  }
+
   function homeHtml() {
     const g = G(), s = g.state, p = s.profile || {};
     const lv = s.xpLoaded ? s.xpLevel : "—";
     const owner = isOwnerRole();
-    return `
+    return dashHtml() + `
       <div class="gxa-card">
         <div class="gxa-owner">
           <span class="gxa-av">${g.avatarEmoji(p.avatar || "a1")}</span>
@@ -491,11 +550,13 @@
     if (a === "tab") {
       view.tab = b.dataset.v; view.msg = "";
       if (view.tab === "log") loadLog();
+      if (view.tab === "home" && !view.dash) loadDash();
       if (view.tab === "ban" && !view.list) { view.list = newList(); loadList(true); }
       draw(); return;
     }
     if (a === "type") { view.type = b.dataset.v; draw(); return; }
     if (a === "cat") { view.cat = b.dataset.v; draw(); return; }
+    if (a === "refresh") { loadDash(); return; }
     if (a === "sync") {
       view.busy = true; view.msg = ""; draw();
       const r = await syncOwner(false);
