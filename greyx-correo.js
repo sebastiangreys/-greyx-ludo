@@ -25,11 +25,14 @@
   /* ---------- CSS ---------- */
   const css = document.createElement("style");
   css.textContent = `
+
 .gx-mailbtn{
-  position:fixed;
-  top:calc(16px + env(safe-area-inset-top, 0px));
-  left:16px;
-  z-index:1100;
+  position:absolute;
+  top:0;
+  left:0;
+  right:auto;
+  bottom:auto;
+  z-index:20;
   width:46px;
   height:46px;
   display:grid;
@@ -39,12 +42,14 @@
   background:linear-gradient(145deg,#232a66,#0d1030);
   border:1px solid #6d5cffaa;
   box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
-  background:linear-gradient(145deg,#232a66,#0d1030);border:1px solid #6d5cffaa;box-shadow:0 0 18px #4f46e577,0 6px 16px #000a}
-.gx-mailbtn svg{width:22px;height:22px}
-.gx-mailbtn:active{transform:scale(.93)}
-.gx-mailbadge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;display:none;place-items:center;
-  background:#ef4444;border:2px solid #0a0c24;color:#fff;font:900 .68rem Inter,system-ui,sans-serif;font-style:normal}
-.gx-mailbadge.on{display:grid}
+}
+.gx-mailbtn svg{
+  width:22px;
+  height:22px;
+}
+.gx-mailbtn:active{
+  transform:scale(.93);
+}
 
 .gx-mail{position:fixed;inset:0;z-index:1200;color:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));
@@ -131,37 +136,74 @@
   /* ---------- botón pegado al menú (junto al Buzón de ideas) ---------- */
   
 
-  function ensureButton() {
-    const host = document.querySelector(".gx6.on .gx6-in");
-    if (!host) return;
+  
+function ensureButton() {
+  const host = document.querySelector(".gx6.on .gx6-in");
+  if (!host) return;
 
-    let b = document.querySelector(".gx-mailbtn");
-
-    if (!b) {
-      b = document.createElement("button");
-      b.className = "gx-mailbtn";
-      b.type = "button";
-      b.setAttribute("aria-label", "Correo");
-      b.setAttribute("title", "Correo");
-      b.innerHTML = ENV + `<i class="gx-mailbadge"></i>`;
-      b.addEventListener("click", openMail);
-    }
-
-    // Mantener un solo botón y colocarlo en la capa principal.
-    if (b.parentElement !== document.body) {
-      document.body.appendChild(b);
-    }
-
-    // Posición fija en la esquina superior izquierda.
-    b.style.position = "fixed";
-    b.style.top = "calc(16px + env(safe-area-inset-top, 0px))";
-    b.style.left = "16px";
-    b.style.right = "auto";
-    b.style.bottom = "auto";
-    b.style.zIndex = "1100";
-
-    updateBadge();
+  // El contenedor del menú será la referencia de posición.
+  if (getComputedStyle(host).position === "static") {
+    host.style.position = "relative";
   }
+
+  let b = host.querySelector(".gx-mailbtn");
+
+  // Recuperar el botón existente sin duplicarlo.
+  if (!b) {
+    b = document.querySelector(".gx-mailbtn");
+  }
+
+  if (!b) {
+    b = document.createElement("button");
+    b.className = "gx-mailbtn";
+    b.type = "button";
+    b.setAttribute("aria-label", "Correo");
+    b.setAttribute("title", "Correo");
+    b.innerHTML = ENV + `<i class="gx-mailbadge"></i>`;
+    b.addEventListener("click", openMail);
+  }
+
+  // El botón debe pertenecer al menú, no al body.
+  if (b.parentElement !== host) {
+    host.appendChild(b);
+  }
+
+  const hostRect = host.getBoundingClientRect();
+
+  // Buscar el control superior derecho: configuración.
+  const controls = [...host.querySelectorAll(
+    "button, a, [role='button']"
+  )].filter(el => {
+    if (el === b || el.contains(b)) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 &&
+      r.top >= hostRect.top - 5 &&
+      r.top < hostRect.top + 180 &&
+      r.left > hostRect.left + hostRect.width * 0.45;
+  });
+
+  controls.sort((a, c) =>
+    c.getBoundingClientRect().right -
+    a.getBoundingClientRect().right
+  );
+
+  const gear = controls[0];
+
+  if (gear) {
+    const r = gear.getBoundingClientRect();
+    b.style.left =
+      Math.round(r.left - hostRect.left - 46 - 10) + "px";
+    b.style.top =
+      Math.round(r.top - hostRect.top + (r.height - 46) / 2) + "px";
+  }
+
+  b.style.position = "absolute";
+  b.style.right = "auto";
+  b.style.bottom = "auto";
+  b.style.zIndex = "20";
+
+  updateBadge();
+}
 
   function updateBadge() {
     const n = unread(), el = document.querySelector(".gx-mailbadge");
