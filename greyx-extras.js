@@ -262,7 +262,9 @@
         <div><b>${rate}%</b><span>% VICTORIAS</span></div>
         <div><b>${esc((p.uid || D.uid).slice(0, 6))}</b><span>ID</span></div>
       </div>
-      <div class="feat">${featOf(eq).map(a => `<span title="${esc(a.name)}">${a.icon}</span>`).join("")}</div>
+      <div class="feat">
+      <div class="gx-likes" data-uid="${esc(p.uid || D.uid)}"></div>
+      ${featOf(eq).map(a => `<span title="${esc(a.name)}">${a.icon}</span>`).join("")}</div>
     </div>`;
   }
 
