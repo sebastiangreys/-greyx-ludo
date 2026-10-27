@@ -20,6 +20,9 @@
   let mails = [], unsub = null, curUid = null, isAdmin = false;
   let overlay = null, view = "list", openId = null, tab = "inbox";
   let busy = false, note = "";
+  let selectedIds = new Set();
+let confirmDeleteMode = null;
+let deleting = false;
   const shownSanctions = new Set();
 
   /* ---------- CSS ---------- */
@@ -143,6 +146,118 @@
 .gx-warn-card p{margin:0 0 18px;color:#e7d9c4;font-size:.88rem;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 .gx-toast2{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:1400;padding:11px 20px;
   border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font:800 .85rem Inter,system-ui,sans-serif;box-shadow:0 10px 30px #000c}
+  /* Selección de correos */
+.gx-mail-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.gx-mail-tools button {
+  min-height: 38px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid #ffffff20;
+  background: #1c2250;
+  color: #fff;
+  font: 800 12px Inter, system-ui, sans-serif;
+}
+
+.gx-mail-tools .gx-mail-delete {
+  background: #9f202c;
+  border-color: #ff5964;
+}
+
+.gx-mail-tools button:disabled {
+  opacity: .45;
+}
+
+.gx-mail-select {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  accent-color: #a78bfa;
+  cursor: pointer;
+}
+
+.gx-mail-row-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gx-mail-row-wrap .gx-mail-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.gx-mail-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 1350;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #03040dcc;
+  backdrop-filter: blur(5px);
+  animation: gxMailIn .18s ease both;
+}
+
+.gx-mail-confirm-card {
+  width: min(340px, 100%);
+  padding: 22px;
+  border-radius: 23px;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(160deg, #252b60, #0d1027);
+  border: 1px solid #a78bfa88;
+  box-shadow: 0 25px 70px #000b;
+}
+
+.gx-mail-confirm-card .gx-confirm-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.gx-mail-confirm-card h3 {
+  margin: 0 0 9px;
+  font-size: 1.08rem;
+}
+
+.gx-mail-confirm-card p {
+  margin: 0 0 20px;
+  color: #cbd5e1;
+  font-size: .86rem;
+  line-height: 1.5;
+}
+
+.gx-mail-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gx-mail-confirm-actions button {
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 13px;
+  border: 1px solid #ffffff25;
+  color: #fff;
+  background: #252b48;
+  font: 800 .84rem Inter, system-ui, sans-serif;
+}
+
+.gx-mail-confirm-actions .gx-confirm-danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border-color: #fb7185;
+}
+
+.gx-mail-confirm-actions button:disabled {
+  opacity: .5;
+}
 `;
   document.head.appendChild(css);
 
@@ -318,21 +433,94 @@ function updateBadge() {
           <button class="gx-mail-btn" data-m="send" type="button" ${busy ? "disabled" : ""}>${busy ? "Enviando…" : "Enviar"}</button>
         </div>`;
       } else {
-        const rows = inbox().map(m => `
-          <button class="gx-mail-row ${m.read ? "" : "unread"}" data-m="open" data-id="${esc(m.id)}" type="button">
-            <span class="gx-mail-ico">${ICON[m.type] || "✉️"}</span>
-            <span class="gx-mail-txt"><strong>${esc(m.title || "Mensaje")}</strong><small>${esc((m.body || "").replace(/\s+/g, " "))}</small></span>
-            <span class="gx-mail-side">${m.read ? "" : `<i class="gx-mail-dot"></i>`}
-              ${m.type === "reward" && !m.claimed ? `<span class="gx-mail-chip">Sin reclamar</span>` : ""}${esc(fmt(m))}</span>
-          </button>`).join("");
-        html = top("Correo", "close") + tabs + (rows
-          ? `<div class="gx-mail-list">${rows}</div>`
-          : `<div class="gx-mail-empty"><i>📭</i><strong>Tu correo está vacío</strong><p>Aquí llegarán los mensajes y recompensas del equipo.</p></div>`);
-      }
-    }
+        const visibleMails = inbox();
+const selectedCount = visibleMails.filter(m => selectedIds.has(m.id)).length;
+const allSelected = visibleMails.length > 0 &&
+  selectedCount === visibleMails.length;
+
+const rows = visibleMails.map(m => `
+  <div class="gx-mail-row-wrap">
+    <input
+      class="gx-mail-select"
+      type="checkbox"
+      data-select-mail="${esc(m.id)}"
+      aria-label="Seleccionar ${esc(m.title || "correo")}"
+      ${selectedIds.has(m.id) ? "checked" : ""}
+      ${deleting ? "disabled" : ""}
+    >
+    <button class="gx-mail-row ${m.read ? "" : "unread"}"
+      data-m="open" data-id="${esc(m.id)}" type="button">
+      <span class="gx-mail-ico">${ICON[m.type] || "✉️"}</span>
+      <span class="gx-mail-txt">
+        <strong>${esc(m.title || "Mensaje")}</strong>
+        <small>${esc((m.body || "").replace(/\s+/g, " "))}</small>
+      </span>
+      <span class="gx-mail-side">
+        ${m.read ? "" : `<i class="gx-mail-dot"></i>`}
+        ${m.type === "reward" && !m.claimed
+          ? `<span class="gx-mail-chip">Sin reclamar</span>` : ""}
+        ${esc(fmt(m))}
+      </span>
+    </button>
+  </div>
+`).join("");
+
+const tools = visibleMails.length ? `
+  <div class="gx-mail-tools">
+    <button type="button" data-m="select-all"
+      ${deleting ? "disabled" : ""}>
+      ${allSelected ? "Desmarcar todos" : "Seleccionar todos"}
+    </button>
+    <span style="color:#cbd5e1;font-size:.75rem">
+      ${selectedCount} seleccionados
+    </span>
+    <button type="button" class="gx-mail-delete"
+      data-m="delete-selected"
+      ${!selectedCount || deleting ? "disabled" : ""}>
+      ${deleting ? "Eliminando…" : "Eliminar seleccionados"}
+    </button>
+    <button type="button" class="gx-mail-delete"
+      data-m="delete-all" ${deleting ? "disabled" : ""}>
+      Borrar todo
+    </button>
+  </div>` : "";
+
+html = top("Correo", "close") + tabs +
+  (rows
+    ? `${tools}<div class="gx-mail-list">${rows}</div>`
+    : `<div class="gx-mail-empty">
+        <i>📭</i>
+        <strong>Tu correo está vacío</strong>
+        <p>Aquí llegarán los mensajes y recompensas del equipo.</p>
+      </div>`);
 
     const y = overlay.scrollTop;
-    overlay.innerHTML = `<div class="gx-mail-in">${html}</div>`;
+const confirmHtml = confirmDeleteMode ? `
+  <div class="gx-mail-confirm" role="dialog"
+       aria-modal="true" aria-labelledby="gx-mail-confirm-title">
+    <div class="gx-mail-confirm-card">
+      <div class="gx-confirm-icon">🗑️</div>
+      <h3 id="gx-mail-confirm-title">
+        ${confirmDeleteMode === "all" ? "¿Borrar todos los correos?" : "¿Eliminar correos?"}
+      </h3>
+      <p>
+        ${confirmDeleteMode === "all"
+          ? "Se eliminarán todos los mensajes y recompensas de tu bandeja. Las advertencias de sanción se conservarán."
+          : `¿Seguro que quieres eliminar ${selectedCount} correo${selectedCount === 1 ? "" : "s"} seleccionado${selectedCount === 1 ? "" : "s"}? Esta acción no se puede deshacer.`}
+      </p>
+      <div class="gx-mail-confirm-actions">
+        <button type="button" data-m="delete-cancel"
+          ${deleting ? "disabled" : ""}>Cancelar</button>
+        <button type="button" class="gx-confirm-danger"
+          data-m="delete-confirm" ${deleting ? "disabled" : ""}>
+          ${deleting ? "Eliminando…" : "Aceptar"}
+        </button>
+      </div>
+    </div>
+  </div>` : "";
+
+overlay.innerHTML =
+  `<div class="gx-mail-in">${html}</div>${confirmHtml}`;
     overlay.scrollTop = view === "detail" ? 0 : y;
   }
 
@@ -420,7 +608,117 @@ function updateBadge() {
     }
     busy = false; draw();
   }
+async function deleteMails() {
+  if (deleting || !confirmDeleteMode) return;
 
+  const mode = confirmDeleteMode;
+  const ids = mode === "all"
+    ? null
+    : [...selectedIds];
+
+  if (mode !== "all" && (!ids || !ids.length)) {
+    confirmDeleteMode = null;
+    draw();
+    return;
+  }
+
+  const uidBefore = G()?.state?.user?.uid;
+  if (!uidBefore) {
+    confirmDeleteMode = null;
+    toast("Inicia sesión para continuar.");
+    draw();
+    return;
+  }
+
+  deleting = true;
+  note = "";
+  draw();
+
+  try {
+    const { fb, fs, uid } = await ctx();
+
+    if (uid !== uidBefore) {
+      throw new Error("La sesión cambió.");
+    }
+
+    const collectionRef = fs.collection(fb.db, "users", uid, "mail");
+    let docsToDelete = [];
+
+    if (mode === "all") {
+      // Leer la colección completa, no solo los 50 correos mostrados.
+      const snap = await fs.getDocs(collectionRef);
+
+      // Conservar las sanciones, que se gestionan como advertencias.
+      docsToDelete = snap.docs.filter(d =>
+        d.data().type !== "sanction"
+      );
+    } else {
+      // Solo se permiten IDs de mensajes visibles en la bandeja.
+      const allowedIds = new Set(
+        inbox().map(m => m.id)
+      );
+
+      docsToDelete = ids
+        .filter(id => allowedIds.has(id))
+        .map(id => ({ id }));
+    }
+
+    if (!docsToDelete.length) {
+      selectedIds.clear();
+      confirmDeleteMode = null;
+      deleting = false;
+      draw();
+      toast("No hay correos para eliminar.");
+      return;
+    }
+
+    // Borrar en grupos para no superar el límite de operaciones por lote.
+    for (let i = 0; i < docsToDelete.length; i += 450) {
+      if (G()?.state?.user?.uid !== uidBefore) {
+        throw new Error("La sesión cambió.");
+      }
+
+      const chunk = docsToDelete.slice(i, i + 450);
+
+      if (typeof fs.writeBatch === "function") {
+        const batch = fs.writeBatch(fb.db);
+
+        for (const d of chunk) {
+          batch.delete(
+            fs.doc(fb.db, "users", uid, "mail", d.id)
+          );
+        }
+
+        await batch.commit();
+      } else if (typeof fs.deleteDoc === "function") {
+        for (const d of chunk) {
+          await fs.deleteDoc(
+            fs.doc(fb.db, "users", uid, "mail", d.id)
+          );
+        }
+      } else {
+        throw new Error("La función de borrado no está disponible.");
+      }
+    }
+
+    const removedIds = new Set(docsToDelete.map(d => d.id));
+    mails = mails.filter(m => !removedIds.has(m.id));
+    selectedIds.clear();
+    confirmDeleteMode = null;
+
+    updateBadge();
+    draw();
+    toast(mode === "all" ? "Bandeja limpiada." : "Correos eliminados.");
+  } catch (e) {
+    console.error("deleteMails", e);
+    confirmDeleteMode = null;
+    draw();
+    toast("No se pudieron eliminar todos los correos. Revisa tu conexión.");
+  } finally {
+    deleting = false;
+    if (overlay) draw();
+  }
+}
   /* ---------- advertencia de sanción al iniciar sesión ---------- */
   function checkSanctions() {
     if (document.querySelector(".gx-intro,.gx-gate,.gx-warn")) return;
@@ -449,6 +747,42 @@ function updateBadge() {
     if (!overlay || !overlay.contains(e.target)) return;
     const b = e.target.closest("[data-m]"); if (!b) return;
     const a = b.dataset.m;
+    if (a === "select-all") {
+  const visible = inbox();
+  const allSelected = visible.length > 0 &&
+    visible.every(m => selectedIds.has(m.id));
+
+  if (allSelected) {
+    selectedIds.clear();
+  } else {
+    visible.forEach(m => selectedIds.add(m.id));
+  }
+
+  draw();
+}
+else if (a === "delete-selected") {
+  if (selectedIds.size) {
+    confirmDeleteMode = "selected";
+    draw();
+  }
+}
+else if (a === "delete-all") {
+  if (inbox().length) {
+    confirmDeleteMode = "all";
+    draw();
+  }
+}
+else if (a === "delete-cancel") {
+  if (!deleting) {
+    confirmDeleteMode = null;
+    draw();
+  }
+}
+else if (a === "delete-confirm") {
+  deleteMails();
+}
+else if (a === "close") closeMail();
+
     if (a === "close") closeMail();
     else if (a === "back") { view = "list"; note = ""; draw(); }
     else if (a === "open") {
@@ -461,6 +795,17 @@ function updateBadge() {
     else if (a === "send") send();
   });
   document.addEventListener("change", e => {
+    if (e.target?.matches("[data-select-mail]")) {
+  const id = e.target.dataset.selectMail;
+
+  if (e.target.checked) {
+    selectedIds.add(id);
+  } else {
+    selectedIds.delete(id);
+  }
+
+  draw();
+}
     if (e.target && e.target.id === "gxm-type") {
       const rw = overlay && overlay.querySelector("#gxm-rw");
       if (rw) rw.style.display = e.target.value === "reward" ? "grid" : "none";
