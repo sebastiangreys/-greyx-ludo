@@ -44,6 +44,32 @@
   box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
 }
 .gx-mailbtn svg{
+
+
+
+.gx-mailbtn {
+  position: absolute;
+  overflow: visible;
+}
+
+.gx-mailbadge {
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff303b;
+  border: 2px solid #171943;
+  box-shadow: 0 0 7px #ff303b88;
+  pointer-events: none;
+}
+
+.gx-mailbadge.on {
+  display: block;
+}
+
   width:22px;
   height:22px;
 }
@@ -205,12 +231,18 @@ function ensureButton() {
   updateBadge();
 }
 
-  function updateBadge() {
-    const n = unread(), el = document.querySelector(".gx-mailbadge");
-    if (!el) return;
-    el.textContent = n > 9 ? "9+" : n;
-    el.classList.toggle("on", n > 0);
-  }
+  
+function updateBadge() {
+  const n = unread();
+  const el = document.querySelector(".gx-mailbadge");
+  if (!el) return;
+
+  // Sin mensajes sin leer: no mostrar nada.
+  // Con mensajes sin leer: mostrar un punto rojo.
+  el.textContent = "";
+  el.classList.toggle("on", n > 0);
+}
+
 
   /* ---------- ventana de correo (pantalla completa) ---------- */
   function openMail() {
