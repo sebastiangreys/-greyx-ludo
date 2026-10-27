@@ -511,7 +511,11 @@
     else if (k === "create") createRoom(R.mode);
     else if (k === "leave") {
       const host = R.room && R.room.host === R.uid;
-      if (confirm(host ? "¿Cerrar la sala para todos?" : "¿Salir de la sala?")) leaveRoom();
+          (window.GXConfirm ? window.GXConfirm({
+        title: host ? "Cerrar sala" : "Salir de la sala",
+        text: host ? "¿Cerrar la sala para todos?" : "¿Salir de la sala?",
+        danger: true
+      }) : Promise.resolve(true)).then(ok => { if (ok) leaveRoom(); });
     }
     else if (k === "start") { if (window.GreyxOnline) GreyxOnline.start(); else toast("Servidor no disponible."); }
     else if (k === "invite-open") loadFriends();
