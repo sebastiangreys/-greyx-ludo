@@ -275,7 +275,7 @@
   }
 
   async function remove(id) {
-    if (v.del !== id) { v.del = id; return draw(); }
+      if (!(await (window.GXConfirm ? window.GXConfirm({ title: "Borrar idea", text: "¿Borrar esta idea? No se puede deshacer.", danger: true }) : Promise.resolve(true)))) return;
     try {
       const g = G(), fs = await g.fsModule();
       await fs.deleteDoc(fs.doc(g.fb.db, "ideas", id));
