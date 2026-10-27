@@ -987,7 +987,9 @@
     if (!tabs.some(t => t[0] === view.tab)) view.tab = "home";
     const body = view.tab === "home" ? homeHtml()
       : view.tab === "ban" ? banHtml()
+            : view.tab === "mail" ? window.GXMailAdmin.html({ isOwner: isOwnerRole() })
       : view.tab === "team" ? teamHtml()
+
       : logHtml();
     el.innerHTML = `
       <div class="gxa-in">
@@ -1011,6 +1013,7 @@
     if (!b) return;
     const a = b.dataset.a;
     grab();
+    if (window.GXMailAdmin) window.GXMailAdmin.grab();
     if (!["apply", "lift", "role", "staffrm", "revoke"].includes(a)) view.confirm = null;
 
     if (a === "close") { closePanel(); return; }
@@ -1049,39 +1052,46 @@
     if (a === "logf") { draw(); return; }
     if (a === "logclear") { view.logF = newLogF(); draw(); return; }
 
+        // Correo (owner y moderador; las reglas validan el rol en el servidor)
+    if (a.startsWith("m-")) {
+      if (!canMod() || !window.GXMailAdmin) return;
+      await window.GXMailAdmin.act(a, b, { draw, ctx, logAction, isOwner: isOwnerRole() });
+      return;
+    }
+
+    const ask = (title, text, danger) => window.GXConfirm
+      ? window.GXConfirm({ title, text, ok: "Aceptar", danger })
+      : Promise.resolve(true);
+
     // Gestión de equipo (solo owner)
     if (a === "role") {
-      if (!isOwnerRole()) return;
-      const key = "role:" + b.dataset.v;
-      if (view.confirm !== key) { view.confirm = key; view.msg = ""; draw(); return; }
-      view.confirm = null;
+      if (!isOwnerRole() || view.busy) return;
+      const n = (GRANTABLE.find(x => x[0] === b.dataset.v) || [])[1] || b.dataset.v;
+      if (!(await ask("Cambiar rol", "¿Asignar el rol " + n + " a @" + view.target.username + "?", false))) return;
       await setStaffRole(view.target, b.dataset.v); return;
     }
     if (a === "staffrm") {
-      if (!isOwnerRole()) return;
-      if (view.confirm !== "staffrm") { view.confirm = "staffrm"; view.msg = ""; draw(); return; }
-      view.confirm = null;
+      if (!isOwnerRole() || view.busy) return;
+      if (!(await ask("Quitar del staff", "¿Quitar a @" + view.target.username + " del staff?", true))) return;
       await removeStaff(view.target.uid, view.target.username); return;
     }
     if (a === "revoke") {
-      if (!isOwnerRole()) return;
-      const key = "revoke:" + b.dataset.uid;
-      if (view.confirm !== key) { view.confirm = key; view.msg = ""; draw(); return; }
-      view.confirm = null;
+      if (!isOwnerRole() || view.busy) return;
       const m = (view.team || []).find(x => x.uid === b.dataset.uid);
+      if (!(await ask("Quitar del staff", "¿Quitar a @" + ((m && m.username) || "este miembro") + " del staff?", true))) return;
       await removeStaff(b.dataset.uid, m && m.username); return;
     }
 
     if (!canMod()) return;
 
     if (a === "apply") {
-      if (view.confirm !== "apply") { view.confirm = "apply"; view.msg = ""; draw(); return; }
-      view.confirm = null;
+      if (view.busy) return;
+      if (!(await ask("Aplicar sanción", "¿Aplicar esta sanción a @" + view.target.username + "?", true))) return;
       await applySanction(); return;
     }
     if (a === "lift") {
-      if (view.confirm !== "lift") { view.confirm = "lift"; view.msg = ""; draw(); return; }
-      view.confirm = null;
+      if (view.busy) return;
+      if (!(await ask("Retirar sanción", "¿Retirar la sanción a @" + view.target.username + "?", false))) return;
       await liftSanction(); return;
     }
   }
