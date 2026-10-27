@@ -5727,15 +5727,16 @@ ranking: null,
 };
 /* ========== IDIOMAS ========== */
 
-const LANGS = { es:"Español", en:"English", pt:"Português" };
+const LANGS = { es:"Español", en:"English", pt:"Português", fr:"Français" };
 
 function loadLang() {
   try {
     const saved = localStorage.getItem("gx-lang");
-    if (["es","en","pt"].includes(saved)) return saved;
+if (["es","en","pt","fr"].includes(saved)) return saved;
   } catch (e) {}
   const nav = (navigator.language || "es").slice(0,2).toLowerCase();
-  return ["en","pt"].includes(nav) ? nav : "es";
+  return ["en","pt","fr"].includes(nav) ? nav : "es";
+
 }
 
 const DICT = {
@@ -6008,12 +6009,14 @@ function translateText(str, lang) {
 
   const d = DICT[lang];
   if (d && d[key]) return d[key];
+  if (lang !== "en" && DICT.en && DICT.en[key]) return DICT.en[key];
 
   for (const [re, out] of PATTERNS) {
-    if (re.test(key)) return key.replace(re, out[lang]);
+    if (re.test(key)) return key.replace(re, out[lang] || out.en);
   }
   return null;
 }
+
 
 function translateDOM(root) {
   const lang = state.lang;
@@ -7246,7 +7249,7 @@ function settingsViewMarkup(v) {
   }
 
   if (v === "lang") {
-    return `<div class="st-list">${["es","en","pt"].map(c => `
+    return `<div class="st-list">Object.keys(LANGS)`
       <button class="st-row ${state.lang === c ? "sel" : ""}" data-action="set-lang" data-lang="${c}" type="button">
         <span class="st-txt"><strong>${LANGS[c]}</strong></span>
         ${state.lang === c ? `<span class="st-chev ok">${SI.check}</span>` : ""}
@@ -7741,20 +7744,22 @@ function handleAuthAction(action) {
       submitAuth();
       return true;
 
-    case "auth-logout":
-      if (state.confirmAction !== "auth-logout") {
-        state.confirmAction = "auth-logout";
+        case "auth-logout":
+      (window.GXConfirm ? window.GXConfirm({
+        title: "¿Cerrar sesión?",
+        text: "Saldrás de tu cuenta en este dispositivo.",
+        danger: true
+      }) : Promise.resolve(true)).then(ok => {
+        if (!ok) return;
+        state.confirmAction = null;
+        state.settingsOpen = false;
+        try { localStorage.removeItem("gx-guest"); } catch (e) {}
+        if (fb) fb.signOut(fb.auth).catch(() => {});
+        state.authMode = "login";
+        state.authError = "";
+        state.showAuth = true;
         render();
-        return true;
-      }
-      state.confirmAction = null;
-      state.settingsOpen = false;
-      try { localStorage.removeItem("gx-guest"); } catch (e) {}
-      if (fb) fb.signOut(fb.auth).catch(() => {});
-      state.authMode = "login";
-      state.authError = "";
-      state.showAuth = true;
-      render();
+      });
       return true;
   }
   return false;
@@ -8320,29 +8325,23 @@ if (action === "settings-music") {
           render();
         }
 
-        if (action === "settings-new-game" || action === "settings-menu") {
-
-          // Primer toque: pedir confirmación
-          if (state.confirmAction !== action) {
-            state.confirmAction = action;
-            render();
-            return;
-          }
-
-          // Segundo toque: ejecutar
-          state.confirmAction = null;
-          state.settingsOpen = false;
-          state.howToPlayOpen = false;
-          state.aboutGreyxOpen = false;
-
-          if (action === "settings-new-game") {
-            start(state.players.length);
-          } else {
-            setup();
-          }
-
+                if (action === "settings-new-game" || action === "settings-menu") {
+          const isNew = action === "settings-new-game";
+          (window.GXConfirm ? window.GXConfirm({
+            title: isNew ? "Nueva partida" : "Salir al menú",
+            text: isNew ? "Se reiniciará la partida con los mismos jugadores." : "Se perderá la partida actual.",
+            danger: true
+          }) : Promise.resolve(true)).then(ok => {
+            if (!ok || state.phase !== "playing") return;
+            state.confirmAction = null;
+            state.settingsOpen = false;
+            state.howToPlayOpen = false;
+            state.aboutGreyxOpen = false;
+            if (isNew) start(state.players.length); else setup();
+          });
           return;
         }
+        
   if (action === "friends-open") {
   state.showFriends = true;
   state.settingsOpen = false;
@@ -9239,25 +9238,9 @@ if (stillPlaying.length <= 1 || humanDone) {
       queueBotTurn();
 
     } else {
-
-      state.active =
-        (state.active + 1) % state.players.length;
-
-      state.roll = null;
-
-      state.message = isBotTurn()
-  ? `Turno de ${playerLabel(state.players[state.active])}. El bot está pensando…`
-  : "Tu turno. Lanza el dado.";
-
-      render();
-      queueBotTurn();
+      nextTurn();
     }
-  }
-}
 
-  animateStep();
-}
-console.log("GREYX: JavaScript funcionando");
 function startIntroWhenReady() {
   if (document.fonts && document.fonts.load) {
     Promise.race([
@@ -9431,7 +9414,7 @@ async function ensureUsernameDoc() {
     const snap = await fb.getDoc(ref);
     const data = { uid: state.user.uid, username: p.username, avatar: p.avatar || "a1" };
     if (!snap.exists()) await fb.setDoc(ref, data);
-    else if (snap.data().uid === state.user.uid) await fb.updateDoc(ref, data);
+    else { const d0 = snap.data(); if (d0.uid === state.user.uid && (d0.username !== data.username || d0.avatar !== data.avatar)) await fb.updateDoc(ref, data); }
   } catch (e) { console.warn("ensureUsernameDoc", e); }
 }
 
@@ -9720,6 +9703,7 @@ function playerModalMarkup() {
       <span class="pl-av">${avatarEmoji(p.avatar)}</span>
       <h2>@${escHtml(p.username || "jugador")}</h2>
       <span class="pl-lv">NV. ${lv}</span>
+      <div class="gx-likes" data-uid="${escHtml(p.uid)}"></div>
       ${body}
       ${idBlock}
     </section>
@@ -10970,7 +10954,7 @@ function xpBarMarkup() {
 window.GX = {
   get fb() { return fb; },
   get state() { return state; },
-  fsModule, render,
+    fsModule, render, DICT, LANGS, PATTERNS, translateText, translateDOM,
   xpLevelFromTotal, xpForLevel, xpToNext, xpBarPct,
   avatarEmoji
 };
@@ -11277,7 +11261,9 @@ body .settings-panel{overscroll-behavior:contain}
     const el = e.target.closest("button,[data-action],[data-go]");
     if (!el || el.disabled || el.classList.contains("token")) return;
     pop(el);
-    if (!el.dataset.action) tick();           // los que ya tienen sonido propio no se duplican
+        const proxied = el.classList.contains("gx-fab") || ["friends","local","bot","settings","online"].includes(el.dataset.go);
+    if (!el.dataset.action && !proxied) tick();
+           // los que ya tienen sonido propio no se duplican
   }, true);
   document.addEventListener("click", e => {
     if (e.target.closest('[data-action="settings-sound"]')) soundOn = !soundOn;
@@ -11302,7 +11288,7 @@ body .settings-panel{overscroll-behavior:contain}
     if (id !== "home" && v) v.animate(
       [{ opacity: 0, transform: "translateY(24px) scale(.97)" }, { opacity: 1, transform: "none" }],
       { duration: 400, easing: EASE });
-  }, 90);
+  }, 250);
 
   /* ---------- Menú principal ---------- */
   document.querySelectorAll(".gxm").forEach(e => e.remove());   // restos de versiones anteriores
