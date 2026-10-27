@@ -981,7 +981,9 @@
     const el = document.getElementById("gxAdm");
     if (!el) return;
     const tabs = [["home", "Resumen"], ["ban", "Jugadores"], ["log", "Registro"]];
+    if (canMod()) tabs.push(["mail", "Correo"]);
     if (isOwnerRole()) tabs.push(["team", "Equipo"]);
+
     if (!tabs.some(t => t[0] === view.tab)) view.tab = "home";
     const body = view.tab === "home" ? homeHtml()
       : view.tab === "ban" ? banHtml()
