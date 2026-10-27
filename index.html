@@ -2267,32 +2267,6 @@ p {
     box-shadow .2s ease;
 }
 
-  width: 46px;
-  height: 46px;
-
-  border: 1px solid #202b3e22;
-  border-radius: 50%;
-
-  background: #ffffff;
-  color: #202b3e;
-
-  font-size: 21px;
-
-  display: grid;
-  place-items: center;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 5px 14px #202b3e18;
-
-  z-index: 80;
-
-  transition:
-    transform .2s ease,
-    box-shadow .2s ease;
-}
-
 .settings-button:hover {
   transform: rotate(25deg) scale(1.05);
 
@@ -7249,12 +7223,12 @@ function settingsViewMarkup(v) {
   }
 
   if (v === "lang") {
-    return `<div class="st-list">Object.keys(LANGS)`
-      <button class="st-row ${state.lang === c ? "sel" : ""}" data-action="set-lang" data-lang="${c}" type="button">
-        <span class="st-txt"><strong>${LANGS[c]}</strong></span>
-        ${state.lang === c ? `<span class="st-chev ok">${SI.check}</span>` : ""}
-      </button>`).join("")}</div>`;
-  }
+  return `<div class="st-list">${Object.keys(LANGS).map(c => `
+    <button class="st-row ${state.lang === c ? "sel" : ""}" data-action="set-lang" data-lang="${c}" type="button">
+      <span class="st-txt"><strong>${LANGS[c]}</strong></span>
+      ${state.lang === c ? `<span class="st-chev ok">${SI.check}</span>` : ""}
+    </button>`).join("")}</div>`;
+}
 
   if (v === "howto") {
     const rules = [
@@ -9237,9 +9211,14 @@ if (stillPlaying.length <= 1 || humanDone) {
       render();
       queueBotTurn();
 
-    } else {
+} else {
       nextTurn();
     }
+  }          // cierra continueAfterMove
+  }          // cierra finishMove
+
+  animateStep();   // arranca la animación
+}  
 
 function startIntroWhenReady() {
   if (document.fonts && document.fonts.load) {
