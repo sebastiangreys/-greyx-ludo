@@ -81,10 +81,6 @@ let deleting = false;
 .gx-mailbtn:active{
   transform:scale(.93);
 }
-
-.gx-mail{position:fixed;inset:0;z-index:1200;color:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));
-  background:radial-gradient(circle at 50% 0,#4c1d9566,transparent 55%),linear-gradient(180deg,#0b0c2e,#05060f);
   font-family:Inter,system-ui,sans-serif;animation:gxMailIn .35s cubic-bezier(.2,.8,.2,1) both}
 @keyframes gxMailIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 .gx-mail-in{max-width:520px;margin:0 auto}
@@ -505,7 +501,7 @@ const confirmHtml = confirmDeleteMode ? `
       </h3>
       <p>
         ${confirmDeleteMode === "all"
-          ? "Se eliminarán todos los mensajes y recompensas de tu bandeja. Las advertencias de sanción se conservarán."
+          ? "Se eliminarán los mensajes y las recompensas ya reclamadas. Las recompensas sin reclamar se conservan."
           : `¿Seguro que quieres eliminar ${selectedCount} correo${selectedCount === 1 ? "" : "s"} seleccionado${selectedCount === 1 ? "" : "s"}? Esta acción no se puede deshacer.`}
       </p>
       <div class="gx-mail-confirm-actions">
@@ -608,6 +604,7 @@ overlay.innerHTML =
     }
     busy = false; draw();
   }
+  const deletable = m => m.type === "message" || (m.type === "reward" && m.claimed === true);
 async function deleteMails() {
   if (deleting || !confirmDeleteMode) return;
 
@@ -649,14 +646,10 @@ async function deleteMails() {
       const snap = await fs.getDocs(collectionRef);
 
       // Conservar las sanciones, que se gestionan como advertencias.
-      docsToDelete = snap.docs.filter(d =>
-        d.data().type !== "sanction"
-      );
+      docsToDelete = snap.docs.filter(d => deletable(d.data()));
     } else {
       // Solo se permiten IDs de mensajes visibles en la bandeja.
-      const allowedIds = new Set(
-        inbox().map(m => m.id)
-      );
+      const allowedIds = new Set(inbox().filter(deletable).map(m => m.id));
 
       docsToDelete = ids
         .filter(id => allowedIds.has(id))
@@ -828,7 +821,7 @@ else if (a === "close") closeMail();
       },
       err => console.warn("mail", err)
     );
-    try { isAdmin = (await fs.getDoc(fs.doc(fb.db, "admins", uid))).exists(); } catch (e) { isAdmin = false; }
+        isAdmin = false;
     return true;
   }
 
@@ -840,8 +833,11 @@ else if (a === "close") closeMail();
 
   
   // Detectar inmediatamente los cambios del menú.
+    let mq = false;
   const menuObserver = new MutationObserver(() => {
-    ensureButton();
+    if (mq) return;
+    mq = true;
+    requestAnimationFrame(() => { mq = false; ensureButton(); });
   });
 
   if (document.body) {
