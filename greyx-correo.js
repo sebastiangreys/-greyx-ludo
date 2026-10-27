@@ -25,7 +25,20 @@
   /* ---------- CSS ---------- */
   const css = document.createElement("style");
   css.textContent = `
-.gx-mailbtn{position:absolute;top:0;left:170px;z-index:2;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;color:#fff;
+.gx-mailbtn{
+  position:fixed;
+  top:calc(16px + env(safe-area-inset-top, 0px));
+  left:16px;
+  z-index:1100;
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#fff;
+  background:linear-gradient(145deg,#232a66,#0d1030);
+  border:1px solid #6d5cffaa;
+  box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
   background:linear-gradient(145deg,#232a66,#0d1030);border:1px solid #6d5cffaa;box-shadow:0 0 18px #4f46e577,0 6px 16px #000a}
 .gx-mailbtn svg{width:22px;height:22px}
 .gx-mailbtn:active{transform:scale(.93)}
@@ -116,26 +129,38 @@
   const ctx = async () => ({ fb: G().fb, fs: await G().fsModule(), uid: G().state.user.uid });
 
   /* ---------- botón pegado al menú (junto al Buzón de ideas) ---------- */
+  
+
   function ensureButton() {
     const host = document.querySelector(".gx6.on .gx6-in");
     if (!host) return;
-    let b = host.querySelector(".gx-mailbtn");
+
+    let b = document.querySelector(".gx-mailbtn");
+
     if (!b) {
       b = document.createElement("button");
-      b.className = "gx-mailbtn"; b.type = "button"; b.setAttribute("aria-label", "Correo");
+      b.className = "gx-mailbtn";
+      b.type = "button";
+      b.setAttribute("aria-label", "Correo");
+      b.setAttribute("title", "Correo");
       b.innerHTML = ENV + `<i class="gx-mailbadge"></i>`;
       b.addEventListener("click", openMail);
-      host.appendChild(b);
-      updateBadge();
     }
-    // Se coloca justo a la derecha del botón Buzón de ideas (si lo encuentra)
-    const ideas = [...document.querySelectorAll("button,a,div")].filter(e =>
-      /Buz[oó]n de ideas/i.test(e.textContent) && e.children.length < 4 && !e.contains(host))
-      .sort((x, y) => x.textContent.length - y.textContent.length)[0];
-    if (ideas) {
-      const r = ideas.getBoundingClientRect(), h = host.getBoundingClientRect();
-      if (r.width > 0) b.style.left = Math.round(r.right - h.left + 10) + "px";
+
+    // Mantener un solo botón y colocarlo en la capa principal.
+    if (b.parentElement !== document.body) {
+      document.body.appendChild(b);
     }
+
+    // Posición fija en la esquina superior izquierda.
+    b.style.position = "fixed";
+    b.style.top = "calc(16px + env(safe-area-inset-top, 0px))";
+    b.style.left = "16px";
+    b.style.right = "auto";
+    b.style.bottom = "auto";
+    b.style.zIndex = "1100";
+
+    updateBadge();
   }
 
   function updateBadge() {
