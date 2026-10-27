@@ -176,15 +176,12 @@ body.gx-playing .top-actions{display:none!important}
   }
 
   /* Reinicia o sale reutilizando los botones de configuración del juego */
-  function viaSettings(action) {
+    function viaSettings(action) {
     const gear = document.querySelector('.top-actions [data-action="settings"]');
     if (!gear) return;
     gear.click();
-    for (let i = 0; i < 2; i++) {            // el 1er toque pide confirmación, el 2º ejecuta
-      const b = document.querySelector('.settings-overlay [data-action="' + action + '"]');
-      if (!b) break;
-      b.click();
-    }
+    const b = document.querySelector('.settings-overlay [data-action="' + action + '"]');
+    if (b) { window.__gxSkipConfirm = true; b.click(); window.__gxSkipConfirm = false; }
   }
 
   function leaveGame(action) {
