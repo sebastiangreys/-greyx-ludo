@@ -244,27 +244,35 @@
     } catch (e) { console.warn("markRead", e); }
   }
 
-  async function claim(m) {
+    async function claim(m) {
     if (busy || m.claimed) return;
     busy = true; note = ""; draw();
     try {
       const { fb, fs, uid } = await ctx();
+      const p = G().state.profile;
+      if (!p) throw new Error("noprofile");
       let newXP = 0, newTr = 0;
       await fs.runTransaction(fb.db, async tx => {
         const mref = fs.doc(fb.db, "users", uid, "mail", m.id);
         const sref = fs.doc(fb.db, "stats", uid);
+        const pref = fs.doc(fb.db, "publicProfiles", uid);
         const ms = await tx.get(mref);
         const ss = await tx.get(sref);
         if (!ms.exists() || ms.data().claimed) throw new Error("claimed");
+        if (!ss.exists()) throw new Error("nostats");
         const r = ms.data().reward || {};
-        const d = ss.exists() ? ss.data() : {};
+        const d = ss.data();
         newXP = (d.xp || 0) + Math.max(0, r.xp | 0);
         newTr = (d.trophies || 0) + Math.max(0, r.trophies | 0);
-        const upd = { xp: newXP, trophies: newTr, updatedAt: fs.serverTimestamp() };
-        if (ss.exists()) tx.update(sref, upd);
-        else tx.set(sref, Object.assign({ played: 0, wins: 0, losses: 0, captures: 0, goals: 0,
-          streak: 0, bestStreak: 0 }, upd));
+        tx.update(sref, { xp: newXP, trophies: newTr, lastClaimId: m.id,
+          updatedAt: fs.serverTimestamp() });
         tx.update(mref, { claimed: true, read: true });
+        tx.set(pref, {
+          username: p.username, usernameLower: p.usernameLower,
+          avatar: p.avatar || "a1", xp: newXP, trophies: newTr,
+          wins: d.wins || 0, played: d.played || 0,
+          updatedAt: fs.serverTimestamp()
+        });
       });
       const s = G().state;
       s.xp = newXP; s.xpLevel = G().xpLevelFromTotal(newXP); s.xpLoaded = true;
@@ -273,7 +281,9 @@
       toast("🎁 Recompensa reclamada");
     } catch (e) {
       console.warn("claim", e);
-      note = "No se pudo reclamar. Intenta de nuevo.";
+      note = e && e.message === "nostats"
+        ? "Juega una partida primero para poder reclamar."
+        : "No se pudo reclamar. Intenta de nuevo.";
     }
     busy = false; draw();
   }
