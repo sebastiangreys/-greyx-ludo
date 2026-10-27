@@ -47,6 +47,7 @@
 
 
 
+
 .gx-mailbtn {
   position: absolute;
   overflow: visible;
@@ -55,8 +56,8 @@
 .gx-mailbadge {
   display: none;
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 0;
+  right: 0;
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -64,11 +65,13 @@
   border: 2px solid #171943;
   box-shadow: 0 0 7px #ff303b88;
   pointer-events: none;
+  transform: translate(25%, -25%);
 }
 
 .gx-mailbadge.on {
   display: block;
 }
+
 
   width:22px;
   height:22px;
