@@ -187,6 +187,7 @@
   const OPTS = { childList: true, subtree: true, characterData: true };
 
   function schedule() {
+    if (window.GX && window.GX.state && window.GX.state.phase === "playing") return;
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => { queued = false; run(); });
