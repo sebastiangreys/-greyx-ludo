@@ -29,59 +29,19 @@ let deleting = false;
   const css = document.createElement("style");
   css.textContent = `
 
-.gx-mailbtn{
-  position:absolute;
-  top:0;
-  left:0;
-  right:auto;
-  bottom:auto;
-  z-index:20;
-  width:46px;
-  height:46px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  color:#fff;
-  background:linear-gradient(145deg,#232a66,#0d1030);
-  border:1px solid #6d5cffaa;
-  box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
-}
-
-.gx-mailbtn svg {
-  width: 22px;
-  height: 22px;
-}
-
-.gx-mailbtn {
-  overflow: visible;
-}
-
-.gx-mailbadge {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ff303b;
-  border: 2px solid #171943;
-  box-shadow: 0 0 7px #ff303b88;
-  pointer-events: none;
-  transform: translate(25%, -25%);
-}
-
-.gx-mailbadge.on {
-  display: block;
-}
-
-  width:22px;
-  height:22px;
-}
-.gx-mailbtn:active{
-  transform:scale(.93);
-}
+.gx-mailbtn{position:absolute;top:0;right:46px;z-index:2;width:46px;height:46px;display:grid;place-items:center;
+  border-radius:50%;color:#fff;background:linear-gradient(145deg,#232a66,#0d1030);
+  border:1px solid #6d5cffaa;box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;overflow:visible}
+.gx-mailbtn svg{width:22px;height:22px}
+.gx-mailbtn:active{transform:scale(.93)}
+.gx-mailbadge{display:none;position:absolute;top:0;right:0;width:10px;height:10px;border-radius:50%;
+  background:#ff303b;border:2px solid #171943;box-shadow:0 0 7px #ff303b88;pointer-events:none;transform:translate(25%,-25%)}
+.gx-mailbadge.on{display:block}
+.gx-mail{position:fixed;inset:0;z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch;color:#fff;
+  background:radial-gradient(circle at 50% 0,#4c1d9566,transparent 55%),linear-gradient(180deg,#0b0c2e,#05060f);
+  padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(30px + env(safe-area-inset-bottom,0px));
   font-family:Inter,system-ui,sans-serif;animation:gxMailIn .35s cubic-bezier(.2,.8,.2,1) both}
+
 @keyframes gxMailIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 .gx-mail-in{max-width:520px;margin:0 auto}
 .gx-mail-top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin-bottom:16px}
@@ -273,77 +233,21 @@ let deleting = false;
   const ctx = async () => ({ fb: G().fb, fs: await G().fsModule(), uid: G().state.user.uid });
 
   /* ---------- botón pegado al menú (junto al Buzón de ideas) ---------- */
-  
-
-  
 function ensureButton() {
   const host = document.querySelector(".gx6.on .gx6-in");
   if (!host) return;
-
-  // El contenedor del menú será la referencia de posición.
-  if (getComputedStyle(host).position === "static") {
-    host.style.position = "relative";
-  }
-
-  let b = host.querySelector(".gx-mailbtn");
-
-  // Recuperar el botón existente sin duplicarlo.
-  if (!b) {
-    b = document.querySelector(".gx-mailbtn");
-  }
-
+  let b = document.querySelector(".gx-mailbtn");
   if (!b) {
     b = document.createElement("button");
     b.className = "gx-mailbtn";
     b.type = "button";
     b.setAttribute("aria-label", "Correo");
-    b.setAttribute("title", "Correo");
     b.innerHTML = ENV + `<i class="gx-mailbadge"></i>`;
     b.addEventListener("click", openMail);
   }
-
-  // El botón debe pertenecer al menú, no al body.
-  if (b.parentElement !== host) {
-    host.appendChild(b);
-  }
-
-  const hostRect = host.getBoundingClientRect();
-
-  // Buscar el control superior derecho: configuración.
-  const controls = [...host.querySelectorAll(
-    "button, a, [role='button']"
-  )].filter(el => {
-    if (el === b || el.contains(b)) return false;
-    const r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0 &&
-      r.top >= hostRect.top - 5 &&
-      r.top < hostRect.top + 180 &&
-      r.left > hostRect.left + hostRect.width * 0.45;
-  });
-
-  controls.sort((a, c) =>
-    c.getBoundingClientRect().right -
-    a.getBoundingClientRect().right
-  );
-
-  const gear = controls[0];
-
-  if (gear) {
-    const r = gear.getBoundingClientRect();
-    b.style.left =
-      Math.round(r.left - hostRect.left - 46 - 10) + "px";
-    b.style.top =
-      Math.round(r.top - hostRect.top + (r.height - 46) / 2) + "px";
-  }
-
-  b.style.position = "absolute";
-  b.style.right = "auto";
-  b.style.bottom = "auto";
-  b.style.zIndex = "20";
-
+  if (b.parentElement !== host) host.appendChild(b);
   updateBadge();
 }
-
   
 function updateBadge() {
   const n = unread();
@@ -488,7 +392,12 @@ html = top("Correo", "close") + tabs +
         <i>📭</i>
         <strong>Tu correo está vacío</strong>
         <p>Aquí llegarán los mensajes y recompensas del equipo.</p>
-      </div>`);
+      </div>
+
+    `));   // (esto ya lo tienes: el cierre del html = ...)
+      }    // cierra el else de la bandeja
+    }      // cierra el else principal
+
 
     const y = overlay.scrollTop;
 const confirmHtml = confirmDeleteMode ? `
