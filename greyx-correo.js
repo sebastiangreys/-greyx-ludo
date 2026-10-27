@@ -43,13 +43,13 @@
   border:1px solid #6d5cffaa;
   box-shadow:0 0 18px #4f46e577,0 6px 16px #000a;
 }
-.gx-mailbtn svg{
 
-
-
+.gx-mailbtn svg {
+  width: 22px;
+  height: 22px;
+}
 
 .gx-mailbtn {
-  position: absolute;
   overflow: visible;
 }
 
@@ -71,7 +71,6 @@
 .gx-mailbadge.on {
   display: block;
 }
-
 
   width:22px;
   height:22px;
@@ -494,12 +493,39 @@ function updateBadge() {
     closeMail(); updateBadge();
   }
 
+  
+  // Detectar inmediatamente los cambios del menú.
+  const menuObserver = new MutationObserver(() => {
+    ensureButton();
+  });
+
+  if (document.body) {
+    menuObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // Colocar el botón si el menú ya existe.
+  ensureButton();
+
+  // Recalcular la posición al cambiar el tamaño de pantalla.
+  window.addEventListener("resize", ensureButton);
+
+  // Mantener la comprobación de sesión y las sanciones.
   setInterval(async () => {
     if (!G()) return;
-    const uid = G().state.user ? G().state.user.uid : null;
-    if (uid && uid !== curUid) { if (await subscribe(uid)) curUid = uid; }
-    else if (!uid && curUid) reset();
-    ensureButton();
+
+    const uid = G().state.user
+      ? G().state.user.uid
+      : null;
+
+    if (uid && uid !== curUid) {
+      if (await subscribe(uid)) curUid = uid;
+    } else if (!uid && curUid) {
+      reset();
+    }
+
     checkSanctions();
   }, 700);
 })();
