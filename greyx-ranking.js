@@ -1,9 +1,10 @@
-/* GREYX LUDO — Ranking competitivo (rangos + divisiones + Top 100 + Amigos)
+/* GREYX LUDO — Ranking competitivo v2 (pantalla única, sin scroll de página)
    - Rango = f(trofeos reales). No se guarda en Firebase: nunca se desincroniza.
-   - Elegibilidad: solo jugadores con trofeos >= 1 (publicProfiles.trophies >= 1).
-   - Expone window.GXRank (rankOf, badge) para usar las insignias en cualquier pantalla.
-   - Mantiene la barra inferior siempre visible (Inicio / Amigos / Ranking / Perfil).
-   Requiere: greyx-extras.js (perfil de jugador) y, opcional, greyx-presence.js (conectados). */
+   - Solo aparecen jugadores con trofeos >= 1 (publicProfiles.trophies >= 1).
+   - Toca tu tarjeta de rango -> detalle de los 6 rangos y qué necesitas para subir.
+   - Botón "i" -> widget de reglas encima de la tarjeta.
+   - Expone window.GXRank (rankOf, badge) para usar insignias en cualquier pantalla.
+   - Mantiene la barra inferior visible (Inicio / Amigos / Ranking / Perfil). */
 (() => {
   "use strict";
 
@@ -14,20 +15,19 @@
   const fmt = n => String(Math.floor(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   /* =====================================================
-     1) SISTEMA DE RANGOS (una sola fuente de verdad)
+     1) RANGOS (una sola fuente de verdad)
      ===================================================== */
-  const ROMAN = ["III", "II", "I"];           // índice 0 = inicial, 2 = superior
+  const ROMAN = ["III", "II", "I"];
   const TIERS = [
     { k:"bronze",   n:"Bronce",   min:1,     max:499,  c1:"#f0a868", c2:"#8a4b14", l:"#ffd9b0", desc:"Aquí empieza todo jugador. Cada trofeo cuenta." },
     { k:"silver",   n:"Plata",    min:500,   max:999,  c1:"#dbe4f0", c2:"#64748b", l:"#ffffff", desc:"Ya sabes jugar. Ahora toca ser constante." },
     { k:"gold",     n:"Oro",      min:1000,  max:1999, c1:"#fcd34d", c2:"#b45309", l:"#fff3b8", desc:"Un jugador respetado. Pocos llegan hasta aquí." },
     { k:"platinum", n:"Platino",  min:2000,  max:4999, c1:"#38bdf8", c2:"#1d4ed8", l:"#c7ecff", desc:"Nivel competitivo alto. Rivales muy exigentes." },
-    { k:"diamond",  n:"Diamante", min:5000,  max:9999, c1:"#c084fc", c2:"#6d28d9", l:"#f0dcff", desc:"La verdadera élite está cerca. Cada partida pesa." },
+    { k:"diamond",  n:"Diamante", min:5000,  max:9999, c1:"#c084fc", c2:"#6d28d9", l:"#f0dcff", desc:"La élite está cerca. Cada partida pesa." },
     { k:"elite",    n:"Élite",    min:10000, max:null, c1:"#fb7a4a", c2:"#b91c1c", l:"#ffe0b8", desc:"La cima del juego. Sin límite superior." }
   ];
 
-  // Divisiones repartidas automáticamente en partes iguales dentro de cada intervalo.
-  // Élite no tiene tope, así que cada división mide 1.000 trofeos.
+  // Divisiones repartidas automáticamente en partes iguales. Élite (sin tope): 1.000 por división.
   TIERS.forEach(t => {
     if (t.max == null) t.starts = [t.min, t.min + 1000, t.min + 2000];
     else {
@@ -42,7 +42,6 @@
     return to == null ? fmt(from) + "+" : fmt(from) + " - " + fmt(to);
   };
 
-  // trofeos -> rango (null si no está habilitado: 0 trofeos)
   function rankOf(raw) {
     const t = Math.floor(Number(raw) || 0);
     if (t < 1) return null;
@@ -64,8 +63,7 @@
   }
 
   /* =====================================================
-     2) INSIGNIAS (SVG propio por rango; las divisiones se
-        distinguen con 1, 2 o 3 puntos y brillo en la I)
+     2) INSIGNIAS (SVG; divisiones = 1, 2 o 3 puntos)
      ===================================================== */
   function ensureDefs() {
     if ($("#rkDefs")) return;
@@ -88,12 +86,12 @@
         return `<path d="M32 20l12 7v14l-12 7-12-7V27z" fill="${L}"/><path d="M32 27l6 3.5v7L32 41l-6-3.5v-7z" fill="#0e1230" opacity=".55"/>`;
       case "diamond":
         return `<path d="M32 20l13 12-13 18-13-18z" fill="${L}"/><path d="M19 32h26M26 32l6-12 6 12-6 18z" fill="none" stroke="#0e1230" stroke-opacity=".45" stroke-width="1.6" stroke-linejoin="round"/>`;
-      default: // elite: corona
+      default:
         return `<path d="M20 46l2-17 8 8 2-12 2 12 8-8 2 17z" fill="${L}" stroke="${L}" stroke-width="1.5" stroke-linejoin="round"/><rect x="20" y="47" width="24" height="3.4" rx="1.4" fill="${L}"/>`;
     }
   }
 
-  // di: 0 (III) · 1 (II) · 2 (I) · null = sin división (para mostrar la categoría)
+  // di: 0 (III) · 1 (II) · 2 (I) · null = categoría sin división
   function badge(k, di, size) {
     ensureDefs();
     const t = TIERS.find(x => x.k === k) || TIERS[0];
@@ -120,15 +118,16 @@
     <path d="M7 5H4v1.5A3.5 3.5 0 0 0 7.5 10M17 5h3v1.5A3.5 3.5 0 0 1 16.5 10" fill="none" stroke="currentColor" stroke-width="1.6"/>
     <rect x="10.8" y="13" width="2.4" height="4" fill="currentColor"/>
     <rect x="7.5" y="17" width="9" height="2.6" rx="1.1" fill="currentColor"/></svg>`;
-  const CROWN = (c, s = 22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true" style="filter:drop-shadow(0 0 6px ${c}99)">
+  const CROWN = (c, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true" style="filter:drop-shadow(0 0 5px ${c}99)">
     <path d="M3 18l1.5-10 4.5 4.5L12 5l3 7.5L19.5 8 21 18z" fill="${c}" stroke="#00000066" stroke-width="1" stroke-linejoin="round"/>
     <rect x="3.5" y="18.6" width="17" height="2.2" rx="1" fill="${c}" stroke="#00000066" stroke-width=".8"/></svg>`;
-  const REFRESH = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const REFRESH = `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const BACK = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const INFO = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.6v.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`;
 
-  /* ---------- Estilos ---------- */
+  /* =====================================================
+     3) ESTILOS
+     ===================================================== */
   const st = document.createElement("style");
   st.textContent = `
   .gx6-nav{z-index:950!important}
@@ -136,137 +135,148 @@
   .friends-screen{padding-bottom:130px!important}
   body:has(#gxRank) .gx-fab{display:none!important}
 
-  .rk{position:fixed;inset:0;z-index:190;overflow-y:auto;-webkit-overflow-scrolling:touch;color:#f4f6ff;
-    background:radial-gradient(120% 45% at 50% 0,#4c2fd066,transparent 60%),radial-gradient(70% 40% at 100% 55%,#1d4ed833,transparent 60%),linear-gradient(180deg,#0a0f33,#050716);
-    padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(116px + env(safe-area-inset-bottom,0px));
+  /* Pantalla fija: la página no se mueve, solo se desplaza la lista */
+  .rk{position:fixed;inset:0;z-index:190;overflow:hidden;display:flex;flex-direction:column;color:#f4f6ff;
+    background:radial-gradient(120% 45% at 50% 0,#4c2fd066,transparent 60%),radial-gradient(70% 40% at 100% 60%,#1d4ed833,transparent 60%),linear-gradient(180deg,#0a0f33,#050716);
+    padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(88px + env(safe-area-inset-bottom,0px));
     animation:rkIn .3s ease both;font-family:Inter,system-ui,-apple-system,sans-serif}
-  @keyframes rkIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  .rk-in{max-width:480px;margin:0 auto}
+  @keyframes rkIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .rk-in{position:relative;flex:1;min-height:0;width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
   .rk button{font:inherit;cursor:pointer;color:inherit}
-  .rk-card{border-radius:22px;border:1px solid #5b6cff40;margin-bottom:12px;
-    background:linear-gradient(160deg,#141a4ad9,#0a0e2ad9);box-shadow:0 0 26px #4f46e522,0 12px 30px #0008,inset 0 1px 0 #ffffff14}
+  .rk-card{border-radius:20px;border:1px solid #5b6cff40;background:linear-gradient(160deg,#141a4ad9,#0a0e2ad9);
+    box-shadow:0 0 22px #4f46e51f,0 10px 26px #0008,inset 0 1px 0 #ffffff14}
 
-  .rk-top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin-bottom:14px}
-  .rk-ib{width:44px;height:44px;border-radius:14px;border:1.5px solid #6d7bff88;background:linear-gradient(145deg,#1b2370,#0d1240);
-    color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 0 16px #4f46e555}
+  .rk-top{flex:none;display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:8px}
+  .rk-ib{width:40px;height:40px;border-radius:13px;border:1.5px solid #6d7bff88;background:linear-gradient(145deg,#1b2370,#0d1240);
+    color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 0 14px #4f46e544}
   .rk-ib:active{transform:scale(.94)}
-  .rk-title{text-align:center}
-  .rk-title h1{margin:0;font-size:1.45rem;font-weight:900;letter-spacing:.06em;
-    background:linear-gradient(180deg,#fff,#b8c4ff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px #6d7bffaa)}
-  .rk-title p{margin:3px 0 0;color:#8fa0ff;font-size:.68rem;font-weight:600;line-height:1.3}
+  .rk-ib.on{border-color:#fbbf24;box-shadow:0 0 16px #fbbf2466}
+  .rk-title{text-align:center;min-width:0}
+  .rk-title h1{margin:0;font-size:1.3rem;font-weight:900;letter-spacing:.08em;
+    background:linear-gradient(180deg,#fff,#b8c4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .rk-title p{margin:2px 0 0;color:#8fa0ff;font-size:.66rem;font-weight:600;line-height:1.3}
 
-  /* --- Tu posición --- */
-  .rk-hero{padding:14px;display:grid;gap:12px}
-  .rk-k{font:800 .62rem monospace;letter-spacing:.16em;color:#a5b4fc}
-  .rk-me{display:flex;align-items:center;gap:12px}
-  .rk-big{font:900 2.2rem/1 Inter,system-ui,sans-serif;background:linear-gradient(180deg,#fff,#fbbf24);
-    -webkit-background-clip:text;background-clip:text;color:transparent;min-width:58px}
-  .rk-bigav{position:relative;flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:2rem;
-    background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:3px solid var(--rc,#8b5cf6);box-shadow:0 0 20px var(--rc,#8b5cf6)}
-  .rk-bigav em{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);padding:2px 8px;border-radius:99px;white-space:nowrap;
-    background:linear-gradient(135deg,#fbbf24,#d97706);color:#2a1600;font:900 .55rem Inter,sans-serif;font-style:normal;border:1.5px solid #fff8}
+  /* --- Tarjeta de rango (botón) --- */
+  .rk-hero{flex:none;position:relative;padding:12px;display:grid;gap:10px;cursor:pointer;text-align:left;
+    border-color:color-mix(in srgb,var(--rc,#6d7bff) 60%,transparent);
+    background:radial-gradient(120% 90% at 0 0,color-mix(in srgb,var(--rc,#6d7bff) 20%,transparent),transparent 60%),linear-gradient(160deg,#141a4a,#0a0e2a);
+    box-shadow:0 0 24px color-mix(in srgb,var(--rc,#6d7bff) 28%,transparent),0 10px 26px #0008,inset 0 1px 0 #ffffff14;
+    transition:transform .15s}
+  .rk-hero:active{transform:scale(.99)}
+  .rk-hh{display:flex;align-items:center;justify-content:space-between}
+  .rk-k{font:800 .6rem monospace;letter-spacing:.16em;color:#a5b4fc}
+  .rk-more{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff1f;font-size:.64rem;font-weight:800;color:#e0e7ff}
+  .rk-hm{display:flex;align-items:center;gap:10px}
+  .rk-big{font:900 1.9rem/1 Inter,system-ui,sans-serif;background:linear-gradient(180deg,#fff,#fbbf24);
+    -webkit-background-clip:text;background-clip:text;color:transparent;min-width:46px}
+  .rk-bigav{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;
+    background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:2.5px solid var(--rc,#8b5cf6);box-shadow:0 0 14px var(--rc,#8b5cf6)}
   .rk-who{flex:1;min-width:0}
-  .rk-who b{display:block;font-size:1.05rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rk-rp{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:#0a0d2a99;border:1px solid #ffffff14}
-  .rk-rb{flex:none;display:grid;place-items:center;width:70px}
+  .rk-who b{display:block;font-size:.98rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk-who small{display:block;margin-top:1px;color:#9aa6d8;font-size:.64rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-ttr{flex:none;display:flex;align-items:center;gap:5px;color:#fbbf24;font-weight:900;font-size:1.15rem}
+  .rk-rp{display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;background:#070a24b3;border:1px solid #ffffff14}
+  .rk-rb{flex:none;display:grid;place-items:center;width:52px}
   .rk-rt{flex:1;min-width:0}
-  .rk-rl{display:block;font-size:1.25rem;font-weight:900;margin-bottom:7px}
-  .rk-bar{height:9px;border-radius:99px;background:#0b1030;border:1px solid #ffffff1c;overflow:hidden}
+  .rk-rl{display:block;font-size:1.1rem;font-weight:900;margin-bottom:6px}
+  .rk-bar{height:8px;border-radius:99px;background:#0b1030;border:1px solid #ffffff1c;overflow:hidden}
   .rk-bar i{display:block;height:100%;border-radius:99px;box-shadow:0 0 10px currentColor}
-  .rk-rt small{display:block;margin-top:7px;color:#b6bfe8;font-size:.7rem;line-height:1.35}
-  .rk-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .rk-mini div{padding:10px 4px;border-radius:14px;text-align:center;background:#0a0d2a99;border:1px solid #ffffff14}
-  .rk-mini b{display:flex;align-items:center;justify-content:center;gap:5px;font-size:1.1rem;color:#fff}
-  .rk-mini div.tr b{color:#fbbf24}
-  .rk-mini span{font-size:.55rem;color:#9aa6d8;letter-spacing:.1em;font-weight:700}
-  .rk-lock{display:grid;place-items:center;width:70px;height:70px;border-radius:50%;font-size:1.9rem;background:#ffffff0a;border:2px dashed #ffffff33}
-  .rk-note{margin:8px 0 0;color:#b6bfe8;font-size:.8rem;line-height:1.45}
+  .rk-rt small{display:block;margin-top:6px;color:#b6bfe8;font-size:.68rem;line-height:1.3}
+  .rk-rt small b{color:#fff}
+  .rk-lock{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;font-size:1.4rem;background:#ffffff0a;border:2px dashed #ffffff33}
 
-  /* --- Pestañas --- */
-  .rk-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px;margin-bottom:12px;border-radius:18px;
-    background:#0a0e2acc;border:1px solid #5b6cff40}
-  .rk-tab{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:0;border-radius:13px;
-    background:transparent;color:#aab3e8;font-weight:800;font-size:.8rem;letter-spacing:.04em}
-  .rk-tab.on{color:#fff;background:linear-gradient(135deg,#7c5cff,#4f2fd8);box-shadow:0 0 20px #7c5cff77,inset 0 1px 0 #ffffff44}
+  /* --- Lista --- */
+  .rk-lc{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px}
+  .rk-lh{flex:none;display:flex;align-items:center;gap:8px}
+  .rk-tabs{display:flex;gap:6px;flex:1}
+  .rk-tab{display:flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:99px;border:1px solid #ffffff1f;background:#ffffff0a;
+    color:#aab3e8;font-weight:800;font-size:.72rem}
+  .rk-tab.on{color:#fff;border-color:#a78bfa;background:linear-gradient(135deg,#7c5cff,#4f2fd8);box-shadow:0 0 14px #7c5cff66}
+  .rk-lh .rk-ib{width:32px;height:32px;border-radius:10px}
+  .rk-cap{flex:none;margin:8px 2px 8px;color:#8e9acd;font-size:.68rem;font-weight:600;display:flex;align-items:center;gap:6px}
+  .rk-cap b{color:#e0e7ff;font-size:.74rem;letter-spacing:.06em}
+  #rkList{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-right:2px}
+  #rkList::-webkit-scrollbar{width:4px}
+  #rkList::-webkit-scrollbar-thumb{background:#ffffff2a;border-radius:4px}
 
-  /* --- Categorías --- */
-  .rk-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;margin-bottom:12px}
-  .rk-cat{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 9px;border-radius:16px;
-    border:1.5px solid #ffffff14;background:linear-gradient(170deg,#ffffff0d,#ffffff03)}
-  .rk-cat b{font-size:.74rem;font-weight:900;color:var(--c);text-transform:uppercase;letter-spacing:.03em}
-  .rk-cat small{font-size:.62rem;color:#b6bfe8;font-weight:600}
-  .rk-dv{font:800 .52rem monospace;letter-spacing:.1em;color:#7f8bc0}
-  .rk-cat.cur{border-color:var(--c);box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent),inset 0 0 18px color-mix(in srgb,var(--c) 14%,transparent)}
-  .rk-cat:active{transform:scale(.96)}
-
-  /* --- Tabla --- */
-  .rk-table{padding:14px}
-  .rk-th{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-  .rk-th .ico{color:#a78bfa;flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#7c5cff22}
-  .rk-th .ico svg{width:26px;height:26px}
-  .rk-th h2{margin:0;font-size:1.15rem;font-weight:900}
-  .rk-th p{margin:2px 0 0;font-size:.7rem;color:#9aa6d8}
-  .rk-th .rk-ib{margin-left:auto;width:40px;height:40px;border-radius:12px}
-  .rk-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-  .rk-search,.rk-sel{width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:14px;border:1.5px solid #5b6cff55;
-    background:#080b26;color:#fff;font:600 16px Inter,system-ui,sans-serif;outline:0}
-  .rk-search:focus,.rk-sel:focus{border-color:#a78bfa}
-  .rk-sel{font-size:.82rem;font-weight:700;appearance:none;-webkit-appearance:none;
-    background-image:linear-gradient(45deg,transparent 50%,#a5b4fc 50%),linear-gradient(135deg,#a5b4fc 50%,transparent 50%);
-    background-position:calc(100% - 20px) 20px,calc(100% - 14px) 20px;background-size:6px 6px;background-repeat:no-repeat;padding-right:34px}
-  .rk-thead{display:none}
-
-  .rk-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;margin-bottom:8px;cursor:pointer;
-    background:#090c2acc;border:1px solid #ffffff14}
+  .rk-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:14px;margin-bottom:6px;cursor:pointer;
+    background:#090c2acc;border:1px solid #ffffff12}
   .rk-row:active{transform:scale(.99)}
-  .rk-row.me{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2418,#090c2acc);box-shadow:0 0 16px #fbbf2433}
-  .rk-row.t1{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2430,#0b0e2acc 70%);box-shadow:0 0 24px #fbbf2455,inset 0 0 20px #fbbf2414}
-  .rk-row.t2{border-color:#cbd5e1;background:linear-gradient(90deg,#cbd5e124,#0b0e2acc 70%);box-shadow:0 0 18px #cbd5e133}
-  .rk-row.t3{border-color:#e0894a;background:linear-gradient(90deg,#e0894a26,#0b0e2acc 70%);box-shadow:0 0 18px #e0894a33}
-  .rk-pos{flex:none;width:38px;display:flex;flex-direction:column;align-items:center;gap:1px;font:900 .95rem Inter,system-ui,sans-serif;color:#b6bfe8}
+  .rk-row.me{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2418,#090c2acc);box-shadow:0 0 14px #fbbf2430}
+  .rk-row.t1{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2430,#0b0e2acc 70%);box-shadow:0 0 20px #fbbf2450}
+  .rk-row.t2{border-color:#cbd5e1;background:linear-gradient(90deg,#cbd5e124,#0b0e2acc 70%);box-shadow:0 0 14px #cbd5e12e}
+  .rk-row.t3{border-color:#e0894a;background:linear-gradient(90deg,#e0894a26,#0b0e2acc 70%);box-shadow:0 0 14px #e0894a30}
+  .rk-pos{flex:none;width:30px;display:flex;flex-direction:column;align-items:center;gap:0;font:900 .88rem/1.1 Inter,system-ui,sans-serif;color:#b6bfe8}
   .rk-row.t1 .rk-pos{color:#fcd34d}.rk-row.t2 .rk-pos{color:#e2e8f0}.rk-row.t3 .rk-pos{color:#f0a868}
-  .rk-av{width:42px;height:42px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:1.35rem;
-    background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:2.5px solid var(--rc,#ffffff33)}
+  .rk-av{position:relative;width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;
+    background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:2px solid var(--rc,#ffffff33)}
+  .rk-dot{position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#64748b;border:2px solid #0a0e2a}
+  .rk-dot.on{background:#34d399;box-shadow:0 0 6px #34d399}
   .rk-info{flex:1;min-width:0}
-  .rk-info b{display:block;font-size:.88rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rk-info small{display:block;color:#8e9acd;font-size:.64rem;font-weight:600;margin-top:1px}
-  .rk-st{display:flex;align-items:center;font-size:.64rem;color:#7c86ad;font-weight:700;margin-top:2px}
-  .rk-st i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#64748b;margin-right:5px}
-  .rk-st.on{color:#34d399}.rk-st.on i{background:#34d399;box-shadow:0 0 6px #34d399}
-  .rk-inl{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:.7rem;font-weight:800;color:var(--rc)}
-  .rk-rcol{display:none}
-  .rk-tr{display:flex;align-items:center;gap:5px;color:#fbbf24;font-weight:900;font-size:.95rem;flex:none}
-  .rk-chev{display:none;color:#8e9acd;font-size:1.3rem}
-
-  .rk-foot{display:flex;align-items:center;gap:10px;margin-top:6px;padding:10px 12px;border-radius:14px;background:#080b26;border:1px solid #ffffff14}
-  .rk-foot p{margin:0;flex:1;color:#9aa6d8;font-size:.7rem;line-height:1.35}
-  .rk-foot button{flex:none;padding:9px 14px;border:0;border-radius:12px;font-weight:800;font-size:.72rem;
-    background:linear-gradient(135deg,#7c5cff,#4f2fd8);box-shadow:0 3px 0 #2a1a8a}
-  .rk-empty{padding:24px 14px;text-align:center;color:#aab3d6;border-radius:18px;background:#090c2acc;border:1px solid #ffffff12;font-size:.85rem;line-height:1.5}
+  .rk-info b{display:block;font-size:.84rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk-info small{display:block;color:#8e9acd;font-size:.62rem;font-weight:600;margin-top:1px}
+  .rk-x{display:none}
+  .rk-rcol{flex:none;display:flex;align-items:center;gap:5px;font-weight:800;font-size:.64rem;color:var(--rc);white-space:nowrap}
+  .rk-tr{flex:none;display:flex;align-items:center;gap:4px;min-width:50px;justify-content:flex-end;color:#fbbf24;font-weight:900;font-size:.9rem}
+  .rk-empty{padding:22px 12px;text-align:center;color:#aab3d6;border-radius:16px;background:#090c2acc;border:1px solid #ffffff12;font-size:.82rem;line-height:1.5}
   .rk-btn{margin-top:12px;padding:12px 18px;border:0;border-radius:14px;color:#fff;font-weight:900;
     background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 0 #3b1d8f}
 
-  /* --- Modales --- */
-  .rk-mo{position:fixed;inset:0;z-index:260;display:grid;place-items:center;padding:18px;background:rgba(4,6,20,.86);animation:rkIn .2s ease both}
-  .rk-mc{position:relative;width:min(400px,100%);max-height:86vh;overflow-y:auto;padding:22px 16px 16px;border-radius:26px;text-align:center;
-    border:1.5px solid var(--c,#7c5cff);background:linear-gradient(160deg,#171d54,#0a0e2a);
-    box-shadow:0 30px 80px #000c,0 0 40px color-mix(in srgb,var(--c,#7c5cff) 35%,transparent)}
-  .rk-mc h3{margin:6px 0 2px;font-size:1.4rem;font-weight:900;color:var(--c,#fff);text-transform:uppercase;letter-spacing:.04em}
-  .rk-mc .rg{color:#c6cdf5;font-weight:800;font-size:.85rem}
-  .rk-mc p{margin:10px 0;color:#aab3d6;font-size:.82rem;line-height:1.5}
-  .rk-x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff12;color:#fff;padding:0}
-  .rk-dr{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-top:8px;border-radius:16px;text-align:left;background:#ffffff08;border:1px solid #ffffff14}
-  .rk-dr.cur{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
-  .rk-dr div{flex:1}
-  .rk-dr b{display:block;font-size:.92rem}
-  .rk-dr small{color:#aab3d6;font-size:.72rem}
-  .rk-dr span{font-size:.66rem;font-weight:800;color:#9aa6d8}
-  .rk-dr.cur span{color:var(--c)}
-  .rk-mc .rk-btn{width:100%;margin-top:10px}
-  .rk-ghost{background:#ffffff10!important;box-shadow:none!important;border:1px solid #ffffff22!important}
-  .rk-rules{display:grid;gap:8px;margin-top:12px;text-align:left}
-  .rk-rules div{display:flex;gap:10px;padding:10px 12px;border-radius:14px;background:#ffffff08;border:1px solid #ffffff12;font-size:.78rem;color:#c6cdf5;line-height:1.4}
-  .rk-rules i{font-style:normal;flex:none}
+  /* --- Widget de reglas (sobre la tarjeta de rango) --- */
+  .rk-popbg{position:fixed;inset:0;z-index:40}
+  .rk-pop{position:absolute;z-index:41;top:50px;right:0;width:min(318px,100%);padding:14px;border-radius:22px;
+    border:1.5px solid #fbbf2488;background:linear-gradient(160deg,#222a7a,#0c1138);
+    box-shadow:0 22px 50px #000c,0 0 30px #fbbf2430,inset 0 1px 0 #ffffff22;transform-origin:calc(100% - 20px) -8px;animation:rkPop .2s cubic-bezier(.2,.9,.3,1.2) both}
+  .rk-pop::before{content:"";position:absolute;top:-8px;right:14px;width:14px;height:14px;background:#222a7a;border-left:1.5px solid #fbbf2488;border-top:1.5px solid #fbbf2488;transform:rotate(45deg)}
+  @keyframes rkPop{from{opacity:0;transform:scale(.85) translateY(-6px)}to{opacity:1;transform:none}}
+  .rk-ph{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .rk-ph span{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#fbbf24,#d97706);color:#2a1600}
+  .rk-ph b{display:block;font-size:.95rem;font-weight:900}
+  .rk-ph small{color:#aab3e8;font-size:.64rem}
+  .rk-pr{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-top:1px solid #ffffff14}
+  .rk-pr i{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:10px;font-style:normal;font-size:.95rem;background:#ffffff12;border:1px solid #ffffff1a}
+  .rk-pr b{display:block;font-size:.76rem;font-weight:800;color:#fff}
+  .rk-pr small{display:block;margin-top:1px;color:#b6bfe8;font-size:.67rem;line-height:1.35}
+
+  /* --- Detalle de rangos (hoja inferior) --- */
+  .rkm{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;background:rgba(4,6,20,.84);animation:rkFade .2s ease both}
+  @keyframes rkFade{from{opacity:0}to{opacity:1}}
+  .rkm-c{position:relative;width:min(480px,100%);max-height:94vh;max-height:94dvh;overflow-y:auto;overscroll-behavior:contain;
+    padding:14px 14px calc(16px + env(safe-area-inset-bottom,0px));border-radius:26px 26px 0 0;color:#f4f6ff;font-family:Inter,system-ui,sans-serif;
+    border:1.5px solid color-mix(in srgb,var(--c,#7c5cff) 70%,transparent);border-bottom:0;
+    background:radial-gradient(120% 40% at 50% 0,color-mix(in srgb,var(--c,#7c5cff) 22%,transparent),transparent 70%),linear-gradient(170deg,#171d54,#090d28);
+    box-shadow:0 -20px 60px #000b;animation:rkUp .28s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes rkUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .rkm-c button{font:inherit;cursor:pointer;color:inherit}
+  .rkm-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .rkm-h h2{margin:0;font-size:1.05rem;font-weight:900;letter-spacing:.06em}
+  .rkm-x{width:34px;height:34px;border-radius:11px;border:1px solid #ffffff22;background:#ffffff12;padding:0}
+  .rkm-goal{padding:10px 12px;border-radius:16px;background:#070a24b3;border:1px solid #ffffff1a;margin-bottom:10px}
+  .rkm-goal b{display:block;font-size:.8rem}
+  .rkm-goal small{display:block;margin-top:2px;color:#b6bfe8;font-size:.7rem}
+  .rkm-goal .rk-bar{margin-top:7px;height:7px}
+  .rkm-sel{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:10px}
+  .rkm-s{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 6px;border-radius:13px;
+    border:1.5px solid #ffffff14;background:#ffffff08}
+  .rkm-s span{font-size:.54rem;font-weight:800;color:#b6bfe8;letter-spacing:.02em;text-transform:uppercase}
+  .rkm-s.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}
+  .rkm-s.on span{color:var(--c)}
+  .rkm-s em{position:absolute;top:-6px;right:-3px;padding:1px 5px;border-radius:99px;font:900 .45rem Inter,sans-serif;font-style:normal;background:#fbbf24;color:#2a1600}
+  .rkm-d{padding:12px;border-radius:18px;background:#ffffff08;border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+  .rkm-dh{display:flex;align-items:center;gap:12px}
+  .rkm-dh h3{margin:0;font-size:1.3rem;font-weight:900;color:var(--c);text-transform:uppercase;letter-spacing:.04em}
+  .rkm-dh div small{display:block;color:#d6dcff;font-size:.78rem;font-weight:700;margin-top:1px}
+  .rkm-d p{margin:9px 0 8px;color:#aab3d6;font-size:.76rem;line-height:1.45}
+  .rkm-dr{display:flex;align-items:center;gap:10px;padding:7px 10px;margin-top:6px;border-radius:13px;background:#ffffff08;border:1px solid #ffffff12}
+  .rkm-dr.cur{border-color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+  .rkm-dr div{flex:1;min-width:0}
+  .rkm-dr b{display:block;font-size:.82rem}
+  .rkm-dr small{color:#aab3d6;font-size:.66rem}
+  .rkm-dr span{font-size:.62rem;font-weight:800;color:#9aa6d8;white-space:nowrap}
+  .rkm-dr.cur span{color:var(--c)}
+  .rkm-req{margin-top:9px;padding:9px 11px;border-radius:13px;font-size:.74rem;line-height:1.4;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,transparent),#ffffff0a);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+
   .rk-toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:10px;
     padding:10px 18px;border-radius:99px;background:#111631;border:1.5px solid #fbbf24;color:#fff;font-weight:800;font-size:.85rem;box-shadow:0 10px 30px #000c;animation:rkIn .3s ease both}
 
@@ -276,38 +286,66 @@
   .rk-prow i{font-style:normal;color:#94a3b8;font:700 .6rem monospace;letter-spacing:.08em}
   .rk-pbi{display:inline-flex;align-items:center;gap:6px;margin-left:12px;font-size:.85rem;font-weight:900}
 
-  /* --- Tablet / PC --- */
-  @media (min-width:720px){
-    .rk{padding-left:28px;padding-right:28px}
-    .rk-in{max-width:1080px}
-    .rk-title h1{font-size:1.8rem}.rk-title p{font-size:.8rem}
-    .rk-hero{grid-template-columns:1.1fr 1.4fr 1fr;align-items:center;gap:16px;padding:18px}
-    .rk-hero .rk-k{grid-column:1/-1;margin-bottom:-6px}
-    .rk-mini{grid-template-columns:1fr;gap:8px}
-    .rk-mini div{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-    .rk-mini b{order:2;font-size:1.05rem}.rk-mini span{order:1;font-size:.62rem}
-    .rk-cats{grid-template-columns:repeat(6,1fr);gap:10px;padding:12px}
-    .rk-tools{grid-template-columns:1fr 280px}
-    .rk-thead{display:grid;grid-template-columns:70px 54px 1fr 220px 120px 20px;gap:10px;padding:8px 12px;margin-bottom:6px;
-      font:800 .66rem monospace;letter-spacing:.14em;color:#8e9acd;border-radius:12px;background:#080b26;border:1px solid #ffffff10}
-    .rk-thead span:nth-child(5){text-align:right}
-    .rk-row{display:grid;grid-template-columns:70px 54px 1fr 220px 120px 20px;gap:10px;padding:10px 12px}
-    .rk-pos{flex-direction:row;justify-content:flex-start;gap:6px;width:auto;font-size:1rem}
-    .rk-av{width:48px;height:48px}
-    .rk-inl{display:none}
-    .rk-rcol{display:flex;align-items:center;gap:10px;font-weight:900;font-size:.92rem;color:var(--rc)}
-    .rk-tr{justify-content:flex-end;font-size:1.05rem}
-    .rk-chev{display:block}
+  /* --- Pantallas bajas (celular de lado, SE...) --- */
+  @media (max-height:740px){
+    .rk-title p{display:none}
+    .rk-hero{padding:10px;gap:8px}
+    .rk-rb{width:44px}.rk-rb svg{width:40px;height:45px}
+    .rk-rl{font-size:1rem;margin-bottom:4px}
+    .rk-big{font-size:1.6rem}
   }
+  @media (max-height:600px){
+    .rk{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+    .rk-in{gap:7px}
+    .rk-top{grid-template-columns:34px 1fr 34px}
+    .rk-ib{width:34px;height:34px}
+    .rk-title h1{font-size:1.05rem}
+    .rk-rt small{display:none}
+    .rk-hh{display:none}
+    .rk-rp{padding:6px 8px}
+    .rk-row{padding:6px 8px;margin-bottom:4px}
+    .rk-cap{margin:5px 2px}
+    .rkm-d p{display:none}
+  }
+  @media (max-width:360px){
+    .rk-rcol span{display:none}
+    .rk-big{font-size:1.5rem;min-width:38px}
+  }
+
+  /* --- Tablet / PC: tarjeta a la izquierda, Top 100 a la derecha --- */
+  @media (min-width:760px){
+    .rk{padding-left:28px;padding-right:28px}
+    .rk-in{max-width:1040px;display:grid;grid-template-columns:380px 1fr;grid-template-rows:auto 1fr;gap:14px 18px}
+    .rk-top{grid-column:1/-1}
+    .rk-title h1{font-size:1.6rem}.rk-title p{display:block;font-size:.76rem}
+    .rk-hero{grid-column:1;grid-row:2;align-self:start;padding:16px;gap:14px}
+    .rk-lc{grid-column:2;grid-row:2;padding:14px}
+    .rk-big{font-size:2.3rem}.rk-bigav{width:56px;height:56px;font-size:1.8rem}
+    .rk-rb{width:70px}.rk-rb svg{width:64px;height:72px}
+    .rk-rl{font-size:1.3rem}
+    .rk-row{padding:9px 14px;gap:14px}
+    .rk-av{width:42px;height:42px}
+    .rk-info b{font-size:.92rem}
+    .rk-x{display:inline}
+    .rk-rcol{font-size:.8rem;gap:8px;min-width:150px}
+    .rk-tr{font-size:1rem;min-width:70px}
+    .rkm{align-items:center;padding:20px}
+    .rkm-c{border-radius:26px;border-bottom:1.5px solid color-mix(in srgb,var(--c,#7c5cff) 70%,transparent)}
+  }
+  @media (min-width:760px) and (max-height:600px){
+    .rk-in{grid-template-columns:330px 1fr}
+    .rk-hh{display:flex}
+  }
+  @media (prefers-reduced-motion:reduce){.rk,.rk-pop,.rkm,.rkm-c{animation:none}}
   `;
   document.head.appendChild(st);
 
   /* =====================================================
-     3) DATOS
+     4) DATOS
      ===================================================== */
   const rk = {
-    tab: "general", filter: "all", q: "", modal: null,
-    rows: null, me: null, mine: null, pos: 0, err: "", at: 0, loading: false, note: "",
+    tab: "general", modal: null, rules: false,
+    rows: null, me: null, pos: 0, err: "", at: 0, loading: false,
     friends: null, friendsAt: 0, friendsLoading: false, friendsErr: "",
     online: null
   };
@@ -333,7 +371,12 @@
     } catch (e) { rk.online = null; }
   }
 
-  // Memoriza el rango actual para avisar cuando suba o baje
+  function myTrophies() {
+    const g = G();
+    if (rk.me && rk.me.trophies != null) return rk.me.trophies;
+    return (g && g.state.stats && g.state.stats.trophies) || 0;
+  }
+
   function setBase(trophies) {
     try {
       const g = G(); if (!g || !g.state.user) return;
@@ -352,7 +395,7 @@
     rk.loading = true; rk.err = ""; drawRank();
     try {
       const fs = await g.fsModule(), db = g.fb.db, uid = g.state.user.uid;
-      // Solo jugadores con 1+ trofeos: quien baja a 0 desaparece solo y vuelve al ganar uno
+      // Solo 1+ trofeos: quien baja a 0 desaparece solo y vuelve al ganar uno
       const sn = await fs.getDocs(fs.query(fs.collection(db, "publicProfiles"),
         fs.where("trophies", ">=", 1), fs.orderBy("trophies", "desc"), fs.limit(100)));
 
@@ -378,7 +421,6 @@
         } catch (e) { /* sin posición */ }
       }
       rk.me = me;
-      rk.mine = me && (me.trophies || 0) >= 1 ? me : null;
       if (me) setBase(me.trophies);
       rk.at = Date.now();
     } catch (e) {
@@ -419,7 +461,7 @@
   }
 
   /* =====================================================
-     4) PANTALLA
+     5) PANTALLA
      ===================================================== */
   function openRank() {
     ensureDefs();
@@ -429,29 +471,27 @@
       el.id = "gxRank";
       el.className = "rk";
       el.addEventListener("click", onClick);
-      el.addEventListener("input", e => {
-        if (e.target.id === "rkQ") { rk.q = e.target.value; rk.note = ""; renderList(); }
-      });
-      el.addEventListener("change", e => {
-        if (e.target.id === "rkF") { rk.filter = e.target.value; renderList(); }
-      });
       document.body.appendChild(el);
     }
-    el.scrollTop = 0;
-    rk.q = ""; rk.note = ""; rk.modal = null; rk.tab = "general"; rk.filter = "all";
+    rk.modal = null; rk.rules = false; rk.tab = "general";
+    drawModal();
     loadRank(false);
   }
-  function closeRank() { const el = $("#gxRank"); if (el) el.remove(); }
+  function closeRank() {
+    const el = $("#gxRank"); if (el) el.remove();
+    rk.modal = null; rk.rules = false;
+    drawModal();
+  }
 
   function heroHtml() {
     const g = G(), s = g.state;
     if (!s.user) {
-      return `<section class="rk-card rk-hero"><div class="rk-k">TU POSICIÓN</div>
-        <p class="rk-note">Inicia sesión para ver tu posición y tu rango.</p>
-        <button class="rk-btn" data-k="login" type="button">Iniciar sesión</button></section>`;
+      return `<section class="rk-card rk-hero" style="cursor:default"><div class="rk-k">TU POSICIÓN</div>
+        <p style="margin:0;color:#b6bfe8;font-size:.82rem">Inicia sesión para ver tu posición y tu rango.</p>
+        <button class="rk-btn" style="margin:0" data-k="login" type="button">Iniciar sesión</button></section>`;
     }
     if (rk.loading && !rk.rows) {
-      return `<section class="rk-card rk-hero"><div class="rk-k">TU POSICIÓN</div><p class="rk-note">Cargando…</p></section>`;
+      return `<section class="rk-card rk-hero" style="cursor:default"><div class="rk-k">TU POSICIÓN</div><p style="margin:0;color:#b6bfe8;font-size:.82rem">Cargando…</p></section>`;
     }
     const m = rk.me || {}, prof = s.profile || {}, stt = s.stats || {};
     const name = m.username || prof.username || "jugador";
@@ -462,16 +502,16 @@
     const wins = m.wins != null ? m.wins : (stt.wins || 0);
     const played = m.played != null ? m.played : (stt.played || 0);
     const r = rankOf(tr);
-    const col = r ? r.tier.c1 : "#64748b";
+    const col = r ? r.tier.c1 : "#7c86ad";
 
     const panel = r ? `
       <div class="rk-rp">
-        <div class="rk-rb">${badgeFor(r, 62)}</div>
+        <div class="rk-rb">${badgeFor(r, 46)}</div>
         <div class="rk-rt">
           <span class="rk-rl" style="color:${r.tier.c1}">${r.label}</span>
           <div class="rk-bar"><i style="width:${r.pct.toFixed(1)}%;color:${r.tier.c1};background:linear-gradient(90deg,${r.tier.c2},${r.tier.c1})"></i></div>
           <small>${r.next
-            ? `${fmt(tr - r.cur)} / ${fmt(r.next - r.cur)} trofeos · Te faltan <b>${fmt(r.need)}</b> para ${esc(r.nextLabel)}`
+            ? `Te faltan <b>${fmt(r.need)}</b> trofeos para ${esc(r.nextLabel)}`
             : "¡Rango máximo alcanzado!"}</small>
         </div>
       </div>` : `
@@ -480,79 +520,61 @@
         <div class="rk-rt">
           <span class="rk-rl" style="color:#cbd5e1">Ranking bloqueado</span>
           <div class="rk-bar"><i style="width:0%;color:#a78bfa;background:#a78bfa"></i></div>
-          <small>0 / 1 trofeo · Consigue tu primer trofeo jugando contra bots para aparecer en el ranking y recibir tu rango.</small>
+          <small>0 / 1 trofeo · Consigue tu primer trofeo para entrar al ranking</small>
         </div>
       </div>`;
 
     return `
-    <section class="rk-card rk-hero">
-      <div class="rk-k">TU POSICIÓN</div>
-      <div class="rk-me">
+    <section class="rk-card rk-hero" data-k="ranks" role="button" tabindex="0" aria-label="Ver todos los rangos" style="--rc:${col}">
+      <div class="rk-hh"><span class="rk-k">TU POSICIÓN</span><span class="rk-more">Ver rangos ›</span></div>
+      <div class="rk-hm">
         <span class="rk-big">${r && rk.pos ? "#" + fmt(rk.pos) : "—"}</span>
-        <span class="rk-bigav" style="--rc:${col}">${avatar}<em>NV. ${lv}</em></span>
-        <div class="rk-who"><b>@${esc(name)}</b><div class="rk-st on"><i></i>En línea</div></div>
+        <span class="rk-bigav">${avatar}</span>
+        <div class="rk-who"><b>@${esc(name)}</b><small>Nivel ${lv} · ${fmt(wins)} victorias · ${fmt(played)} partidas</small></div>
+        <span class="rk-ttr">${CUP(18)}${fmt(tr)}</span>
       </div>
       ${panel}
-      <div class="rk-mini">
-        <div class="tr"><b>${CUP(16)}${fmt(tr)}</b><span>TROFEOS</span></div>
-        <div><b>${fmt(wins)}</b><span>VICTORIAS</span></div>
-        <div><b>${fmt(played)}</b><span>PARTIDAS</span></div>
-      </div>
     </section>`;
   }
 
-  function catsHtml() {
-    const cur = rk.me ? rankOf(rk.me.trophies) : null;
-    return `<section class="rk-card rk-cats">${TIERS.map(t => `
-      <button class="rk-cat ${cur && cur.k === t.k ? "cur" : ""}" data-k="tier" data-t="${t.k}" style="--c:${t.c1}" type="button">
-        ${badge(t.k, null, 46)}<b>${t.n}</b><small>${rangeText(t)}</small><span class="rk-dv">III · II · I</span>
-      </button>`).join("")}</section>`;
+  function rulesHtml() {
+    if (!rk.rules) return "";
+    return `<div class="rk-popbg" data-k="pclose"></div>
+      <div class="rk-pop" role="dialog" aria-label="Reglas del ranking">
+        <div class="rk-ph"><span>${CUP(18)}</span><div><b>Cómo entrar al ranking</b><small>Reglas rápidas</small></div></div>
+        <div class="rk-pr"><i>🏆</i><div><b>Necesitas 1 trofeo</b><small>Con al menos 1 trofeo apareces en el ranking.</small></div></div>
+        <div class="rk-pr"><i>🔒</i><div><b>0 trofeos = fuera</b><small>Si llegas a 0 sales del ranking. Vuelves al ganar 1.</small></div></div>
+        <div class="rk-pr"><i>🛡️</i><div><b>6 rangos, 3 divisiones</b><small>Bronce a Élite. En cada uno: III, II y I (la I es la más alta).</small></div></div>
+        <div class="rk-pr"><i>📈</i><div><b>Subes al ganar trofeos</b><small>Tu rango se actualiza solo con tus trofeos. Gana partidas con tu sesión iniciada.</small></div></div>
+      </div>`;
   }
 
   function drawRank() {
     const el = $("#gxRank");
     if (!el) return;
-    const prev = $("#rkQ", el);
-    if (prev) rk.q = prev.value;
     const fr = rk.tab === "friends";
-
     el.innerHTML = `
       <div class="rk-in">
         <header class="rk-top">
           <button class="rk-ib" data-k="home" type="button" aria-label="Volver">${BACK}</button>
           <div class="rk-title"><h1>RANKING</h1><p>Compite, sube de rango y demuestra quién es el mejor.</p></div>
-          <button class="rk-ib" data-k="rules" type="button" aria-label="Reglas">${INFO}</button>
+          <button class="rk-ib ${rk.rules ? "on" : ""}" data-k="info" type="button" aria-label="Reglas">${INFO}</button>
         </header>
         ${heroHtml()}
-        <div class="rk-tabs">
-          <button class="rk-tab ${!fr ? "on" : ""}" data-k="tab" data-t="general" type="button">${CUP(18)} TABLA GENERAL</button>
-          <button class="rk-tab ${fr ? "on" : ""}" data-k="tab" data-t="friends" type="button">👥 AMIGOS</button>
-        </div>
-        ${catsHtml()}
-        <section class="rk-card rk-table">
-          <div class="rk-th">
-            <span class="ico">${CUP(26)}</span>
-            <div><h2>${fr ? "AMIGOS" : "TOP 100"}</h2><p>${fr ? "Clasificación entre tus amigos" : "Jugadores con más trofeos"}</p></div>
+        <section class="rk-card rk-lc">
+          <div class="rk-lh">
+            <div class="rk-tabs">
+              <button class="rk-tab ${!fr ? "on" : ""}" data-k="tab" data-t="general" type="button">🌍 Mundial</button>
+              <button class="rk-tab ${fr ? "on" : ""}" data-k="tab" data-t="friends" type="button">👥 Amigos</button>
+            </div>
             <button class="rk-ib" data-k="refresh" type="button" aria-label="Actualizar">${REFRESH}</button>
           </div>
-          <div class="rk-tools">
-            <input id="rkQ" class="rk-search" type="search" placeholder="Buscar jugador" autocomplete="off" autocapitalize="off" spellcheck="false">
-            <select id="rkF" class="rk-sel" aria-label="Filtrar por rango">
-              <option value="all">Todos los rangos</option>
-              ${TIERS.map(t => `<option value="${t.k}">${t.n}</option>`).join("")}
-            </select>
-          </div>
-          <div class="rk-thead"><span>#</span><span></span><span>JUGADOR</span><span>RANGO</span><span>TROFEOS</span><span></span></div>
+          <div class="rk-cap">${fr ? "<b>AMIGOS</b> Clasificación entre tus amigos" : "<b>TOP 100</b> Jugadores con más trofeos"}</div>
           <div id="rkList"></div>
-          <div class="rk-foot"><p>Para aparecer en el ranking necesitas tener al menos 1 trofeo.</p>
-            <button data-k="rules" type="button">Ver reglas ›</button></div>
         </section>
-      </div>
-      <div id="rkModal"></div>`;
-    $("#rkQ", el).value = rk.q;
-    $("#rkF", el).value = rk.filter;
+        ${rulesHtml()}
+      </div>`;
     renderList();
-    drawModal();
   }
 
   function rowHtml(p, pos) {
@@ -561,18 +583,16 @@
     if (!r) return "";
     const me = g.state.user && p.uid === g.state.user.uid;
     const on = isOn(p.uid);
-    const status = on === null ? "" : `<div class="rk-st ${on ? "on" : ""}"><i></i>${on ? "En línea" : "Desconectado"}</div>`;
+    const dot = on === null ? "" : `<i class="rk-dot ${on ? "on" : ""}"></i>`;
     const tcls = pos === 1 ? "t1" : pos === 2 ? "t2" : pos === 3 ? "t3" : "";
     const crown = pos === 1 ? CROWN("#fbbf24") : pos === 2 ? CROWN("#e2e8f0") : pos === 3 ? CROWN("#e0894a") : "";
     return `
       <div class="rk-row ${tcls} ${me ? "me" : ""}" data-k="user" data-uid="${esc(p.uid)}" style="--rc:${r.tier.c1}">
         <span class="rk-pos">${crown}<span>${pos}</span></span>
-        <span class="rk-av">${g.avatarEmoji(p.avatar)}</span>
-        <div class="rk-info"><b>@${esc(p.username)}</b><small>Nivel ${lv}</small>${status}
-          <div class="rk-inl">${badgeFor(r, 20)}${r.label}</div></div>
-        <div class="rk-rcol">${badgeFor(r, 30)}<span>${r.label}</span></div>
-        <span class="rk-tr">${CUP(15)}${fmt(p.trophies)}</span>
-        <span class="rk-chev">›</span>
+        <span class="rk-av">${g.avatarEmoji(p.avatar)}${dot}</span>
+        <div class="rk-info"><b>@${esc(p.username)}</b><small>Nivel ${lv}<span class="rk-x"> · ${fmt(p.wins)} victorias</span></small></div>
+        <span class="rk-rcol">${badgeFor(r, 26)}<span>${r.label}</span></span>
+        <span class="rk-tr">${CUP(14)}${fmt(p.trophies)}</span>
       </div>`;
   }
 
@@ -599,99 +619,108 @@
         : "Aún no hay jugadores clasificados.<br>El primero en conseguir un trofeo abre el ranking."}</div>`;
       return;
     }
-
-    const q = rk.q.trim().replace(/^@/, "").toLowerCase();
-    let items = rows.map((p, i) => ({ p, pos: i + 1 }));
-    if (rk.filter !== "all") items = items.filter(x => { const r = rankOf(x.p.trophies); return r && r.k === rk.filter; });
-    if (q) items = items.filter(x => String(x.p.username || "").toLowerCase().includes(q));
-
-    if (!items.length) {
-      const canLookup = !fr && q.length >= 3;
-      list.innerHTML = `<div class="rk-empty">${esc(rk.note || (q ? "Nadie con ese nombre en esta lista." : "Nadie en este rango todavía."))}
-        ${canLookup ? `<br><button class="rk-btn" data-k="lookup" type="button">Buscar @${esc(q)} en todo el juego</button>` : ""}</div>`;
-      return;
-    }
-    list.innerHTML = items.map(x => rowHtml(x.p, x.pos)).join("");
+    list.innerHTML = rows.map((p, i) => rowHtml(p, i + 1)).join("");
   }
 
-  /* ---------- Modales ---------- */
-  function drawModal() {
-    const box = $("#rkModal");
-    if (!box) return;
-    const M = rk.modal;
-    if (!M) { box.innerHTML = ""; return; }
+  /* ---------- Detalle de rangos (hoja inferior sobre la barra) ---------- */
+  function modalHtml() {
+    const t = myTrophies(), cur = rankOf(t);
+    const sel = TIERS.find(x => x.k === rk.modal.sel) || TIERS[0];
+    const si = TIERS.indexOf(sel);
+    const goalCol = cur ? cur.tier.c1 : "#a78bfa";
 
-    if (M.type === "rules") {
-      box.innerHTML = `<div class="rk-mo" data-k="close"><section class="rk-mc" data-k="stop">
-        <button class="rk-x" data-k="close" type="button">✕</button>
-        <h3 style="color:#fff">Reglas del ranking</h3>
-        <div class="rk-rules">
-          <div><i>🏆</i>Los trofeos son tu progreso. Tu rango se calcula automáticamente con ellos.</div>
-          <div><i>🔓</i>Necesitas al menos 1 trofeo para aparecer. Con 0 trofeos (o si nunca tuviste) no apareces.</div>
-          <div><i>⬇️</i>Si pierdes todos tus trofeos sales del ranking, y vuelves en cuanto consigas 1.</div>
-          <div><i>🛡️</i>Hay 6 rangos: Bronce, Plata, Oro, Platino, Diamante y Élite. Cada uno tiene 3 divisiones: III, II y I (la I es la más alta).</div>
-          <div><i>📈</i>Subes o bajas de división al instante cuando ganas o pierdes trofeos.</div>
-          <div><i>🎮</i>Los trofeos se ganan en partidas contra bots con tu sesión iniciada.</div>
-        </div>
-        <button class="rk-btn" data-k="close" type="button">Entendido</button></section></div>`;
-      return;
-    }
+    const goal = cur ? `
+      <div class="rkm-goal" style="--c:${goalCol}">
+        <b>Tu rango: <span style="color:${goalCol}">${cur.label}</span> · ${fmt(t)} trofeos</b>
+        <small>${cur.next ? `Meta: ${esc(cur.nextLabel)} — te faltan ${fmt(cur.need)} trofeos` : "Has alcanzado el rango máximo."}</small>
+        <div class="rk-bar"><i style="width:${cur.pct.toFixed(1)}%;color:${goalCol};background:linear-gradient(90deg,${cur.tier.c2},${goalCol})"></i></div>
+      </div>` : `
+      <div class="rkm-goal">
+        <b>Aún sin rango</b>
+        <small>Meta: consigue tu primer trofeo para entrar a Bronce III.</small>
+        <div class="rk-bar"><i style="width:0%"></i></div>
+      </div>`;
 
-    const t = TIERS.find(x => x.k === M.k);
-    if (!t) { box.innerHTML = ""; return; }
-    const cur = rk.me ? rankOf(rk.me.trophies) : null;
-    const dr = [2, 1, 0].map(di => {
-      const sc = TIERS.indexOf(t) * 3 + di;
-      const state = !cur ? "Bloqueada" : cur.score === sc ? "Tu división" : cur.score > sc ? "Superada ✓" : "Bloqueada";
-      return `<div class="rk-dr ${cur && cur.score === sc ? "cur" : ""}" style="--c:${t.c1}">
-        ${badge(t.k, di, 38)}<div><b>${t.n} ${ROMAN[di]}</b><small>${divRangeText(t, di)} trofeos</small></div><span>${state}</span></div>`;
+    const selector = TIERS.map(x => `
+      <button class="rkm-s ${x.k === sel.k ? "on" : ""}" data-k="sel" data-t="${x.k}" style="--c:${x.c1}" type="button">
+        ${cur && cur.k === x.k ? "<em>TÚ</em>" : ""}${badge(x.k, null, 34)}<span>${x.n}</span>
+      </button>`).join("");
+
+    const divs = [2, 1, 0].map(di => {
+      const sc = si * 3 + di, from = sel.starts[di];
+      const state = !cur ? `Faltan ${fmt(from - t)}` : cur.score === sc ? "TU DIVISIÓN" : cur.score > sc ? "Superada ✓" : `Faltan ${fmt(from - t)}`;
+      return `<div class="rkm-dr ${cur && cur.score === sc ? "cur" : ""}">
+        ${badge(sel.k, di, 30)}<div><b>${sel.n} ${ROMAN[di]}</b><small>${divRangeText(sel, di)} trofeos</small></div><span>${state}</span></div>`;
     }).join("");
 
-    box.innerHTML = `<div class="rk-mo" data-k="close"><section class="rk-mc" data-k="stop" style="--c:${t.c1}">
-      <button class="rk-x" data-k="close" type="button">✕</button>
-      <div style="display:grid;place-items:center">${badge(t.k, null, 92)}</div>
-      <h3>${t.n}</h3><div class="rg">${rangeText(t)} trofeos</div>
-      <p>${esc(t.desc)}<br>Requisito: <b>${fmt(t.min)}</b> trofeos${t.max == null ? " o más." : "."}</p>
-      ${dr}
-      <button class="rk-btn" data-k="filter" data-t="${t.k}" type="button">Ver jugadores de ${t.n}</button>
-      <button class="rk-btn rk-ghost" data-k="close" type="button">Cerrar</button></section></div>`;
+    let req;
+    if (!cur) req = si === 0 ? "Consigue tu primer trofeo para entrar a Bronce III." : `Necesitas ${fmt(sel.min)} trofeos. Te faltan ${fmt(sel.min - t)}.`;
+    else if (cur.ti === si) req = cur.next ? `Estás en ${cur.label}. Te faltan ${fmt(cur.need)} trofeos para ${cur.nextLabel}.` : "Estás en la cima. ¡Rango máximo!";
+    else if (cur.ti > si) req = "Ya superaste este rango. ✓";
+    else req = `Necesitas ${fmt(sel.min)} trofeos para llegar. Te faltan ${fmt(sel.min - t)}.`;
+
+    return `<div class="rkm" data-k="mclose"><section class="rkm-c" style="--c:${sel.c1}">
+      <div class="rkm-h"><h2>RANGOS</h2><button class="rkm-x" data-k="mclose" type="button" aria-label="Cerrar">✕</button></div>
+      ${goal}
+      <div class="rkm-sel">${selector}</div>
+      <div class="rkm-d" style="--c:${sel.c1}">
+        <div class="rkm-dh">${badge(sel.k, null, 58)}<div><h3>${sel.n}</h3><small>${rangeText(sel)} trofeos</small></div></div>
+        <p>${esc(sel.desc)}</p>
+        ${divs}
+        <div class="rkm-req">${esc(req)}</div>
+      </div></section></div>`;
   }
 
-  async function lookup() {
-    const q = rk.q.trim().replace(/^@/, "").toLowerCase();
-    if (!q) return;
-    try {
-      const g = G(), fs = await g.fsModule();
-      const s = await fs.getDoc(fs.doc(g.fb.db, "usernames", q));
-      if (s.exists() && window.GreyxExtras) window.GreyxExtras.open("user", s.data().uid);
-      else { rk.note = "No se encontró ese jugador."; renderList(); }
-    } catch (e) { rk.note = "No se pudo buscar. Intenta de nuevo."; renderList(); }
+  function drawModal() {
+    let box = $("#gxRkModal");
+    if (!rk.modal) { if (box) box.remove(); return; }
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "gxRkModal";
+      box.addEventListener("click", e => {
+        const b = e.target.closest("[data-k]");
+        if (!b) return;
+        if (b.dataset.k === "mclose") {
+          if (b.classList.contains("rkm") && e.target !== b) return;   // clic dentro de la hoja
+          rk.modal = null; return drawModal();
+        }
+        if (b.dataset.k === "sel") { rk.modal.sel = b.dataset.t; drawModal(); }
+      });
+      document.body.appendChild(box);
+    }
+    const y = box.querySelector(".rkm-c") ? box.querySelector(".rkm-c").scrollTop : 0;
+    box.innerHTML = modalHtml();
+    const c = box.querySelector(".rkm-c");
+    if (c) c.scrollTop = y;
   }
 
   function onClick(e) {
     const b = e.target.closest("[data-k]");
     if (!b) return;
     const k = b.dataset.k;
-    if (k === "stop") return;
-    if (k === "close") { if (b.classList.contains("rk-mo") && e.target !== b) return; rk.modal = null; return drawModal(); }
     if (k === "home") return goHome();
-    if (k === "rules") { rk.modal = { type: "rules" }; return drawModal(); }
-    if (k === "tier") { rk.modal = { type: "tier", k: b.dataset.t }; return drawModal(); }
-    if (k === "filter") { rk.filter = b.dataset.t; rk.modal = null; const f = $("#rkF"); if (f) f.value = rk.filter; drawModal(); return renderList(); }
+    if (k === "info") { rk.rules = !rk.rules; return drawRank(); }
+    if (k === "pclose") { rk.rules = false; return drawRank(); }
+    if (k === "ranks") {
+      const cur = rankOf(myTrophies());
+      rk.rules = false;
+      rk.modal = { sel: cur ? cur.k : "bronze" };
+      drawRank();
+      return drawModal();
+    }
     if (k === "tab") {
-      rk.tab = b.dataset.t; rk.q = "";
+      rk.tab = b.dataset.t;
       drawRank();
       if (rk.tab === "friends") loadFriends(false);
       return;
     }
     if (k === "refresh") return rk.tab === "friends" ? loadFriends(true) : loadRank(true);
-    if (k === "lookup") return lookup();
     if (k === "user") { if (window.GreyxExtras) window.GreyxExtras.open("user", b.dataset.uid); return; }
     if (k === "login") { closeRank(); const g = G(); g.state.showAuth = true; g.render(); }
   }
 
   /* =====================================================
-     5) AVISO DE ASCENSO / DESCENSO
+     6) AVISO DE ASCENSO / DESCENSO
      ===================================================== */
   function toast(html) {
     const t = document.createElement("div");
@@ -711,7 +740,7 @@
     const now = r ? String(r.score) : "none";
     if (old === now) return;
     try { localStorage.setItem(key, now); } catch (e) {}
-    if (old === null) return;                         // primera vez: solo memoriza
+    if (old === null) return;
     if (!r) return setTimeout(() => toast("Saliste del ranking"), 3800);
     if (old === "none") return setTimeout(() => toast(`${badgeFor(r, 28)} ¡Entraste al ranking: ${r.label}!`), 3800);
     const up = r.score > Number(old);
@@ -720,8 +749,8 @@
   setInterval(watchRank, 1500);
 
   /* =====================================================
-     6) INSIGNIA EN PERFILES (sin duplicar datos: se calcula
-        a partir de los trofeos que el perfil ya muestra)
+     7) INSIGNIA EN PERFILES (calculada con los trofeos que
+        el perfil ya muestra: sin duplicar datos)
      ===================================================== */
   function rankLine(raw) {
     const r = rankOf(raw);
@@ -749,7 +778,7 @@
   }).observe(document.body, { childList: true, subtree: true });
 
   /* =====================================================
-     7) BARRA INFERIOR (sin cambios de comportamiento)
+     8) BARRA INFERIOR (mismo comportamiento de siempre)
      ===================================================== */
   function friendsTitle() {
     return Array.from(document.querySelectorAll("h1")).find(
