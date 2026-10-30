@@ -146,41 +146,59 @@
   .rk-card{border-radius:20px;border:1px solid #5b6cff40;background:linear-gradient(160deg,#141a4ad9,#0a0e2ad9);
     box-shadow:0 0 22px #4f46e51f,0 10px 26px #0008,inset 0 1px 0 #ffffff14}
 
-  .rk-top{flex:none;display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:8px}
+  .rk-in>*{min-width:0}
+  .rk-top{flex:none;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px}
   .rk-ib{width:40px;height:40px;border-radius:13px;border:1.5px solid #6d7bff88;background:linear-gradient(145deg,#1b2370,#0d1240);
-    color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 0 14px #4f46e544}
+    color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 0 14px #4f46e544,inset 0 1px 0 #ffffff22}
   .rk-ib:active{transform:scale(.94)}
   .rk-ib.on{border-color:#fbbf24;box-shadow:0 0 16px #fbbf2466}
   .rk-title{text-align:center;min-width:0}
-  .rk-title h1{margin:0;font-size:1.3rem;font-weight:900;letter-spacing:.08em;
-    background:linear-gradient(180deg,#fff,#b8c4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .rk-title p{margin:2px 0 0;color:#8fa0ff;font-size:.66rem;font-weight:600;line-height:1.3}
+  .rk-ttl{display:flex;align-items:center;justify-content:center;gap:10px}
+  .rk-ttl i{flex:1;max-width:44px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#8b9bff);box-shadow:0 0 8px #6d7bff}
+  .rk-ttl i:last-child{transform:scaleX(-1)}
+  .rk-ttl h1{margin:0;font-size:1.3rem;font-weight:900;letter-spacing:.12em;
+    background:linear-gradient(180deg,#fff,#b8c4ff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px #6d7bffaa)}
+  .rk-title p{margin:3px 0 0;color:#8fa0ff;font-size:.66rem;font-weight:600;line-height:1.3}
 
   /* --- Tarjeta de rango (botón) --- */
-  .rk-hero{flex:none;position:relative;padding:12px;display:grid;gap:10px;cursor:pointer;text-align:left;
+  .rk-hero{flex:none;position:relative;overflow:hidden;padding:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;cursor:pointer;text-align:left;
     border-color:color-mix(in srgb,var(--rc,#6d7bff) 60%,transparent);
     background:radial-gradient(120% 90% at 0 0,color-mix(in srgb,var(--rc,#6d7bff) 20%,transparent),transparent 60%),linear-gradient(160deg,#141a4a,#0a0e2a);
     box-shadow:0 0 24px color-mix(in srgb,var(--rc,#6d7bff) 28%,transparent),0 10px 26px #0008,inset 0 1px 0 #ffffff14;
     transition:transform .15s}
+  .rk-hero::after{content:"";position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,color-mix(in srgb,var(--rc,#6d7bff) 28%,transparent),transparent 70%)}
+  .rk-hero>*{position:relative;z-index:1;min-width:0}
   .rk-hero:active{transform:scale(.99)}
-  .rk-hh{display:flex;align-items:center;justify-content:space-between}
+  .rk-hh{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .rk-k{font:800 .6rem monospace;letter-spacing:.16em;color:#a5b4fc}
-  .rk-more{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff1f;font-size:.64rem;font-weight:800;color:#e0e7ff}
+  .rk-more{flex:none;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff26;font-size:.64rem;font-weight:800;color:#e0e7ff;white-space:nowrap}
   .rk-hm{display:flex;align-items:center;gap:10px}
-  .rk-big{font:900 1.9rem/1 Inter,system-ui,sans-serif;background:linear-gradient(180deg,#fff,#fbbf24);
-    -webkit-background-clip:text;background-clip:text;color:transparent;min-width:46px}
+  .rk-pos1{flex:none;min-width:50px;height:46px;padding:0 9px;border-radius:14px;display:grid;place-items:center;font:900 1.25rem Inter,system-ui,sans-serif;
+    color:#e0e7ff;background:linear-gradient(145deg,#4338ca,#1e1b6b);border:1px solid #ffffff2e;box-shadow:inset 0 1px 0 #ffffff33}
+  .rk-pos1.p1{color:#3a2200;background:linear-gradient(145deg,#fff1a8,#f59e0b);box-shadow:0 0 16px #fbbf2466,inset 0 1px 0 #fff9}
+  .rk-pos1.p2{color:#1e293b;background:linear-gradient(145deg,#ffffff,#94a3b8);box-shadow:0 0 14px #cbd5e155,inset 0 1px 0 #fff9}
+  .rk-pos1.p3{color:#3a1a00;background:linear-gradient(145deg,#fcd9b0,#b45309);box-shadow:0 0 14px #e0894a55,inset 0 1px 0 #fff8}
   .rk-bigav{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;
     background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:2.5px solid var(--rc,#8b5cf6);box-shadow:0 0 14px var(--rc,#8b5cf6)}
   .rk-who{flex:1;min-width:0}
   .rk-who b{display:block;font-size:.98rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rk-who small{display:block;margin-top:1px;color:#9aa6d8;font-size:.64rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rk-ttr{flex:none;display:flex;align-items:center;gap:5px;color:#fbbf24;font-weight:900;font-size:1.15rem}
-  .rk-rp{display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;background:#070a24b3;border:1px solid #ffffff14}
-  .rk-rb{flex:none;display:grid;place-items:center;width:52px}
+  .rk-chips{display:flex;gap:5px;margin-top:4px;flex-wrap:nowrap;overflow:hidden}
+  .rk-chips span{flex:none;padding:2px 8px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff18;color:#d6dcff;font-size:.6rem;font-weight:800;white-space:nowrap}
+  .rk-rp{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 8px;border-radius:16px;
+    background:linear-gradient(135deg,#0a0e2ad9,#070a24d9);border:1px solid color-mix(in srgb,var(--rc,#6d7bff) 35%,transparent)}
+  .rk-rb{flex:none;position:relative;display:grid;place-items:center;width:58px;height:62px}
+  .rk-rb::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--rc,#6d7bff) 42%,transparent),transparent 66%)}
+  .rk-rb>*{position:relative}
   .rk-rt{flex:1;min-width:0}
-  .rk-rl{display:block;font-size:1.1rem;font-weight:900;margin-bottom:6px}
-  .rk-bar{height:8px;border-radius:99px;background:#0b1030;border:1px solid #ffffff1c;overflow:hidden}
+  .rk-rtop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+  .rk-rl{min-width:0;font-size:1.1rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-tpill{flex:none;display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;color:#fbbf24;font-weight:900;font-size:.88rem;
+    background:linear-gradient(135deg,#fbbf2428,#fbbf2410);border:1px solid #fbbf2455}
+  .rk-barw{display:flex;align-items:center;gap:8px}
+  .rk-bar{flex:1;min-width:0;height:8px;border-radius:99px;background:#0b1030;border:1px solid #ffffff1c;overflow:hidden}
   .rk-bar i{display:block;height:100%;border-radius:99px;box-shadow:0 0 10px currentColor}
+  .rk-nx{flex:none;display:grid;place-items:center;opacity:.6}
   .rk-rt small{display:block;margin-top:6px;color:#b6bfe8;font-size:.68rem;line-height:1.3}
   .rk-rt small b{color:#fff}
   .rk-lock{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;font-size:1.4rem;background:#ffffff0a;border:2px dashed #ffffff33}
@@ -188,36 +206,43 @@
   /* --- Lista --- */
   .rk-lc{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px}
   .rk-lh{flex:none;display:flex;align-items:center;gap:8px}
-  .rk-tabs{display:flex;gap:6px;flex:1}
-  .rk-tab{display:flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:99px;border:1px solid #ffffff1f;background:#ffffff0a;
-    color:#aab3e8;font-weight:800;font-size:.72rem}
-  .rk-tab.on{color:#fff;border-color:#a78bfa;background:linear-gradient(135deg,#7c5cff,#4f2fd8);box-shadow:0 0 14px #7c5cff66}
-  .rk-lh .rk-ib{width:32px;height:32px;border-radius:10px}
-  .rk-cap{flex:none;margin:8px 2px 8px;color:#8e9acd;font-size:.68rem;font-weight:600;display:flex;align-items:center;gap:6px}
-  .rk-cap b{color:#e0e7ff;font-size:.74rem;letter-spacing:.06em}
-  #rkList{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-right:2px}
+  .rk-seg{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:15px;background:#070a24;border:1px solid #ffffff14}
+  .rk-tab{display:flex;align-items:center;justify-content:center;gap:6px;height:34px;border:0;border-radius:11px;background:transparent;color:#9aa6d8;font-weight:800;font-size:.76rem;white-space:nowrap}
+  .rk-tab.on{color:#fff;background:linear-gradient(135deg,#7c5cff,#4f2fd8);box-shadow:0 0 14px #7c5cff66,inset 0 1px 0 #ffffff44}
+  .rk-lh .rk-ib{width:42px;height:42px;border-radius:13px}
+  .rk-cap{flex:none;margin:10px 2px 6px;display:flex;align-items:center;gap:8px;color:#8e9acd;font-size:.68rem;font-weight:600;min-width:0}
+  .rk-cap b{color:#e0e7ff;font-size:.76rem;letter-spacing:.08em;white-space:nowrap}
+  .rk-cap span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk-cap em{flex:none;margin-left:auto;font-style:normal;padding:2px 9px;border-radius:99px;background:#7c5cff26;border:1px solid #7c5cff55;color:#c4b5fd;font-weight:800;font-size:.62rem}
+  #rkList{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:8px 2px 4px 0}
   #rkList::-webkit-scrollbar{width:4px}
   #rkList::-webkit-scrollbar-thumb{background:#ffffff2a;border-radius:4px}
 
-  .rk-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:14px;margin-bottom:6px;cursor:pointer;
-    background:#090c2acc;border:1px solid #ffffff12}
+  .rk-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:15px;margin-bottom:7px;cursor:pointer;
+    background:linear-gradient(90deg,#0d1236cc,#090c2acc);border:1px solid #ffffff12;box-shadow:inset 3px 0 0 var(--rc,#ffffff22)}
   .rk-row:active{transform:scale(.99)}
-  .rk-row.me{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2418,#090c2acc);box-shadow:0 0 14px #fbbf2430}
-  .rk-row.t1{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2430,#0b0e2acc 70%);box-shadow:0 0 20px #fbbf2450}
-  .rk-row.t2{border-color:#cbd5e1;background:linear-gradient(90deg,#cbd5e124,#0b0e2acc 70%);box-shadow:0 0 14px #cbd5e12e}
-  .rk-row.t3{border-color:#e0894a;background:linear-gradient(90deg,#e0894a26,#0b0e2acc 70%);box-shadow:0 0 14px #e0894a30}
-  .rk-pos{flex:none;width:30px;display:flex;flex-direction:column;align-items:center;gap:0;font:900 .88rem/1.1 Inter,system-ui,sans-serif;color:#b6bfe8}
-  .rk-row.t1 .rk-pos{color:#fcd34d}.rk-row.t2 .rk-pos{color:#e2e8f0}.rk-row.t3 .rk-pos{color:#f0a868}
-  .rk-av{position:relative;width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;
+  .rk-row.me{border-color:#fbbf2488;background:linear-gradient(90deg,#fbbf2418,#090c2acc)}
+  .rk-row.t1{border-color:#fbbf24;background:linear-gradient(90deg,#fbbf2430,#0b0e2acc 75%);box-shadow:0 0 20px #fbbf2440,inset 3px 0 0 #fbbf24}
+  .rk-row.t2{border-color:#cbd5e1aa;background:linear-gradient(90deg,#cbd5e124,#0b0e2acc 75%);box-shadow:0 0 14px #cbd5e12a,inset 3px 0 0 #cbd5e1}
+  .rk-row.t3{border-color:#e0894aaa;background:linear-gradient(90deg,#e0894a26,#0b0e2acc 75%);box-shadow:0 0 14px #e0894a2a,inset 3px 0 0 #e0894a}
+  .rk-pos{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:900 .78rem Inter,system-ui,sans-serif;color:#b6bfe8;background:#ffffff0d;border:1px solid #ffffff14}
+  .rk-row.t1 .rk-pos{color:#3a2200;border:0;background:radial-gradient(circle at 35% 30%,#fff3b0,#f59e0b);box-shadow:0 0 12px #fbbf2488}
+  .rk-row.t2 .rk-pos{color:#1e293b;border:0;background:radial-gradient(circle at 35% 30%,#fff,#94a3b8);box-shadow:0 0 10px #cbd5e166}
+  .rk-row.t3 .rk-pos{color:#3a1a00;border:0;background:radial-gradient(circle at 35% 30%,#fcd9b0,#b45309);box-shadow:0 0 10px #e0894a66}
+  .rk-av{position:relative;width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:1.25rem;
     background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c);border:2px solid var(--rc,#ffffff33)}
+  .rk-cr{position:absolute;top:-11px;left:50%;transform:translateX(-50%);display:grid;line-height:0}
   .rk-dot{position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#64748b;border:2px solid #0a0e2a}
   .rk-dot.on{background:#34d399;box-shadow:0 0 6px #34d399}
   .rk-info{flex:1;min-width:0}
-  .rk-info b{display:block;font-size:.84rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rk-info small{display:block;color:#8e9acd;font-size:.62rem;font-weight:600;margin-top:1px}
+  .rk-info b{display:block;font-size:.86rem;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk-info small{display:flex;align-items:center;gap:6px;margin-top:2px;color:#8e9acd;font-size:.62rem;font-weight:700;white-space:nowrap;overflow:hidden}
+  .rk-info small em{font-style:normal;font-weight:800;color:var(--rc)}
+  .rk-lv{padding:1px 6px;border-radius:99px;background:#ffffff10;color:#aab3e8}
   .rk-x{display:none}
-  .rk-rcol{flex:none;display:flex;align-items:center;gap:5px;font-weight:800;font-size:.64rem;color:var(--rc);white-space:nowrap}
-  .rk-tr{flex:none;display:flex;align-items:center;gap:4px;min-width:50px;justify-content:flex-end;color:#fbbf24;font-weight:900;font-size:.9rem}
+  .rk-rcol{flex:none;display:grid;place-items:center}
+  .rk-tr{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:54px;color:#fbbf24;font-weight:900;font-size:.92rem}
+  .rk-note2{margin:4px 0 2px;padding:10px 12px;border-radius:14px;border:1px dashed #ffffff26;color:#8e9acd;font-size:.68rem;text-align:center;line-height:1.4}
   .rk-empty{padding:22px 12px;text-align:center;color:#aab3d6;border-radius:16px;background:#090c2acc;border:1px solid #ffffff12;font-size:.82rem;line-height:1.5}
   .rk-btn{margin-top:12px;padding:12px 18px;border:0;border-radius:14px;color:#fff;font-weight:900;
     background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 0 #3b1d8f}
@@ -284,56 +309,59 @@
   .pl-stats .rk-prow{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px}
   .rk-prow strong{font-size:.95rem;font-weight:900}
   .rk-prow i{font-style:normal;color:#94a3b8;font:700 .6rem monospace;letter-spacing:.08em}
+  .pc .rk-prow{display:flex;align-items:center;justify-content:center;gap:8px}
   .rk-pbi{display:inline-flex;align-items:center;gap:6px;margin-left:12px;font-size:.85rem;font-weight:900}
 
   /* --- Pantallas bajas (celular de lado, SE...) --- */
   @media (max-height:740px){
     .rk-title p{display:none}
     .rk-hero{padding:10px;gap:8px}
-    .rk-rb{width:44px}.rk-rb svg{width:40px;height:45px}
-    .rk-rl{font-size:1rem;margin-bottom:4px}
-    .rk-big{font-size:1.6rem}
+    .rk-pos1{min-width:42px;height:40px;font-size:1.1rem}
+    .rk-bigav{width:40px;height:40px;font-size:1.3rem}
+    .rk-rb{width:48px;height:52px}.rk-rb svg{width:40px;height:45px}
+    .rk-rl{font-size:1rem}
+    .rk-rtop{margin-bottom:5px}
   }
-  @media (max-height:600px){
+  @media (max-height:620px){
     .rk{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     .rk-in{gap:7px}
-    .rk-top{grid-template-columns:34px 1fr 34px}
+    .rk-top{grid-template-columns:34px minmax(0,1fr) 34px}
     .rk-ib{width:34px;height:34px}
-    .rk-title h1{font-size:1.05rem}
-    .rk-rt small{display:none}
-    .rk-hh{display:none}
+    .rk-ttl h1{font-size:1.05rem}
+    .rk-rt small,.rk-chips,.rk-hh{display:none}
     .rk-rp{padding:6px 8px}
-    .rk-row{padding:6px 8px;margin-bottom:4px}
-    .rk-cap{margin:5px 2px}
+    .rk-row{padding:6px 8px;margin-bottom:5px}
     .rkm-d p{display:none}
   }
   @media (max-width:360px){
-    .rk-rcol span{display:none}
-    .rk-big{font-size:1.5rem;min-width:38px}
+    .rk-pos1{min-width:38px;font-size:1rem}
+    .rk-chips span:nth-child(3){display:none}
+    .rk-rl{font-size:.95rem}
+    .rk-lv{display:none}
   }
 
   /* --- Tablet / PC: tarjeta a la izquierda, Top 100 a la derecha --- */
   @media (min-width:760px){
     .rk{padding-left:28px;padding-right:28px}
-    .rk-in{max-width:1040px;display:grid;grid-template-columns:380px 1fr;grid-template-rows:auto 1fr;gap:14px 18px}
+    .rk-in{max-width:1040px;display:grid;grid-template-columns:380px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:14px 18px}
     .rk-top{grid-column:1/-1}
-    .rk-title h1{font-size:1.6rem}.rk-title p{display:block;font-size:.76rem}
+    .rk-ttl h1{font-size:1.6rem}.rk-title p{display:block;font-size:.76rem}
     .rk-hero{grid-column:1;grid-row:2;align-self:start;padding:16px;gap:14px}
     .rk-lc{grid-column:2;grid-row:2;padding:14px}
-    .rk-big{font-size:2.3rem}.rk-bigav{width:56px;height:56px;font-size:1.8rem}
-    .rk-rb{width:70px}.rk-rb svg{width:64px;height:72px}
-    .rk-rl{font-size:1.3rem}
+    .rk-pos1{min-width:58px;height:52px;font-size:1.4rem}
+    .rk-bigav{width:54px;height:54px;font-size:1.7rem}
+    .rk-rb{width:72px;height:78px}.rk-rb svg{width:62px;height:70px}
+    .rk-rl{font-size:1.25rem}
     .rk-row{padding:9px 14px;gap:14px}
-    .rk-av{width:42px;height:42px}
-    .rk-info b{font-size:.92rem}
+    .rk-av{width:44px;height:44px}
+    .rk-info b{font-size:.94rem}
     .rk-x{display:inline}
-    .rk-rcol{font-size:.8rem;gap:8px;min-width:150px}
     .rk-tr{font-size:1rem;min-width:70px}
     .rkm{align-items:center;padding:20px}
     .rkm-c{border-radius:26px;border-bottom:1.5px solid color-mix(in srgb,var(--c,#7c5cff) 70%,transparent)}
   }
-  @media (min-width:760px) and (max-height:600px){
-    .rk-in{grid-template-columns:330px 1fr}
+  @media (min-width:760px) and (max-height:620px){
+    .rk-in{grid-template-columns:330px minmax(0,1fr)}
     .rk-hh{display:flex}
   }
   @media (prefers-reduced-motion:reduce){.rk,.rk-pop,.rkm,.rkm-c{animation:none}}
@@ -503,13 +531,15 @@
     const played = m.played != null ? m.played : (stt.played || 0);
     const r = rankOf(tr);
     const col = r ? r.tier.c1 : "#7c86ad";
+    const pc = !r || !rk.pos ? "" : rk.pos === 1 ? "p1" : rk.pos === 2 ? "p2" : rk.pos === 3 ? "p3" : "";
+    const nextR = r && r.next ? rankOf(r.next) : null;
 
     const panel = r ? `
       <div class="rk-rp">
-        <div class="rk-rb">${badgeFor(r, 46)}</div>
+        <div class="rk-rb">${badgeFor(r, 50)}</div>
         <div class="rk-rt">
-          <span class="rk-rl" style="color:${r.tier.c1}">${r.label}</span>
-          <div class="rk-bar"><i style="width:${r.pct.toFixed(1)}%;color:${r.tier.c1};background:linear-gradient(90deg,${r.tier.c2},${r.tier.c1})"></i></div>
+          <div class="rk-rtop"><span class="rk-rl" style="color:${r.tier.c1}">${r.label}</span><span class="rk-tpill">${CUP(14)}${fmt(tr)}</span></div>
+          <div class="rk-barw"><div class="rk-bar"><i style="width:${r.pct.toFixed(1)}%;color:${r.tier.c1};background:linear-gradient(90deg,${r.tier.c2},${r.tier.c1})"></i></div>${nextR ? `<span class="rk-nx">${badgeFor(nextR, 20)}</span>` : ""}</div>
           <small>${r.next
             ? `Te faltan <b>${fmt(r.need)}</b> trofeos para ${esc(r.nextLabel)}`
             : "¡Rango máximo alcanzado!"}</small>
@@ -518,8 +548,8 @@
       <div class="rk-rp">
         <div class="rk-rb"><span class="rk-lock">🔒</span></div>
         <div class="rk-rt">
-          <span class="rk-rl" style="color:#cbd5e1">Ranking bloqueado</span>
-          <div class="rk-bar"><i style="width:0%;color:#a78bfa;background:#a78bfa"></i></div>
+          <div class="rk-rtop"><span class="rk-rl" style="color:#cbd5e1">Ranking bloqueado</span><span class="rk-tpill">${CUP(14)}${fmt(tr)}</span></div>
+          <div class="rk-barw"><div class="rk-bar"><i style="width:0%;color:#a78bfa;background:#a78bfa"></i></div></div>
           <small>0 / 1 trofeo · Consigue tu primer trofeo para entrar al ranking</small>
         </div>
       </div>`;
@@ -528,10 +558,10 @@
     <section class="rk-card rk-hero" data-k="ranks" role="button" tabindex="0" aria-label="Ver todos los rangos" style="--rc:${col}">
       <div class="rk-hh"><span class="rk-k">TU POSICIÓN</span><span class="rk-more">Ver rangos ›</span></div>
       <div class="rk-hm">
-        <span class="rk-big">${r && rk.pos ? "#" + fmt(rk.pos) : "—"}</span>
+        <span class="rk-pos1 ${pc}">${r && rk.pos ? "#" + fmt(rk.pos) : "—"}</span>
         <span class="rk-bigav">${avatar}</span>
-        <div class="rk-who"><b>@${esc(name)}</b><small>Nivel ${lv} · ${fmt(wins)} victorias · ${fmt(played)} partidas</small></div>
-        <span class="rk-ttr">${CUP(18)}${fmt(tr)}</span>
+        <div class="rk-who"><b>@${esc(name)}</b>
+          <div class="rk-chips"><span>NV. ${lv}</span><span>🥇 ${fmt(wins)}</span><span>🎮 ${fmt(played)}</span></div></div>
       </div>
       ${panel}
     </section>`;
@@ -553,23 +583,25 @@
     const el = $("#gxRank");
     if (!el) return;
     const fr = rk.tab === "friends";
+    const rows = fr ? rk.friends : rk.rows;
+    const n = rows ? rows.length : 0;
     el.innerHTML = `
       <div class="rk-in">
         <header class="rk-top">
           <button class="rk-ib" data-k="home" type="button" aria-label="Volver">${BACK}</button>
-          <div class="rk-title"><h1>RANKING</h1><p>Compite, sube de rango y demuestra quién es el mejor.</p></div>
+          <div class="rk-title"><div class="rk-ttl"><i></i><h1>RANKING</h1><i></i></div><p>Compite, sube de rango y demuestra quién es el mejor.</p></div>
           <button class="rk-ib ${rk.rules ? "on" : ""}" data-k="info" type="button" aria-label="Reglas">${INFO}</button>
         </header>
         ${heroHtml()}
         <section class="rk-card rk-lc">
           <div class="rk-lh">
-            <div class="rk-tabs">
+            <div class="rk-seg">
               <button class="rk-tab ${!fr ? "on" : ""}" data-k="tab" data-t="general" type="button">🌍 Mundial</button>
               <button class="rk-tab ${fr ? "on" : ""}" data-k="tab" data-t="friends" type="button">👥 Amigos</button>
             </div>
             <button class="rk-ib" data-k="refresh" type="button" aria-label="Actualizar">${REFRESH}</button>
           </div>
-          <div class="rk-cap">${fr ? "<b>AMIGOS</b> Clasificación entre tus amigos" : "<b>TOP 100</b> Jugadores con más trofeos"}</div>
+          <div class="rk-cap"><b>${fr ? "AMIGOS" : "TOP 100"}</b><span>${fr ? "Clasificación entre tus amigos" : "Jugadores con más trofeos"}</span>${n ? `<em>${n} ${fr ? (n === 1 ? "jugador" : "jugadores") : "clasificados"}</em>` : ""}</div>
           <div id="rkList"></div>
         </section>
         ${rulesHtml()}
@@ -585,13 +617,13 @@
     const on = isOn(p.uid);
     const dot = on === null ? "" : `<i class="rk-dot ${on ? "on" : ""}"></i>`;
     const tcls = pos === 1 ? "t1" : pos === 2 ? "t2" : pos === 3 ? "t3" : "";
-    const crown = pos === 1 ? CROWN("#fbbf24") : pos === 2 ? CROWN("#e2e8f0") : pos === 3 ? CROWN("#e0894a") : "";
+    const cr = pos <= 3 ? `<span class="rk-cr">${CROWN(pos === 1 ? "#fbbf24" : pos === 2 ? "#e2e8f0" : "#e0894a", 16)}</span>` : "";
     return `
       <div class="rk-row ${tcls} ${me ? "me" : ""}" data-k="user" data-uid="${esc(p.uid)}" style="--rc:${r.tier.c1}">
-        <span class="rk-pos">${crown}<span>${pos}</span></span>
-        <span class="rk-av">${g.avatarEmoji(p.avatar)}${dot}</span>
-        <div class="rk-info"><b>@${esc(p.username)}</b><small>Nivel ${lv}<span class="rk-x"> · ${fmt(p.wins)} victorias</span></small></div>
-        <span class="rk-rcol">${badgeFor(r, 26)}<span>${r.label}</span></span>
+        <span class="rk-pos">${pos}</span>
+        <span class="rk-av">${cr}${g.avatarEmoji(p.avatar)}${dot}</span>
+        <div class="rk-info"><b>@${esc(p.username)}</b><small><em>${r.label}</em><span class="rk-lv">Nv ${lv}</span><span class="rk-x">${fmt(p.wins)} victorias</span></small></div>
+        <span class="rk-rcol">${badgeFor(r, 30)}</span>
         <span class="rk-tr">${CUP(14)}${fmt(p.trophies)}</span>
       </div>`;
   }
@@ -619,7 +651,8 @@
         : "Aún no hay jugadores clasificados.<br>El primero en conseguir un trofeo abre el ranking."}</div>`;
       return;
     }
-    list.innerHTML = rows.map((p, i) => rowHtml(p, i + 1)).join("");
+    list.innerHTML = rows.map((p, i) => rowHtml(p, i + 1)).join("") +
+      `<div class="rk-note2">🔓 Solo aparecen jugadores con al menos 1 trofeo.</div>`;
   }
 
   /* ---------- Detalle de rangos (hoja inferior sobre la barra) ---------- */
@@ -763,6 +796,13 @@
       const b = box.querySelector("div b");
       if (!b) return;
       box.insertAdjacentHTML("beforeend", `<div class="rk-prow"><i>RANGO</i>${rankLine(parseInt(b.textContent.replace(/\D/g, ""), 10))}</div>`);
+    });
+    document.querySelectorAll(".pc").forEach(box => {
+      if (box.querySelector(".rk-prow")) return;
+      const b = box.querySelector(".sg div b");
+      const anchor = box.querySelector(".plv");
+      if (!b || !anchor) return;
+      anchor.insertAdjacentHTML("beforebegin", `<div class="rk-prow" style="margin-top:10px">${rankLine(parseInt(b.textContent.replace(/\D/g, ""), 10))}</div>`);
     });
     document.querySelectorAll(".trophy-big").forEach(box => {
       if (box.querySelector(".rk-pbi")) return;
