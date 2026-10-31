@@ -1,179 +1,243 @@
-/* GREYX LUDO — MENÚ PRINCIPAL v2 (Fase 1: solo presentación)
-   Carga: <script src="greyx-menu-v2.js"></script> DESPUÉS de greyx-fijo.js
-   - No toca tablero, Firebase, auth, stats ni modos de juego.
-   - Lee datos reales desde window.GX.state.
-   - Cada acceso reenvía el clic al botón original (el del menú anterior, que queda
-     oculto pero vivo), así se conservan los listeners de los demás scripts. */
+/* GREYX LUDO — MENÚ PRINCIPAL v2 (corrección Fase 1)
+   Requiere greyx-assets.js (window.GXArt) cargado antes.
+   - Solo presentación: no toca tablero, Firebase, auth, stats ni modos de juego.
+   - Datos reales desde window.GX.state.
+   - Cada acceso reenvía el clic al botón/función ORIGINAL (menú anterior, oculto pero vivo),
+     así Amigos / Ranking / Perfil / Buzón de ideas abren exactamente los mismos widgets,
+     sin ventanas ni listeners duplicados.
+   - Composición proporcional: todo se mide en "u" (1% del ancho de la composición), y el ancho
+     se limita por el alto disponible, así el menú entero cabe sin scroll en cualquier pantalla. */
 (() => {
   if (window.__gx8) return;
+  const A = window.GXArt;
+  if (!A) { console.warn("greyx-menu-v2: falta greyx-assets.js; se conserva el menú anterior."); return; }
   window.__gx8 = true;
 
   const $ = (s, r = document) => r.querySelector(s);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ---------- CSS ---------- */
-  const css = `
+  /* ---------- CSS (las medidas "Nu" se convierten en N × 1% del ancho de la composición) ---------- */
+  const U = s => s.replace(/(-?\d*\.?\d+)u\b/g, "calc(var(--u)*$1)");
+  const css = U(`
 .gx6,.gx6-nav{display:none!important}
-.g8,.g8-nav{--g8-bg:#050719;--g8-line:#3b46c9;--g8-glow:#5b6cff;--g8-vio:#8b5cf6;--g8-gold:#fbbf24;--g8-txt:#f1f3ff;--g8-mut:#9aa4d6;--g8-nav:68px}
-.g8{position:fixed;inset:0;z-index:85;display:none;color:var(--g8-txt);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-  background:radial-gradient(circle at 50% 0,#3a1fa088,transparent 46%),radial-gradient(circle at 100% 38%,#2a3cc844,transparent 40%),radial-gradient(circle at 0 78%,#4c1d9555,transparent 42%),linear-gradient(180deg,#080a2a,#04051a);
-  overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;
-  padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(var(--g8-nav) + 14px + env(safe-area-inset-bottom,0px))}
+.g8,.g8-nav{
+  --H:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  --u:calc(min(100vw,var(--H)*.58)/100);
+}
+@supports (height:100dvh){.g8,.g8-nav{--H:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}}
+
+.g8{position:fixed;inset:0;z-index:85;display:none;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;
+  color:#f1f3ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#04051a;
+  -webkit-user-select:none;user-select:none}
 .g8.on{display:block}
-.g8-in{max-width:480px;min-height:100%;margin:0 auto;display:flex;flex-direction:column;gap:clamp(7px,1.3dvh,13px)}
-.g8 button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.g8-card{border:1.5px solid var(--g8-line);border-radius:20px;background:linear-gradient(160deg,#121858ee,#080b2bee);box-shadow:0 0 18px #3b46c944,inset 0 1px 0 #ffffff1c}
+.g8 *{box-sizing:border-box}
+.g8 button{font:inherit;color:inherit;margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.g8 svg{display:block}
+.g8-bg{position:absolute;inset:0;pointer-events:none}
+.g8-bg svg{width:100%;height:100%}
 
-/* encabezado */
-.g8-studio{display:flex;align-items:center;justify-content:center;gap:10px;font:800 .6rem Inter,system-ui,sans-serif;letter-spacing:.34em;color:#8b8fe8}
-.g8-studio::before,.g8-studio::after{content:"";height:1.5px;width:34px;background:linear-gradient(90deg,transparent,#4f46e5)}
+.g8-in{position:relative;width:calc(var(--u)*100);height:100%;margin:0 auto;
+  padding:calc(env(safe-area-inset-top,0px) + 1u) 4u calc(14.6u + env(safe-area-inset-bottom,0px) + 1u);
+  display:flex;flex-direction:column;justify-content:space-between}
+
+/* tarjeta base */
+.g8-card{position:relative;border:1.5px solid #3b46c9;border-radius:3u;background:linear-gradient(160deg,#10165a,#070a2a);
+  box-shadow:0 0 2u #3b46c944,inset 0 1px 0 #ffffff1c}
+
+/* ---- encabezado ---- */
+.g8-hd{display:flex;flex-direction:column;gap:.3u}
+.g8-studio{display:flex;align-items:center;justify-content:center;gap:1.6u;font-size:max(7.5px,1.45u);font-weight:800;letter-spacing:.34em;color:#a2a6f5;line-height:1;padding-left:.34em}
+.g8-studio::before,.g8-studio::after{content:"";width:9u;height:1.5px;background:linear-gradient(90deg,transparent,#5b52f0)}
 .g8-studio::after{transform:scaleX(-1)}
-.g8-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
-.g8-chip{justify-self:start;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;padding:4px 12px 4px 4px;border-radius:99px;border:1.5px solid #6d5cffaa;background:#0d1140cc;box-shadow:0 0 14px #4f46e555}
-.g8-av{position:relative;flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;font-size:1.35rem;background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);border:2px solid #a78bfa}
-.g8-chip div{min-width:0;line-height:1.15}
-.g8-chip b{display:block;font-size:.78rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
-.g8-chip small{display:block;color:var(--g8-mut);font-size:.6rem;font-weight:800}
-.g8-logo{display:flex;flex-direction:column;align-items:center;line-height:.9}
-.g8-logo svg{height:clamp(46px,7.6dvh,66px);width:auto;filter:drop-shadow(0 0 14px #6d28d9cc)}
-.g8-logo b{margin-top:2px;font:700 .72rem Syncopate,"Arial Black",sans-serif;letter-spacing:.18em;color:#fff}
-.g8-logo b i{font-style:normal;color:#8b5cf6}
-.g8-acts{justify-self:end;display:flex;gap:8px}
-.g8-ic{position:relative;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:1.5px solid #6d5cffaa;background:linear-gradient(145deg,#232a66,#0d1030);box-shadow:0 0 14px #4f46e566}
-.g8-ic svg{width:21px;height:21px}
+.g8-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1u}
+.g8-logo{width:32u}
+.g8-logo svg{width:100%;height:auto;filter:drop-shadow(0 0 1.4u #6d28d9bb)}
+.g8-acts{justify-self:end;display:flex;gap:1.3u}
+.g8-ic{position:relative;width:max(40px,8.4u);height:max(40px,8.4u);display:grid;place-items:center;border-radius:50%;
+  border:1.5px solid #6d5cffcc;background:linear-gradient(145deg,#2a3290,#0e1240);box-shadow:0 0 1.6u #4f46e588,inset 0 1px 0 #ffffff33}
+.g8-ic svg{width:54%;height:54%}
+.g8-ic.idea{justify-self:start;border-color:#fbbf24cc;box-shadow:0 0 1.8u #fbbf2477,inset 0 1px 0 #ffffff33}
+.g8-ic.idea svg{width:62%;height:62%;filter:drop-shadow(0 0 .7u #fbbf24aa)}
 .g8-ic:active{transform:scale(.93)}
-.g8-season{align-self:flex-end;display:flex;align-items:center;gap:8px;padding:5px 14px;border-radius:12px 4px 4px 12px;border:1px solid #6d5cff77;background:linear-gradient(90deg,#1a1f6b88,#0a0d30);font-size:.62rem;line-height:1.2}
-.g8-season b{display:block;font-weight:900;letter-spacing:.08em;color:#c4b5fd}
-.g8-season small{color:var(--g8-mut);font-weight:700;font-size:.55rem}
+.g8-dot{position:absolute;right:-.2u;top:-.2u;min-width:max(16px,3.2u);height:max(16px,3.2u);padding:0 .6u;border-radius:99px;background:#ef4444;color:#fff;
+  font-size:max(9px,1.9u);font-weight:900;display:none;place-items:center;border:2px solid #0a0d30}
+.g8-dot.on{display:grid}
 
-/* monedas */
-.g8-wallet{display:flex;align-items:center;padding:7px 10px}
-.g8-cur{flex:1;display:flex;align-items:center;gap:9px;min-width:0}
-.g8-cur+.g8-cur{border-left:1px solid #ffffff1c;padding-left:10px}
-.g8-coin{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;font-size:1.2rem;border-radius:50%}
-.g8-coin.gold{background:radial-gradient(circle at 35% 30%,#ffe27a,#d99a00);box-shadow:0 0 12px #fbbf2488}
-.g8-coin.gem{background:none;filter:drop-shadow(0 0 8px #8b5cf6)}
-.g8-cur div{flex:1;min-width:0;line-height:1.1}
-.g8-cur small{display:block;color:var(--g8-mut);font:800 .55rem Inter,system-ui,sans-serif;letter-spacing:.14em}
-.g8-cur b{font-size:1.15rem;font-weight:900}
-.g8-plus{flex:0 0 32px;width:32px;height:32px;border-radius:10px;border:1.5px solid #5b6cff;background:#141a5acc;font-size:1.2rem;font-weight:900;opacity:.7}
+/* ---- monedas ---- */
+.g8-wallet{display:flex;align-items:center;height:10.9u;padding:0 2.2u;border-radius:3.4u}
+.g8-cur{flex:1;display:flex;align-items:center;gap:1.5u;min-width:0}
+.g8-cur .art{flex:none;width:7.6u}
+.g8-cur .art svg{width:100%;height:auto;filter:drop-shadow(0 0 1u #fbbf2488)}
+.g8-cur.gem .art svg{filter:drop-shadow(0 0 1u #8b5cf6cc)}
+.g8-cur .txt{flex:1;min-width:0;line-height:1.1}
+.g8-cur small{display:block;font-size:max(7.5px,1.65u);letter-spacing:.16em;color:#aab3ee;font-weight:800}
+.g8-cur b{display:block;font-size:max(14px,3.5u);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g8-sep{flex:none;width:1px;height:6.5u;background:#ffffff26;margin:0 1.6u}
+.g8-plus{flex:none;width:max(30px,6.2u);height:max(30px,6.2u);border-radius:1.7u;border:1.5px solid #6a78ff;
+  background:linear-gradient(160deg,#2c37b0,#141b6c);box-shadow:0 0 1.2u #4f5cff66,inset 0 1px 0 #ffffff33;display:grid;place-items:center}
+.g8-plus svg{width:55%;height:55%}
+.g8-plus:active{transform:scale(.94)}
 
-/* título de sección */
-.g8-sec{display:flex;align-items:center;justify-content:center;gap:12px;font:900 .95rem Inter,system-ui,sans-serif;letter-spacing:.16em}
-.g8-sec::before,.g8-sec::after{content:"";flex:1;max-width:70px;height:2px;background:linear-gradient(90deg,transparent,#6d5cff)}
-.g8-sec::after{transform:scaleX(-1)}
+/* ---- título de sección ---- */
+.g8-sec{position:relative;display:flex;align-items:center;justify-content:center;gap:1.8u;height:3.6u;margin-top:1.6u}
+.g8-sec b{font-size:max(12px,3.1u);font-weight:900;letter-spacing:.22em;padding-left:.22em;white-space:nowrap}
+.g8-sec i{flex:1;height:2px;background:linear-gradient(90deg,transparent,#6d5cff);position:relative}
+.g8-sec i:last-of-type{transform:scaleX(-1)}
+.g8-sec i::after{content:"";position:absolute;right:0;top:-2px;width:6px;height:6px;border-radius:50%;background:#8b7cff;box-shadow:0 0 6px #8b7cff}
+.g8-sec .cr{position:absolute;left:50%;top:-2.6u;width:4.2u;transform:translateX(-50%)}
+.g8-sec .cr svg{width:100%;height:auto}
 
-/* modos */
-.g8-modes{flex:1 1 auto;min-height:128px;max-height:210px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.g8-mode{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 6px 38px;border-radius:20px;border:2px solid var(--cc);background:var(--cb);box-shadow:0 0 18px var(--cg),inset 0 1px 0 #ffffff22;overflow:hidden}
-.g8-mode svg{width:clamp(38px,6dvh,52px);height:auto;color:var(--ci);margin-bottom:6px}
-.g8-mode strong{font-size:.92rem;font-weight:900;letter-spacing:.02em}
-.g8-mode small{margin-top:5px;color:#b4bde6;font-size:.6rem;line-height:1.3;padding:0 2px}
-.g8-mode u{position:absolute;right:8px;bottom:8px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;text-decoration:none;font-size:1rem;background:#ffffff14;border:1px solid #ffffff44}
-.g8-mode.online{box-shadow:0 0 26px #38bdf8aa,inset 0 0 18px #38bdf822}
-.g8-live{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
-.g8-mode.pulse{animation:g8Pulse .7s ease-out 2}
-@keyframes g8Pulse{50%{transform:scale(1.04);box-shadow:0 0 30px #fff}}
+/* ---- modos ---- */
+.g8-modes{display:grid;grid-template-columns:1.03fr 1fr 1.1fr;gap:1.8u;height:36u}
+.g8-mode{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:2.6u .8u 0;
+  border-radius:3.2u;border:2px solid var(--bc);box-shadow:var(--bs);background:#08103a}
+.g8-mode>*{position:relative;z-index:1}
+.g8-mbg{position:absolute!important;inset:0;z-index:0!important;border-radius:inherit;overflow:hidden}
+.g8-mbg svg{width:100%;height:100%}
+.g8-mico{width:12u;height:12u;margin-bottom:.8u;filter:drop-shadow(0 0 1.4u var(--ig))}
+.g8-mico svg{width:100%;height:100%}
+.g8-mode strong{font-size:max(15px,3.9u);font-weight:900;line-height:1.05;letter-spacing:.01em;display:flex;align-items:center;gap:.8u;text-shadow:0 .2u .6u #0008}
+.g8-mode small{margin-top:.8u;font-size:max(8.5px,1.85u);line-height:1.25;color:#c9d0f5;padding:0 .4u}
+.g8-go{position:absolute!important;right:1.4u;bottom:1.4u;width:max(24px,5u);height:max(24px,5u);border-radius:50%;border:1.5px solid #ffffff66;
+  background:#0b1240d9;display:grid;place-items:center;color:#fff;box-shadow:0 0 1u #0006}
+.g8-go svg{width:52%;height:52%}
+.g8-mode:active{transform:scale(.97)}
+.g8-mode.local{--bc:#2f8bff;--bs:0 0 2.2u #2a7bff77,inset 0 0 2u #2a7bff33;--ig:#2a8bffcc}
+.g8-mode.ia{--bc:#a37bff;--bs:0 0 2.2u #8b5cf688,inset 0 0 2u #8b5cf633;--ig:#a78bfacc}
+.g8-mode.online{--bc:#46c8ff;--bs:0 0 3.2u #38bdf8cc,0 0 .8u #7fe0ff,inset 0 0 2.6u #38bdf844;--ig:#38bdf8cc}
+.g8-mode .cr{position:absolute!important;left:50%;top:-2.9u;width:5.2u;transform:translateX(-50%);z-index:3!important}
+.g8-mode .cr svg{width:100%;height:auto;filter:drop-shadow(0 0 .8u #fbbf24aa)}
+.g8-live{flex:none;width:max(8px,1.9u);height:max(8px,1.9u);border-radius:50%;background:#22e06a;box-shadow:0 0 .9u #22e06a,0 0 .3u #fff}
 
-/* perfil competitivo */
-.g8-prof{display:grid;grid-template-columns:1.1fr .85fr 1fr;align-items:center;gap:8px;padding:10px}
-.g8-pid{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center}
-.g8-pid .g8-av{flex:none;width:clamp(48px,8dvh,62px);height:clamp(48px,8dvh,62px);font-size:1.8rem;box-shadow:0 0 16px #8b5cf6aa}
-.g8-pid b{max-width:100%;font-size:.88rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.g8-pid small{color:#a5b0ff;font-size:.66rem;font-weight:800}
-.g8-pid small em{font-style:normal;font-size:.95rem;font-weight:900;color:#c4b5fd}
-.g8-xp{width:100%;height:8px;border-radius:9px;border:1.5px solid #6d5cff;background:#0a0d30;overflow:hidden}
-.g8-xp i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa)}
-.g8-pid .g8-xpl{color:var(--g8-mut);font-size:.55rem;font-weight:800}
-.g8-rank{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;padding:0 6px;border-left:1px solid #ffffff1c;border-right:1px solid #ffffff1c;align-self:stretch;justify-content:center}
-.g8-emb{width:clamp(44px,7dvh,58px);height:auto}
-.g8-rank b{font-size:.74rem;font-weight:900;letter-spacing:.06em;text-align:center}
-.g8-seerank{padding:4px 8px;border-radius:99px;border:1.5px solid #5b6cff;background:#0d1140;font:800 .52rem Inter,system-ui,sans-serif;letter-spacing:.08em;color:#9fb0ff;white-space:nowrap}
-.g8-stats{display:grid;gap:5px}
-.g8-stats div{display:flex;align-items:center;gap:7px;line-height:1.05}
-.g8-stats span{flex:0 0 22px;font-size:1.05rem;text-align:center}
-.g8-stats b{display:block;font-size:.95rem;font-weight:900}
-.g8-stats small{display:block;color:var(--g8-mut);font-size:.5rem;font-weight:800;letter-spacing:.1em}
+/* ---- perfil / rango ---- */
+.g8-prof{height:27u;display:grid;grid-template-columns:1.32fr .86fr 1fr;align-items:center;border-radius:3.2u;overflow:hidden;
+  border-color:#4552d8;box-shadow:0 0 2.4u #3b46c966,inset 0 1px 0 #ffffff22}
+.g8-pbg{position:absolute;inset:0;z-index:0}
+.g8-pbg svg{width:100%;height:100%}
+.g8-prof>div{position:relative;z-index:1;min-width:0;height:100%}
+.g8-pl{display:flex;align-items:center;gap:1.4u;padding:0 1.2u 0 1.8u}
+.g8-ring{position:relative;flex:none;width:max(46px,14u);height:max(46px,14u);padding:.55u;border-radius:50%;
+  background:conic-gradient(from 210deg,#a78bfa,#38bdf8,#8b5cf6,#5b21b6,#a78bfa);box-shadow:0 0 2u #8b5cf6bb}
+.g8-ring .av{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#4637b0,#0d0f2e);font-size:max(22px,6.8u);line-height:1}
+.g8-ring .cr{position:absolute;left:50%;top:-1.8u;width:3.6u;transform:translateX(-50%)}
+.g8-ring .cr svg{width:100%;height:auto}
+.g8-pn{min-width:0;flex:1;display:flex;flex-direction:column;gap:.7u}
+.g8-pn b{font-size:max(14px,3.9u);font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+.g8-lv{font-size:max(9.5px,2.4u);font-weight:800;color:#a5b0ff;letter-spacing:.06em;line-height:1}
+.g8-lv em{font-style:normal;font-size:max(13px,3.5u);font-weight:900;color:#c9b8ff;margin-left:.4u}
+.g8-bar{height:max(6px,1.5u);border-radius:9u;border:1.5px solid #6d5cff;background:#090c2e;overflow:hidden}
+.g8-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6d5cff,#38bdf8)}
+.g8-xpl{font-size:max(7.5px,1.75u);color:#aab3ee;font-weight:700;line-height:1}
+.g8-pm{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9u;padding:0 .6u;
+  border-left:1px solid #ffffff22;border-right:1px solid #ffffff22;margin:2.2u 0;height:auto!important;align-self:stretch}
+.g8-pm svg{width:max(40px,12u);height:auto;filter:drop-shadow(0 0 1.4u #8b5cf6aa)}
+.g8-pm b{font-size:max(9.5px,2.3u);font-weight:900;letter-spacing:.12em;padding-left:.12em;text-align:center;white-space:nowrap}
+.g8-pr{display:flex;flex-direction:column;justify-content:space-evenly;padding:1.6u 1.2u 1.6u 2u}
+.g8-st{display:flex;align-items:center;gap:1.3u;line-height:1.05}
+.g8-st .ic{flex:none;width:max(17px,4.2u)}
+.g8-st .ic svg{width:100%;height:auto}
+.g8-st b{display:block;font-size:max(12px,2.9u);font-weight:900}
+.g8-st small{display:block;font-size:max(6.5px,1.45u);letter-spacing:.1em;color:#9ea9e6;font-weight:800}
 
-/* accesos */
-.g8-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.g8-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;min-height:clamp(54px,8.4dvh,70px);padding:8px 10px;border-radius:16px;text-align:left}
-.g8-tile span{font-size:1.35rem;line-height:1}
-.g8-tile b{font-size:.68rem;font-weight:900;letter-spacing:.05em}
-.g8-tile em{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-style:normal;color:#6a74d6;font-size:1.1rem}
-.g8-tile i{position:absolute;right:8px;top:6px;font-style:normal;padding:2px 6px;border-radius:99px;background:#ffffff14;color:#aab3e8;font:800 .45rem Inter,system-ui,sans-serif;letter-spacing:.08em}
+/* ---- accesos ---- */
+.g8-tiles{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:14.8u;gap:1.6u}
+.g8-tile{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:.6u;padding:0 1.4u;border-radius:2.8u;text-align:left;color:#fff;
+  border-color:#3441c4}
 .g8-tile:active{transform:scale(.97)}
-.g8-badge{position:absolute;left:30px;top:2px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:99px;background:#ef4444;color:#fff;font:900 .6rem Inter,system-ui,sans-serif}
+.g8-tico{width:max(30px,8u);height:max(30px,8u);display:grid;place-items:center;border-radius:2u;border:1px solid #ffffff26;
+  background:linear-gradient(145deg,#1d2678,#0b1042);box-shadow:inset 0 1px 0 #ffffff22}
+.g8-tico svg{width:72%;height:72%}
+.g8-tile b{font-size:max(9.5px,2.2u);font-weight:900;letter-spacing:.06em;line-height:1}
+.g8-tarrow{position:absolute;right:1.3u;top:50%;transform:translateY(-50%);width:max(10px,2.2u);color:#6f7ad8}
+.g8-tarrow svg{width:100%;height:auto}
+.g8-soon{position:absolute;right:1.1u;top:1.2u;padding:.35u .8u;border-radius:99px;background:#ffffff14;color:#b5bdf0;font-style:normal;
+  font-size:max(6px,1.3u);font-weight:800;letter-spacing:.08em;line-height:1.2}
+.g8-badge{position:absolute;left:max(24px,6.2u);top:.7u;min-width:max(15px,3.2u);height:max(15px,3.2u);padding:0 .5u;display:none;place-items:center;
+  border-radius:99px;background:#ef4444;color:#fff;font-size:max(9px,1.9u);font-weight:900;border:2px solid #0a0d30}
 .g8-badge.on{display:grid}
 
-/* recompensa diaria */
-.g8-daily{display:flex;align-items:center;gap:12px;padding:9px 12px;border-color:#d9a928aa;background:linear-gradient(120deg,#3b1d8f,#120a3a 60%,#2a1f06);box-shadow:0 0 18px #fbbf2433,inset 0 1px 0 #ffffff22}
-.g8-daily>span{flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;font-size:1.7rem;border-radius:14px;background:radial-gradient(circle at 35% 30%,#7c3aed,#2a1070);border:1.5px solid #fbbf24aa}
-.g8-daily div{flex:1;min-width:0;line-height:1.2}
-.g8-daily b{display:block;font-size:.82rem;font-weight:900;letter-spacing:.03em}
-.g8-daily small{color:#c9b6ff;font-size:.62rem;font-weight:700}
-.g8-claim{padding:10px 14px;border-radius:99px;border:0;background:linear-gradient(135deg,#475569,#334155);color:#cbd5e1;font:900 .66rem Inter,system-ui,sans-serif;letter-spacing:.06em;opacity:.85}
+/* ---- recompensa diaria ---- */
+.g8-daily{height:13.3u;display:flex;align-items:center;gap:1.4u;padding:0 2.2u 0 .4u;border-radius:3u;border-color:#e0ac22;
+  box-shadow:0 0 2.2u #fbbf2455,inset 0 1px 0 #ffffff33}
+.g8-dbg{position:absolute;inset:0;border-radius:inherit;overflow:hidden;z-index:0}
+.g8-dbg svg{width:100%;height:100%}
+.g8-daily>*:not(.g8-dbg){position:relative;z-index:1}
+.g8-chest{flex:none;width:19.5u;margin:-1.8u 0 -.6u}
+.g8-chest svg{width:100%;height:auto;filter:drop-shadow(0 .4u 1u #000a)}
+.g8-dtx{flex:1;min-width:0;line-height:1.2}
+.g8-dtx b{display:flex;align-items:center;gap:.8u;font-size:max(11px,2.75u);font-weight:900;letter-spacing:.02em;white-space:nowrap}
+.g8-dtx b svg{flex:none;width:max(14px,3.4u);height:auto}
+.g8-dtx small{display:block;margin-top:.5u;font-size:max(8px,1.8u);color:#d4c6ff;font-weight:600}
+.g8-claim{flex:none;display:flex;align-items:center;gap:.6u;height:max(30px,6.6u);padding:0 2.2u;border-radius:99px;
+  background:linear-gradient(180deg,#ffd95a,#f59e0b)!important;color:#3a2200!important;font-weight:900;font-size:max(10px,2.3u);letter-spacing:.03em;
+  box-shadow:0 .5u 0 #a86b00,0 0 2u #fbbf2477,inset 0 1px 0 #fff8}
+.g8-claim svg{width:max(8px,1.8u);height:auto}
+.g8-claim:active{transform:translateY(.4u)}
 
-/* navegación inferior */
-.g8-nav{position:fixed;left:0;right:0;bottom:0;z-index:86;display:none;max-width:520px;margin:0 auto;padding:8px 6px max(8px,env(safe-area-inset-bottom,0px));border-radius:24px 24px 0 0;border:1.5px solid #2e3a9a99;border-bottom:0;background:linear-gradient(180deg,#0c1240f7,#070a24)}
+/* ---- navegación inferior (4 apartados) ---- */
+.g8-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:86;display:none;width:calc(var(--u)*100);
+  height:calc(14.6u + env(safe-area-inset-bottom,0px));padding:0 .6u env(safe-area-inset-bottom,0px);box-sizing:border-box;
+  border-radius:4u 4u 0 0;border:1.5px solid #3646b0aa;border-bottom:0;background:linear-gradient(180deg,#0e1650f7,#070a26);
+  box-shadow:0 -1u 3u #2a3cc844}
 .g8-nav.on{display:flex}
-.g8-nav button{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:48px;border:0;background:transparent;color:#8e99d6;font:800 .66rem Inter,system-ui,sans-serif;letter-spacing:.04em}
-.g8-nav button+button::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:#ffffff14}
-.g8-nav svg{width:25px;height:25px}
-.g8-nav button.on{color:#a99dff}
-.g8-nav button.on::after{content:"";position:absolute;bottom:-2px;width:44px;height:3px;border-radius:3px;background:#6d5cff;box-shadow:0 0 10px #6d5cff}
-.g8-nav .play svg{width:30px;height:30px;color:#c4b5fd;filter:drop-shadow(0 0 8px #8b5cf6)}
-.g8-toast{position:fixed;left:50%;bottom:calc(var(--g8-nav) + 22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;padding:10px 18px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font:800 .8rem Inter,system-ui,sans-serif;box-shadow:0 10px 30px #000c;white-space:nowrap}
+.g8-nav button{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7u;
+  border:0;background:none;color:#8794d8;font-family:Inter,system-ui,sans-serif;font-size:max(9px,2u);font-weight:800;letter-spacing:.08em;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+.g8-nav button+button::before{content:"";position:absolute;left:0;top:25%;bottom:25%;width:1px;background:#ffffff1c}
+.g8-nav svg{width:max(22px,6u);height:max(22px,6u);opacity:.72;filter:saturate(.8)}
+.g8-nav button.on{color:#c4b8ff}
+.g8-nav button.on svg{opacity:1;filter:drop-shadow(0 0 1.1u #8b7cff)}
+.g8-nav button.on::after{content:"";position:absolute;bottom:.6u;width:7u;height:3px;border-radius:3px;background:#7c6cff;box-shadow:0 0 1.2u #7c6cff}
+.g8-nav button:active svg{transform:scale(.92)}
 
-@media (max-height:700px){
-  .g8-studio,.g8-season small{display:none}
-  .g8-mode small{display:none}
-  .g8-mode{padding-bottom:36px}
-}
-@media (min-width:700px){
-  .g8{padding-left:24px;padding-right:24px}
-  .g8-in{max-width:520px}
-}
-@media (prefers-reduced-motion:reduce){.g8-mode.pulse{animation:none}}
-`;
+.g8-toast{position:fixed;left:50%;bottom:calc(14.6u + 2u + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;padding:1.2u 2.6u;
+  border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font:800 max(11px,2.3u) Inter,system-ui,sans-serif;
+  box-shadow:0 1.2u 3.6u #000c;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:no-preference){.g8-live{animation:g8live 1.8s ease-in-out infinite}}
+@keyframes g8live{50%{opacity:.55}}
+`);
   const st = document.createElement("style");
   st.id = "g8css";
   st.textContent = css;
   document.head.appendChild(st);
 
-  /* ---------- Iconos ---------- */
-  const I = {
-    logo: `<svg viewBox="40 10 630 540" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g8a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#b9bcc9"/></linearGradient><linearGradient id="g8b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1fd0"/></linearGradient><linearGradient id="g8c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#e09a00"/></linearGradient></defs><g transform="translate(400,22)"><path d="M0 74L10 14L42 44L62 0L82 44L114 14L124 74Z" fill="url(#g8c)" stroke="#8a5a00" stroke-width="4" stroke-linejoin="round"/></g><path fill="url(#g8a)" d="M555 110H245C130 110 60 200 60 310C60 420 120 500 210 526L285 455C230 450 150 400 150 310C150 240 190 195 260 195H475Z"/><path fill="url(#g8a)" d="M255 295H440L385 365H275L237 318Z"/><path fill="url(#g8b)" stroke="#2a1580" stroke-width="5" d="M505 295H645L525 415L652 535H530L465 470L405 535H280Z"/></svg>`,
-    people: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.4"/><circle cx="16.5" cy="9" r="2.8" opacity=".85"/><path d="M3 19c.7-3.6 3-5.5 6-5.5s5.3 1.9 6 5.5z"/><path d="M14.5 14.2c.7-.3 1.3-.4 2-.4 2.4 0 4.2 1.5 4.8 4.2h-5.4c-.2-1.5-.6-2.8-1.4-3.8z" opacity=".85"/></svg>`,
-    robot: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="8" width="14" height="11" rx="4"/><circle cx="9.5" cy="13.5" r="1.5" fill="#0b0e1a"/><circle cx="14.5" cy="13.5" r="1.5" fill="#0b0e1a"/><rect x="11" y="3.5" width="2" height="4"/><circle cx="12" cy="3.5" r="1.6"/></svg>`,
-    globe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.8 3.8 5.8 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-5.8-3.8-9S9.5 5.8 12 3z"/></svg>`,
-    home: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L3 11h2.5v9h5v-6h3v6h5v-9H21z"/></svg>`,
-    trophy: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v4a5 5 0 0 1-10 0zM4 4h3v2.5A3 3 0 0 1 4 4zm16 0h-3v2.5A3 3 0 0 0 20 4zM11 12h2v4h3v2H8v-2h3z"/></svg>`,
-    user: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c.8-4 3.7-6 8-6s7.2 2 8 6z"/></svg>`,
-    dice: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><g fill="#0b0e1a"><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/></g></svg>`,
-    mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7l8 6 8-6"/></svg>`,
-    gear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>`
-  };
-
-  const emblem = color => `<svg class="g8-emb" viewBox="0 0 64 72" aria-hidden="true"><defs><linearGradient id="g8e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b0"/><stop offset=".45" stop-color="${color}"/><stop offset="1" stop-color="#2a1580"/></linearGradient></defs><path d="M32 2L60 14V38C60 54 48 65 32 70C16 65 4 54 4 38V14Z" fill="url(#g8e)" stroke="#fbbf24" stroke-width="3" stroke-linejoin="round"/><path d="M32 16L44 36L32 56L20 36Z" fill="#ffffff" opacity=".35"/><path d="M32 16L44 36L32 56L20 36Z" fill="none" stroke="#fff" stroke-width="1.5"/></svg>`;
-
   /* ---------- Datos reales ---------- */
-  function rankInfo(trophies) {
-    // Reutiliza el sistema de rangos existente (greyx-ranking.js) si expone una función conocida.
-    const hosts = ["GXRanking", "GXRank", "GXRanks", "GreyxRanking", "GreyxRank", "GXRangos"];
-    const fns = ["rankFor", "getRank", "rankOf", "forTrophies", "tierFor", "getTier", "rank", "rangoPara", "getRango"];
+  const num = v => (typeof v === "number" && isFinite(v) ? v : 0);
+  const fmt = v => num(v).toLocaleString("en-US");
+
+  // Rango: reutiliza el sistema existente (greyx-ranking.js). Busca el dato ya calculado en el estado
+  // y, si no, una función de rango expuesta por los módulos GX*. No crea otro sistema.
+  const BAD = /open|show|render|load|close|mount|draw|init|fetch|sync|submit|save|listen|bind|toggle|list|all/i;
+  const RANKY = /rank|rango|tier|league|liga|divis/i;
+  function asRank(r) {
+    if (!r) return null;
+    if (typeof r === "string") return r.trim() ? { name: r.trim() } : null;
+    if (typeof r === "object") {
+      const name = r.name || r.label || r.title || r.nombre || r.rango;
+      if (typeof name !== "string" || !name.trim()) return null;
+      return { name: name.trim(), color: r.color || r.hex || r.c1, color2: r.color2 || r.c2,
+               emblem: r.emblem || r.svg || r.img || r.image || r.icon };
+    }
+    return null;
+  }
+  let rankHit = null;
+  function rankInfo(s, tr) {
+    const direct = asRank(s.rank) || asRank(s.stats && (s.stats.rank || s.stats.rango)) || asRank(s.profile && s.profile.rank);
+    if (direct) return direct;
+    const call = (host, f) => { try { return asRank(host[f](tr)); } catch (e) { return null; } };
+    if (rankHit) { const r = call(rankHit.h, rankHit.f); if (r) return r; rankHit = null; }
+    const hosts = [window.GX];
+    Object.keys(window).forEach(k => { if (/^(GX|Greyx|gx)/.test(k) && k !== "GX" && k !== "GXArt") hosts.push(window[k]); });
     for (const h of hosts) {
-      const R = window[h];
-      if (!R) continue;
-      for (const f of fns) {
-        if (typeof R[f] !== "function") continue;
-        try {
-          const r = R[f](trophies);
-          if (!r) continue;
-          if (typeof r === "string") return { name: r };
-          return { name: r.name || r.label || r.title || r.nombre || "", color: r.color || r.hex || r.c, icon: r.icon || r.emoji };
-        } catch (e) {}
+      if (!h || (typeof h !== "object" && typeof h !== "function")) continue;
+      let keys = [];
+      try { keys = Object.keys(h); } catch (e) {}
+      for (const f of keys) {
+        if (typeof h[f] !== "function" || !RANKY.test(f) || BAD.test(f)) continue;
+        const r = call(h, f);
+        if (r) { rankHit = { h, f }; return r; }
       }
     }
     return null;
@@ -182,107 +246,132 @@
   function data() {
     const G = window.GX, s = G && G.state;
     if (!s) return null;
-    const stats = s.stats || { played: 0, wins: 0, trophies: 0 };
-    const tr = stats.trophies || 0;
+    const stats = s.stats || {};
+    const tr = num(stats.trophies);
     const xpOk = !!s.xpLoaded;
     const lv = xpOk ? s.xpLevel : Math.max(1, Math.floor(tr / 100) + 1);
     let pct = 0, label = "";
     if (xpOk) {
       pct = G.xpBarPct(s.xp);
       const base = G.xpForLevel(lv), next = G.xpForLevel(lv + 1);
-      label = lv >= 100 ? "MÁX" : (s.xp - base) + " / " + (next - base);
+      label = lv >= 100 ? "100 / 100" : (s.xp - base) + " / " + (next - base);
     }
     const p = s.profile;
     const name = p ? p.username : (s.user && s.user.email ? s.user.email.split("@")[0] : "INVITADO");
-    const avatar = p ? G.avatarEmoji(p.avatar) : "👤";
-    const played = stats.played || 0, wins = stats.wins || 0;
-    const rate = played ? Math.round(wins * 100 / played) + "%" : "0%";
-    const req = (s.friendsIncoming || []).length;
-    return { name, avatar, lv, pct, label, tr, played, wins, rate, req, rank: rankInfo(tr) };
+    const played = num(stats.played), wins = num(stats.wins);
+    const dot = $(".gx6 .gxi-dot");
+    const ideas = dot && dot.style.display !== "none" && dot.textContent ? dot.textContent : "";
+    return {
+      name, avatar: p ? G.avatarEmoji(p.avatar) : "👤", lv, pct, label, tr, played, wins,
+      rate: played ? Math.round(wins * 100 / played) + "%" : "0%",
+      gold: num(stats.gold != null ? stats.gold : stats.oro != null ? stats.oro : stats.coins),
+      gems: num(stats.gems != null ? stats.gems : stats.diamonds != null ? stats.diamonds : stats.diamantes),
+      req: (s.friendsIncoming || []).length, ideas, rank: rankInfo(s, tr)
+    };
   }
 
   /* ---------- Markup ---------- */
-  const mode = (go, cls, c1, c2, glow, ic, icon, title, sub, live) => `
-    <button class="g8-mode ${cls}" data-go="${go}" type="button" style="--cc:${c1};--cb:${c2};--cg:${glow};--ci:${ic}">
-      ${icon}<strong>${live ? '<i class="g8-live"></i>' : ""}${title}</strong><small>${sub}</small><u>›</u>
+  function emblemOf(rk) {
+    if (rk && typeof rk.emblem === "string") {
+      const e = rk.emblem.trim();
+      if (e.startsWith("<svg")) return e;
+      if (/^(https?:|data:|\.{0,2}\/|[\w-]+\/)|\.(png|webp|jpe?g|svg)(\?|$)/i.test(e)) return `<img src="${esc(e)}" alt="" style="width:100%;height:auto">`;
+    }
+    return A.rankEmblem(rk && rk.color, rk && rk.color2);
+  }
+
+  const modeCard = (go, cls, bg, icon, title, sub, crown, live) => `
+    <button class="g8-mode ${cls}" data-go="${go}" type="button" aria-label="${esc(title)}">
+      <span class="g8-mbg">${bg}</span>
+      ${crown ? `<span class="cr">${A.crown()}</span>` : ""}
+      <span class="g8-mico">${icon}</span>
+      <strong>${live ? '<i class="g8-live"></i>' : ""}${title}</strong>
+      <small>${sub}</small>
+      <span class="g8-go">${A.chev()}</span>
     </button>`;
 
   const tile = (go, ico, label, soon) => `
     <button class="g8-card g8-tile" data-go="${go}" type="button">
-      <span>${ico}</span><b>${label}</b>${soon ? "<i>PRONTO</i>" : "<em>›</em>"}
-      ${go === "friends" ? '<strong class="g8-badge"></strong>' : ""}
+      <span class="g8-tico">${ico}</span><b>${label}</b>
+      ${soon ? '<i class="g8-soon">PRONTO</i>' : `<span class="g8-tarrow">${A.chev()}</span>`}
+      ${go === "friends" ? '<span class="g8-badge"></span>' : ""}
     </button>`;
+
+  const stat = (ic, v, l) => `<div class="g8-st"><span class="ic">${ic}</span><span><b>${v}</b><small>${l}</small></span></div>`;
 
   function draw(d) {
     const rk = d.rank;
     box.innerHTML = `
+    <div class="g8-bg">${A.menuBg()}</div>
     <div class="g8-in">
-      <div class="g8-studio">GREYX STUDIOS</div>
 
-      <div class="g8-top">
-        <div class="g8-chip" data-go="profile" role="button">
-          <span class="g8-av">${d.avatar}</span>
-          <div><b>${esc(d.name)}</b><small>NV. ${d.lv}</small></div>
-        </div>
-        <div class="g8-logo">${I.logo}<b>LUDO <i>GREYX</i></b></div>
-        <div class="g8-acts">
-          <button class="g8-ic" data-go="mail" type="button" aria-label="Buzón">${I.mail}</button>
-          <button class="g8-ic" data-go="settings" type="button" aria-label="Configuración">${I.gear}</button>
+      <div class="g8-hd">
+        <div class="g8-studio">GREYX STUDIOS</div>
+        <div class="g8-top">
+          <button class="g8-ic idea" data-go="ideas" type="button" aria-label="Buzón de ideas">${A.bulb()}<span class="g8-dot ${d.ideas ? "on" : ""}">${esc(d.ideas)}</span></button>
+          <div class="g8-logo">${A.logoLockup()}</div>
+          <div class="g8-acts">
+            <button class="g8-ic" data-go="mail" type="button" aria-label="Mensajes">${A.mail()}</button>
+            <button class="g8-ic" data-go="settings" type="button" aria-label="Configuración">${A.gear()}</button>
+          </div>
         </div>
       </div>
-
-      <div class="g8-season"><div><b>TEMPORADA</b><small>Próximamente</small></div></div>
 
       <div class="g8-card g8-wallet">
-        <div class="g8-cur"><span class="g8-coin gold">⭐</span><div><small>ORO</small><b>0</b></div>
-          <button class="g8-plus" data-go="soon" data-msg="Las compras llegarán pronto" type="button" aria-label="Añadir oro">+</button></div>
-        <div class="g8-cur"><span class="g8-coin gem">💎</span><div><small>DIAMANTES</small><b>0</b></div>
-          <button class="g8-plus" data-go="soon" data-msg="Las compras llegarán pronto" type="button" aria-label="Añadir diamantes">+</button></div>
+        <div class="g8-cur"><span class="art">${A.coin()}</span><span class="txt"><small>ORO</small><b>${fmt(d.gold)}</b></span>
+          <button class="g8-plus" data-go="soon" data-msg="Conseguir oro estará disponible pronto" type="button" aria-label="Conseguir oro">${A.plus()}</button></div>
+        <span class="g8-sep"></span>
+        <div class="g8-cur gem"><span class="art">${A.gem()}</span><span class="txt"><small>DIAMANTES</small><b>${fmt(d.gems)}</b></span>
+          <button class="g8-plus" data-go="soon" data-msg="Conseguir diamantes estará disponible pronto" type="button" aria-label="Conseguir diamantes">${A.plus()}</button></div>
       </div>
 
-      <div class="g8-sec">ELIGE TU MODO</div>
+      <div class="g8-sec"><span class="cr">${A.crown()}</span><i></i><b>ELIGE TU MODO</b><i></i></div>
 
       <div class="g8-modes">
-        ${mode("local", "", "#2f8bff", "linear-gradient(160deg,#17409e,#0a1347)", "#2a7bff66", "#4fb3ff", I.people, "LOCAL", "Juega con tus amigos en el mismo dispositivo")}
-        ${mode("bot", "", "#9b6bff", "linear-gradient(160deg,#4d22b8,#140b45)", "#8b5cf666", "#c4b5fd", I.robot, "RETO IA", "Pon a prueba tu habilidad contra la IA")}
-        ${mode("online", "online", "#38bdf8", "linear-gradient(160deg,#0f3d7a,#0a1535)", "#38bdf855", "#38bdf8", I.globe, "ONLINE", "Juega con jugadores de todo el mundo", true)}
+        ${modeCard("local", "local", A.modeBg("local"), A.people(), "LOCAL", "Juega con tus amigos en el mismo dispositivo")}
+        ${modeCard("bot", "ia", A.modeBg("ia"), A.robot(), "RETO IA", "Pon a prueba tu habilidad contra la IA")}
+        ${modeCard("online", "online", A.modeBg("online"), A.globe(), "ONLINE", "Juega con jugadores reales de todo el mundo", true, true)}
       </div>
 
       <div class="g8-card g8-prof">
-        <div class="g8-pid">
-          <span class="g8-av">${d.avatar}</span>
-          <b>${esc(d.name)}</b>
-          <small>NV. <em>${d.lv}</em></small>
-          <div class="g8-xp"><i style="width:${d.pct}%"></i></div>
-          ${d.label ? `<span class="g8-xpl">${d.label}</span>` : ""}
+        <span class="g8-pbg">${A.profileBg()}</span>
+        <div class="g8-pl">
+          <span class="g8-ring"><span class="cr">${A.crown()}</span><span class="av">${d.avatar}</span></span>
+          <span class="g8-pn">
+            <b>${esc(d.name)}</b>
+            <span class="g8-lv">NV.<em>${d.lv}</em></span>
+            <span class="g8-bar"><i style="width:${d.pct}%"></i></span>
+            ${d.label ? `<span class="g8-xpl">${esc(d.label)}</span>` : ""}
+          </span>
         </div>
-        <div class="g8-rank">
-          ${emblem((rk && rk.color) || "#8b5cf6")}
-          <b>${rk && rk.name ? esc(String(rk.name).toUpperCase()) : "SIN RANGO"}</b>
-          <button class="g8-seerank" data-go="rank" type="button">VER RANGOS ›</button>
+        <div class="g8-pm">
+          ${emblemOf(rk)}
+          <b>${rk ? esc(rk.name.toUpperCase()) : "SIN RANGO"}</b>
         </div>
-        <div class="g8-stats">
-          <div><span>🏆</span><p style="margin:0"><b>${d.tr}</b><small>TROFEOS</small></p></div>
-          <div><span>⚔️</span><p style="margin:0"><b>${d.played}</b><small>PARTIDAS</small></p></div>
-          <div><span>⭐</span><p style="margin:0"><b>${d.wins}</b><small>VICTORIAS</small></p></div>
-          <div><span>🎯</span><p style="margin:0"><b>${d.rate}</b><small>WIN RATE</small></p></div>
+        <div class="g8-pr">
+          ${stat(A.trophy(), fmt(d.tr), "TROFEOS")}
+          ${stat(A.swords(), fmt(d.played), "PARTIDAS")}
+          ${stat(A.star(), fmt(d.wins), "VICTORIAS")}
+          ${stat(A.target(), d.rate, "WIN RATE")}
         </div>
       </div>
 
-      <div class="g8-grid">
-        ${tile("friends", "👥", "AMIGOS")}
-        ${tile("rank", "🏆", "RANKING")}
-        ${tile("soon", "📋", "MISIONES", true)}
-        ${tile("soon", "🏪", "TIENDA", true)}
-        ${tile("soon", "🎒", "INVENTARIO", true)}
-        ${tile("soon", "🎪", "EVENTOS", true)}
+      <div class="g8-tiles">
+        ${tile("friends", A.friends(), "AMIGOS")}
+        ${tile("rank", A.trophy(), "RANKING")}
+        ${tile("soon", A.missions(), "MISIONES", true)}
+        ${tile("soon", A.shop(), "TIENDA", true)}
+        ${tile("soon", A.backpack(), "INVENTARIO", true)}
+        ${tile("soon", A.events(), "EVENTOS", true)}
       </div>
 
       <div class="g8-card g8-daily">
-        <span>🎁</span>
-        <div><b>RECOMPENSA DIARIA</b><small>Muy pronto podrás reclamar tu premio</small></div>
-        <button class="g8-claim" data-go="soon" data-msg="La recompensa diaria llegará pronto" type="button">PRONTO</button>
+        <span class="g8-dbg">${A.dailyBg()}</span>
+        <span class="g8-chest">${A.chest()}</span>
+        <span class="g8-dtx"><b>${A.calendarGold()}RECOMPENSA DIARIA</b><small>Muy pronto: un premio cada día</small></span>
+        <button class="g8-claim" data-go="soon" data-msg="La recompensa diaria estará disponible pronto" type="button">RECLAMAR${A.chev()}</button>
       </div>
+
     </div>`;
 
     const badge = box.querySelector(".g8-badge");
@@ -299,14 +388,13 @@
   const nav = document.createElement("nav");
   nav.className = "g8-nav";
   nav.innerHTML = `
-    <button class="on" data-go="home" type="button">${I.home}Inicio</button>
-    <button data-go="friends" type="button">${I.people}Amigos</button>
-    <button class="play" data-go="play" type="button">${I.dice}Jugar</button>
-    <button data-go="rank" type="button">${I.trophy}Ranking</button>
-    <button data-go="profile" type="button">${I.user}Perfil</button>`;
+    <button class="on" data-go="home" type="button">${A.navHome()}INICIO</button>
+    <button data-go="friends" type="button">${A.navFriends()}AMIGOS</button>
+    <button data-go="rank" type="button">${A.navTrophy()}RANKING</button>
+    <button data-go="profile" type="button">${A.navUser()}PERFIL</button>`;
   document.body.appendChild(nav);
 
-  /* ---------- Acciones: reenvían al botón original ---------- */
+  /* ---------- Acciones: siempre reenvían al destino original ---------- */
   const FALLBACK = { local: "local", bot: "mode", online: "online-open", friends: "friends-open", settings: "settings", profile: "settings" };
 
   function toast(m) {
@@ -317,7 +405,8 @@
     setTimeout(() => t.remove(), 1800);
   }
 
-  function fire(g) {
+  // Misma función para el acceso del menú y el botón de la barra inferior => mismo widget.
+  function openDest(g) {
     const old = $('.gx6 [data-go="' + g + '"], .gx6-nav [data-go="' + g + '"]');
     if (old) { old.click(); return true; }
     const a = FALLBACK[g];
@@ -326,25 +415,32 @@
     return false;
   }
 
+  function legacy(re) {
+    const els = document.querySelectorAll('.gx6 button,.gx6 [role="button"],.gx6 a,[data-action]');
+    for (const el of els) {
+      if (box.contains(el) || nav.contains(el) || el.closest(".gx6-nav,.gx6-set,.gxi-row")) continue;
+      const t = el.id + " " + (typeof el.className === "string" ? el.className : "") + " " +
+        (el.getAttribute("aria-label") || "") + " " + (el.dataset.action || "") + " " + (el.dataset.go || "") + " " + el.textContent;
+      if (re.test(t)) return el;
+    }
+    return null;
+  }
+
   function onGo(e) {
     const b = e.target.closest("[data-go]");
     if (!b) return;
     const g = b.dataset.go;
     if (g === "home") return;
-    if (g === "soon") { toast(b.dataset.msg || "Próximamente"); return; }
-    if (g === "play") {
-      box.querySelectorAll(".g8-mode").forEach(m => {
-        m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse");
-      });
-      return;
+    if (g === "soon") return toast(b.dataset.msg || "Próximamente");
+    if (g === "ideas") {
+      const i = $(".gx6 .gxi-btn");
+      return i ? i.click() : toast("El buzón de ideas se está cargando");
     }
     if (g === "mail") {
-      const m = $('[data-action*="correo"],[data-action*="mail"],[data-go="correo"],.gx-mail,#gxMail,#gxCorreo');
-      if (m && !box.contains(m)) m.click(); else toast("Buzón: próximamente");
-      return;
+      const m = legacy(/correo|mail|mensaj|inbox/i);
+      return m ? m.click() : toast("Mensajes: próximamente");
     }
-    if (g === "rank") { if (!fire("rank")) toast("Ranking: próximamente"); return; }
-    fire(g);
+    if (!openDest(g) && g === "rank") toast("Ranking: próximamente");
   }
   box.addEventListener("click", onGo);
   nav.addEventListener("click", onGo);
@@ -361,8 +457,9 @@
     const k = JSON.stringify(d);
     if (k !== sig) { sig = k; draw(d); }
   }
-  const root = document.getElementById("app");
-  if (root) new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["class"], subtree: true, childList: true });
+  if (document.getElementById("app")) {
+    new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["class"], subtree: true, childList: true });
+  }
   setInterval(sync, 500);
   sync();
 })();
