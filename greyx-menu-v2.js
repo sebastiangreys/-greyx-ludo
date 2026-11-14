@@ -1,11 +1,10 @@
-/* GREYX LUDO — MENÚ PRINCIPAL v2 (fase 2: refinamiento)
-   Carga: <script src="greyx-icons.js"></script> y después <script src="greyx-menu-v2.js"></script>
-          (ambos DESPUÉS de greyx-fijo.js).
-   - Solo presentación + lectura de datos. No escribe en Firebase, no toca tablero, auth ni partidas.
-   - Estadísticas: lee stats/{uid} (el mismo documento que usa el perfil) y respeta GX.state.stats
-     cuando una partida lo actualiza. Mientras carga muestra "—", nunca ceros inventados.
-   - Rango: window.GXRank.rankOf(trofeos) (sistema de greyx-ranking.js).
-   - Cada acceso reenvía el clic al botón/acción original: no hay widgets duplicados. */
+/* GREYX LUDO — MENÚ PRINCIPAL v2 (fase 3)
+   Carga: greyx-icons.js y después greyx-menu-v2.js (ambos DESPUÉS de greyx-fijo.js).
+   - Solo presentación + lectura de datos. No escribe en Firebase.
+   - Estadísticas: stats/{uid}. Mientras carga muestra "—", nunca ceros inventados.
+   - Rango: window.GXRank.rankOf(trofeos).
+   - Buzón 💡: abre window.GXIdeas.open() (greyx-ideas.js).
+   - Botones + de oro y diamantes: abren su ventana (la tienda aún no existe, y la ventana lo dice). */
 (() => {
   if (window.__gx8) return;
   window.__gx8 = true;
@@ -19,6 +18,8 @@
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const num = n => Number(n || 0).toLocaleString("es");
 
+    const FLAG_DO = `<svg class="g8-flag" viewBox="0 0 28 18" aria-label="República Dominicana"><rect width="28" height="18" rx="2.5" fill="#fff"/><rect width="12" height="7.5" fill="#1d4ed8"/><rect x="16" width="12" height="7.5" fill="#dc2626"/><rect y="10.5" width="12" height="7.5" fill="#dc2626"/><rect x="16" y="10.5" width="12" height="7.5" fill="#1d4ed8"/><rect x="12" width="4" height="18" fill="#fff"/><rect y="7.5" width="28" height="3" fill="#fff"/><rect x=".5" y=".5" width="27" height="17" rx="2.2" fill="none" stroke="#ffffff55"/></svg>`;
+
     /* ---------- CSS ---------- */
     const css = `
 .gx6{display:none!important}
@@ -29,7 +30,7 @@
 .g8.on{display:block}
 .g8 button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
 .g8 svg{display:block}
-.g8-in{width:min(100%,520px);height:100%;min-height:500px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;gap:clamp(7px,1.45dvh,14px)}
+.g8-in{width:min(100%,520px);height:100%;min-height:560px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;gap:clamp(7px,1.35dvh,13px)}
 .g8-card{border:1.5px solid #3b46c9;border-radius:18px;background:linear-gradient(160deg,#121858ee,#080b2bee);box-shadow:0 0 16px #3b46c944,inset 0 1px 0 #ffffff1c}
 
 /* encabezado */
@@ -61,16 +62,17 @@
 .g8-cur small{display:block;color:#9aa4d6;font:800 .5rem Inter,system-ui,sans-serif;letter-spacing:.16em}
 .g8-cur b{display:block;font-size:clamp(.9rem,2.6dvh,1.15rem);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g8-plus{flex:none;height:70%;aspect-ratio:1;display:grid;place-items:center;padding:0;border-radius:10px;border:1.5px solid #5b6cff;background:#141a5acc;font-size:1.15rem;font-weight:900;line-height:1}
+.g8-plus:active{transform:scale(.92)}
 
 /* título de sección */
 .g8-sec{flex:none;display:flex;align-items:center;justify-content:center;gap:12px;font:900 clamp(.72rem,2dvh,.92rem) Inter,system-ui,sans-serif;letter-spacing:.16em}
 .g8-sec::before,.g8-sec::after{content:"";flex:1;max-width:80px;height:2px;background:linear-gradient(90deg,transparent,#6d5cff)}
 .g8-sec::after{transform:scaleX(-1)}
 
-/* modos: 3 capas  (fondo borroso · plano intermedio luminoso · primer plano nítido) */
-.g8-modes{flex:1.2 1 0;min-height:112px;max-height:240px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-.g8-mode{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,1.1dvh,10px);
-  padding:6px 4px clamp(28px,4.8dvh,36px);border-radius:20px;border:2px solid var(--cc);background:var(--cb);box-shadow:0 0 18px var(--cg),inset 0 1px 0 #ffffff26}
+/* modos */
+.g8-modes{flex:1.3 1 0;min-height:132px;max-height:250px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.g8-mode{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(3px,.8dvh,8px);
+  padding:6px 5px clamp(32px,5dvh,38px);border-radius:20px;border:2px solid var(--cc);background:var(--cb);box-shadow:0 0 18px var(--cg),inset 0 1px 0 #ffffff26}
 .g8-mode.local{--cc:#2f8bff;--cb:linear-gradient(165deg,#1a45b0,#0a1347);--cg:#2a7bff77;--ci:#4fb3ff}
 .g8-mode.ai{--cc:#9b6bff;--cb:linear-gradient(165deg,#5a26c9,#140b45);--cg:#8b5cf677;--ci:#c4b5fd}
 .g8-mode.online{--cc:#38bdf8;--cb:linear-gradient(165deg,#0f3d7a,#08122e);--cg:#38bdf8aa;--ci:#38bdf8;box-shadow:0 0 28px #38bdf8aa,0 0 8px #38bdf866,inset 0 0 18px #38bdf822}
@@ -78,9 +80,10 @@
 .g8-mbg svg{width:100%;height:100%;filter:blur(1.6px);opacity:.5;transform:scale(1.05)}
 .g8-mmid{background:radial-gradient(circle at 50% 34%,var(--cg),transparent 54%),linear-gradient(180deg,transparent 46%,#00000066)}
 .g8-mcrown{position:absolute;top:-11px;left:50%;width:24px;height:24px;transform:translateX(-50%);filter:drop-shadow(0 0 6px #fbbf24);z-index:2}
-.g8-mico{position:relative;z-index:1;height:clamp(44px,10.4dvh,76px);aspect-ratio:1;filter:drop-shadow(0 4px 8px #0008) drop-shadow(0 0 12px var(--ci))}
+.g8-mico{position:relative;z-index:1;height:clamp(38px,8.4dvh,64px);aspect-ratio:1;filter:drop-shadow(0 4px 8px #0008) drop-shadow(0 0 12px var(--ci))}
 .g8-mico svg{width:100%;height:100%}
-.g8-mode strong{position:relative;z-index:1;font-size:clamp(.88rem,2.6dvh,1.12rem);font-weight:900;letter-spacing:.02em;text-shadow:0 2px 6px #000b;white-space:nowrap}
+.g8-mode strong{position:relative;z-index:1;font-size:clamp(.86rem,2.5dvh,1.08rem);font-weight:900;letter-spacing:.02em;text-shadow:0 2px 6px #000b;white-space:nowrap}
+.g8-mode small{position:relative;z-index:1;padding:0 3px;color:#c3cbf3;font-size:clamp(.5rem,1.35dvh,.62rem);font-weight:600;line-height:1.25;text-align:center;text-shadow:0 1px 3px #000a}
 .g8-mode u{position:absolute;z-index:1;right:7px;bottom:7px;width:clamp(24px,4.2dvh,30px);aspect-ratio:1;display:grid;place-items:center;border-radius:50%;text-decoration:none;font-size:1.1rem;line-height:1;background:#0a0f3acc;border:1.5px solid #ffffff66}
 .g8-live{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
 .g8-mode:active{transform:scale(.97)}
@@ -92,7 +95,9 @@
 .g8-av{flex:none;height:clamp(42px,8.6dvh,60px);aspect-ratio:1;display:grid;place-items:center;border-radius:50%;font-size:clamp(1.3rem,3.7dvh,1.9rem);
   background:radial-gradient(circle at 35% 30%,#4c3fa8,#14172e);border:2.5px solid #a78bfa;box-shadow:0 0 16px #8b5cf6aa,inset 0 0 10px #0008}
 .g8-pt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.g8-pt b{font-size:clamp(.74rem,2.1dvh,.92rem);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g8-nm{display:flex;align-items:center;gap:6px;min-width:0}
+.g8-nm b{min-width:0;font-size:clamp(.74rem,2.1dvh,.92rem);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g8-flag{flex:none;width:20px;height:13px;border-radius:2px;box-shadow:0 0 0 1px #0006}
 .g8-pt small{color:#a5b0ff;font-size:clamp(.58rem,1.6dvh,.7rem);font-weight:800}
 .g8-pt small em{font-style:normal;font-size:1.25em;font-weight:900;color:#c4b5fd}
 .g8-xp{display:flex;align-items:center;gap:5px}
@@ -114,17 +119,17 @@
 .g8-prof.ld .g8-embw svg{opacity:.4}
 @keyframes g8Ld{50%{opacity:.4}}
 
-/* accesos */
-.g8-grid{flex:1.15 1 0;min-height:96px;max-height:170px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:8px}
-.g8-tile{--ts:clamp(24px,4.4dvh,36px);position:relative;min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:3px 10px;border-radius:15px;text-align:left}
-.g8-tico{display:block;flex:none;width:var(--ts);height:var(--ts);filter:drop-shadow(0 2px 4px #0008)}
-.g8-tico svg{width:100%;height:100%}
+/* accesos (2 filas x 3) */
+.g8-grid{flex:1.15 1 0;min-height:104px;max-height:176px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:8px}
+.g8-tile{--ts:clamp(24px,4.4dvh,34px);position:relative;min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:3px 9px;border-radius:15px;text-align:left}
+.g8-tico{display:grid;place-items:center;flex:none;width:calc(var(--ts) + 10px);height:calc(var(--ts) + 10px);border-radius:11px;background:#0b1038;border:1px solid #ffffff1a}
+.g8-tico svg{width:var(--ts);height:var(--ts);filter:drop-shadow(0 2px 4px #0008)}
 .g8-tile b{font-size:clamp(.56rem,1.55dvh,.68rem);font-weight:900;letter-spacing:.06em;line-height:1}
 .g8-tile em{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-style:normal;color:#7e88e6;font-size:1.2rem}
 .g8-tile i{position:absolute;right:7px;top:6px;font-style:normal;padding:2px 6px;border-radius:99px;background:#ffffff14;color:#aab3e8;font:800 .42rem Inter,system-ui,sans-serif;letter-spacing:.1em}
-.g8-tile.soon{opacity:.9}
+.g8-tile.soon{opacity:.92}
 .g8-tile:active{transform:scale(.97)}
-.g8-badge{position:absolute;left:34px;top:2px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:99px;background:#ef4444;color:#fff;font:900 .6rem Inter,system-ui,sans-serif;border:2px solid #080a2a}
+.g8-badge{position:absolute;left:36px;top:2px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:99px;background:#ef4444;color:#fff;font:900 .6rem Inter,system-ui,sans-serif;border:2px solid #080a2a}
 .g8-badge.on{display:grid}
 
 /* recompensa diaria */
@@ -141,9 +146,25 @@
   font:900 clamp(.62rem,1.7dvh,.76rem) Inter,system-ui,sans-serif;letter-spacing:.05em;white-space:nowrap;box-shadow:0 3px 0 #92600a,0 0 16px #fbbf2477}
 .g8-claim:active{transform:translateY(2px);box-shadow:0 1px 0 #92600a}
 
-.g8-toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;padding:10px 18px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font:800 .8rem Inter,system-ui,sans-serif;box-shadow:0 10px 30px #000c;white-space:nowrap}
+.g8-toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:99;padding:10px 18px;border-radius:99px;background:#111631;border:1px solid #a78bfa;color:#fff;font:800 .8rem Inter,system-ui,sans-serif;box-shadow:0 10px 30px #000c;white-space:nowrap}
 
-/* barra inferior: la misma .gx6-nav de siempre, con el aspecto de la referencia */
+/* ventana de monedas */
+.g8-md{position:fixed;inset:0;z-index:1050;display:grid;place-items:center;padding:20px;background:rgba(5,6,12,.86);animation:g8F .18s ease both}
+@keyframes g8F{from{opacity:0}to{opacity:1}}
+.g8-mdc{position:relative;width:min(340px,100%);padding:26px 20px 20px;border-radius:26px;text-align:center;color:#fff;font-family:Inter,system-ui,sans-serif;
+  border:1.5px solid #a78bfa77;background:linear-gradient(160deg,#252b60,#0d1027);box-shadow:0 25px 70px #000b,0 0 40px #6d28d933}
+.g8-mdx{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff12;color:#fff;cursor:pointer}
+.g8-mdi{display:block;width:64px;height:64px;margin:0 auto 8px;filter:drop-shadow(0 0 12px #fbbf24aa)}
+.g8-mdi.gem{filter:drop-shadow(0 0 12px #8b5cf6)}
+.g8-mdi svg{width:100%;height:100%}
+.g8-mdc h3{margin:0 0 12px;font-size:1.15rem;font-weight:900}
+.g8-mdb{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;margin-bottom:12px;border-radius:14px;background:#ffffff0c;border:1px solid #ffffff1a;color:#9aa4d6;font:800 .66rem Inter,system-ui,sans-serif;letter-spacing:.12em}
+.g8-mdb b{color:#fff;font-size:1.2rem;letter-spacing:0}
+.g8-mdc p{margin:0 0 16px;color:#cbd5e1;font-size:.84rem;line-height:1.5}
+.g8-mdok{width:100%;min-height:48px;border:0;border-radius:14px;color:#fff;font:900 .9rem Inter,system-ui,sans-serif;cursor:pointer;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 4px 0 #3b1d8f}
+.g8-mdok:active{transform:translateY(3px)}
+
+/* barra inferior */
 body .gx6-nav{max-width:520px;margin:0 auto;padding:7px 4px max(7px,env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;
   border:1.5px solid #3b46c9aa;border-bottom:0;background:linear-gradient(180deg,#0c1244f7,#060822);box-shadow:0 -8px 30px #2a3cc833,inset 0 1px 0 #ffffff1a}
 body .gx6-nav button{min-height:50px;gap:3px;justify-content:center;color:#7f8ad0;font:800 clamp(.56rem,1.5dvh,.68rem) Inter,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase}
@@ -161,8 +182,6 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
     document.head.appendChild(st);
 
     /* ---------- Estadísticas reales (stats/{uid}) ---------- */
-    // Causa del bug anterior: state.stats solo se cargaba al abrir la pantalla de perfil
-    // (loadStats() se llama desde profileMarkup). El menú leía null y pintaba ceros.
     const ms = { uid: null, status: "idle", data: null, t: 0, busy: false };
 
     async function loadStats() {
@@ -180,10 +199,8 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
         ]);
         if (G.state.user && G.state.user.uid === uid) {
           const pub = b && b.exists() ? b.data() : null;
-          const src = a.exists() ? a.data() : pub;           // stats manda; publicProfiles solo si falta
+          const src = a.exists() ? a.data() : pub;
           ms.data = src ? { played: src.played || 0, wins: src.wins || 0, trophies: src.trophies || 0 } : { played: 0, wins: 0, trophies: 0 };
-          if (a.exists() && pub && (pub.trophies || 0) !== (a.data().trophies || 0))
-            console.warn("[menu] trophies difiere: stats=" + a.data().trophies + " publicProfiles=" + pub.trophies);
           ms.status = "ok";
         }
       } catch (e) {
@@ -207,7 +224,7 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
 
       let status = "guest", stat = null;
       if (u) {
-        if (s.stats && s.statsUid === u.uid) { stat = s.stats; status = "ok"; }          // actualizado por partidas/perfil
+        if (s.stats && s.statsUid === u.uid) { stat = s.stats; status = "ok"; }
         else if (ms.uid === u.uid && ms.status === "ok") { stat = ms.data; status = "ok"; }
         else status = ms.uid === u.uid && ms.status === "error" ? "error" : "loading";
       }
@@ -237,12 +254,13 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
     }
 
     /* ---------- Markup ---------- */
-    const mode = (go, cls, title, ico, bg, o = {}) => `
+    const mode = (go, cls, title, desc, ico, bg, o = {}) => `
       <button class="g8-mode ${cls}" data-go="${go}" type="button" aria-label="${title}">
         <span class="g8-mbg">${bg}</span><span class="g8-mmid"></span>
         ${o.crown ? `<span class="g8-mcrown">${I.crown}</span>` : ""}
         <span class="g8-mico">${ico}</span>
         <strong>${o.live ? '<i class="g8-live"></i>' : ""}${title}</strong>
+        <small>${desc}</small>
         <u aria-hidden="true">›</u>
       </button>`;
 
@@ -274,24 +292,24 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
 
         <div class="g8-card g8-wallet">
           <div class="g8-cur"><span class="g8-coin">${I.coin}</span><div><small>ORO</small><b>${num(d.gold)}</b></div>
-            <button class="g8-plus" data-go="soon" data-msg="Conseguir oro: próximamente" type="button" aria-label="Conseguir oro">+</button></div>
+            <button class="g8-plus" data-go="wallet" data-w="gold" type="button" aria-label="Conseguir oro">+</button></div>
           <div class="g8-cur"><span class="g8-coin gem">${I.gem}</span><div><small>DIAMANTES</small><b>${num(d.gems)}</b></div>
-            <button class="g8-plus" data-go="soon" data-msg="Conseguir diamantes: próximamente" type="button" aria-label="Conseguir diamantes">+</button></div>
+            <button class="g8-plus" data-go="wallet" data-w="gems" type="button" aria-label="Conseguir diamantes">+</button></div>
         </div>
 
         <div class="g8-sec">ELIGE TU MODO</div>
 
         <div class="g8-modes">
-          ${mode("local", "local", "LOCAL", I.people, A.modeBg.local)}
-          ${mode("bot", "ai", "RETO IA", I.robot, A.modeBg.ai)}
-          ${mode("online", "online", "ONLINE", I.globe, A.modeBg.online, { live: true, crown: true })}
+          ${mode("local", "local", "LOCAL", "Juega con tus amigos en el mismo dispositivo", I.people, A.modeBg.local)}
+          ${mode("bot", "ai", "RETO IA", "Pon a prueba tu estrategia contra la IA", I.robot, A.modeBg.ai)}
+          ${mode("online", "online", "ONLINE", "Juega con jugadores de todo el mundo", I.globe, A.modeBg.online, { live: true, crown: true })}
         </div>
 
         <div class="g8-card g8-prof ${d.status === "loading" ? "ld" : ""}">
           <div class="g8-pl">
             <span class="g8-av">${d.avatar}</span>
             <div class="g8-pt">
-              <b>${esc(d.name)}</b>
+              <div class="g8-nm">${FLAG_DO}<b>${esc(d.name)}</b></div>
               <small>NV. <em>${d.lv == null ? "—" : d.lv}</em></small>
               <div class="g8-xp"><span><i style="width:${d.pct}%"></i></span>${d.label ? `<em>${d.label}</em>` : ""}</div>
             </div>
@@ -327,14 +345,14 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
 
     function badges(d) {
       d = d || data();
-      const set = (el, txt, show) => {            // solo escribe si cambió (evita bucles del observer)
+      const set = (el, txt, show) => {
         if (!el) return;
         if (el.textContent !== txt) el.textContent = txt;
         if (el.classList.contains("on") !== show) el.classList.toggle("on", show);
       };
       if (d) set(box.querySelector(".g8-badge"), d.req > 9 ? "9+" : String(d.req || ""), d.req > 0);
-      const src = $(".gx6 .gxi-dot"), t = src && src.style.display !== "none" ? src.textContent.trim() : "";
-      set($("#g8IdeaDot"), t, !!t);
+      const n = window.GXIdeas ? window.GXIdeas.unread() : 0;
+      set($("#g8IdeaDot"), n > 99 ? "99+" : String(n || ""), n > 0);
     }
 
     /* ---------- Contenedor y barra ---------- */
@@ -354,7 +372,7 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
         <button data-go="profile" type="button">${A.nav.profile}<span>Perfil</span></button>`;
     }
 
-    /* ---------- Acciones: reenvían a lo que ya existe ---------- */
+    /* ---------- Acciones ---------- */
     function toast(m) {
       const t = document.createElement("div");
       t.className = "g8-toast";
@@ -365,10 +383,27 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
     const act = a => { const b = $('[data-action="' + a + '"]'); if (b) { b.click(); return true; } return false; };
     const viaNav = g => { const b = $('.gx6-nav [data-go="' + g + '"]'); if (b) { b.click(); return true; } return false; };
 
+    function wallet(kind) {
+      if ($(".g8-md")) return;
+      const gold = kind === "gold", d = data() || {};
+      const m = document.createElement("div");
+      m.className = "g8-md";
+      m.innerHTML = `<div class="g8-mdc" role="dialog" aria-modal="true">
+        <button class="g8-mdx" type="button" aria-label="Cerrar">✕</button>
+        <span class="g8-mdi ${gold ? "" : "gem"}">${gold ? I.coin : I.gem}</span>
+        <h3>${gold ? "Conseguir oro" : "Conseguir diamantes"}</h3>
+        <div class="g8-mdb">TU SALDO <b>${num(gold ? d.gold : d.gems)}</b></div>
+        <p>La tienda de ${gold ? "oro" : "diamantes"} todavía no está habilitada. Cuando se active, aquí podrás conseguir más.</p>
+        <button class="g8-mdok" type="button">Entendido</button></div>`;
+      const close = () => m.remove();
+      m.addEventListener("click", e => { if (e.target === m || e.target.closest(".g8-mdx,.g8-mdok")) close(); });
+      document.body.appendChild(m);
+    }
+
     function findMail() {
       const re = /correo|mail|buz[oó]n|inbox|mensaje/i;
       for (const e of document.querySelectorAll("button,[role=button],a,[data-action],[data-go]")) {
-        if (box.contains(e) || e.closest("#gxIdeas,.gxi-row,.gx6-nav") || e.classList.contains("gxi-btn")) continue;
+        if (box.contains(e) || e.closest("#gxIdeas,.gx6-nav") || e.classList.contains("gxi-btn")) continue;
         const cls = e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className;
         if (re.test([e.id, cls, e.getAttribute("aria-label"), e.dataset.action, e.dataset.go, e.title].join(" "))) return e;
       }
@@ -380,15 +415,16 @@ body .gx6-nav button.on::after{width:40px;height:3px;background:#7c6cff;box-shad
       if (!b) return;
       const g = b.dataset.go;
       if (g === "soon") return toast(b.dataset.msg || "Próximamente");
+      if (g === "wallet") return wallet(b.dataset.w);
       if (g === "local") return void act("local");
       if (g === "bot") return void act("mode");
       if (g === "online") return void act("online-open");
       if (g === "settings") return void act("settings");
-      if (g === "friends") return void (viaNav("friends") || act("friends-open"));    // mismo destino que la barra
-      if (g === "rank") return void (viaNav("rank") || toast("Ranking: próximamente")); // mismo destino que la barra
+      if (g === "friends") return void (viaNav("friends") || act("friends-open"));
+      if (g === "rank") return void (viaNav("rank") || toast("Ranking: próximamente"));
       if (g === "ideas") {
-        const i = $(".gx6 .gxi-btn") || $(".gxi-btn");
-        return i ? i.click() : toast("Buzón de ideas no disponible");
+        if (window.GXIdeas) return window.GXIdeas.open();
+        return toast("Buzón de ideas no disponible");
       }
       if (g === "mail") { const m = findMail(); return m ? m.click() : toast("Mensajes: próximamente"); }
     });
