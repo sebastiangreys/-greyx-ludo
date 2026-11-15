@@ -1,4 +1,4 @@
-/* GREYX LUDO — PERFIL (Mi perfil + Perfil de otro jugador)
+/* GREYX LUDO — PERFIL v2 compacto y responsive (Mi perfil + Perfil de otro jugador)
    Una sola interfaz con dos modos de permisos:
      MI PERFIL        → editar avatar y descripción (50 caracteres máx.), preferidos y logros recientes.
      PERFIL DE OTRO   → solo lectura + estado de amistad (AMIGOS / AGREGAR AMIGO / solicitud pendiente).
@@ -27,7 +27,6 @@
   const RAR = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, exclusive: 5 };
 
   const FLAG_DO = `<svg viewBox="0 0 28 18" width="22" height="14" aria-hidden="true"><rect width="28" height="18" rx="2.5" fill="#fff"/><rect width="12" height="7.5" fill="#1d4ed8"/><rect x="16" width="12" height="7.5" fill="#dc2626"/><rect y="10.5" width="12" height="7.5" fill="#dc2626"/><rect x="16" y="10.5" width="12" height="7.5" fill="#1d4ed8"/><rect x="12" width="4" height="18" fill="#fff"/><rect y="7.5" width="28" height="3" fill="#fff"/></svg>`;
-  const BACK = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const PENCIL = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z" fill="currentColor"/></svg>`;
   const CUP = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3h10v5a5 5 0 0 1-10 0z" fill="#fbbf24"/><path d="M7 5H4v1.6A3.6 3.6 0 0 0 7.6 10.2M17 5h3v1.6a3.6 3.6 0 0 1-3.6 3.6" fill="none" stroke="#e0a82a" stroke-width="1.7"/><rect x="10.7" y="13" width="2.6" height="4" fill="#e0a82a"/><rect x="7.5" y="17" width="9" height="3" rx="1.2" fill="#fbbf24"/></svg>`;
 
@@ -36,134 +35,150 @@
 #gxPerfil{position:fixed;inset:0;z-index:940;display:block;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;color:#f1f3ff;
   font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
   background:radial-gradient(circle at 50% 0,#3a1fa088,transparent 46%),radial-gradient(circle at 100% 45%,#2a3cc844,transparent 40%),radial-gradient(circle at 0 85%,#4c1d9555,transparent 42%),linear-gradient(180deg,#080a2a,#04051a);
-  padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(108px + env(safe-area-inset-bottom,0px));animation:pfIn .28s cubic-bezier(.2,.8,.2,1) both}
+  padding:calc(8px + env(safe-area-inset-top,0px)) 14px calc(80px + env(safe-area-inset-bottom,0px));animation:pfIn .28s cubic-bezier(.2,.8,.2,1) both}
 @keyframes pfIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-#gxPerfil button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+#gxPerfil button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
 #gxPerfil svg{display:block}
-.pf-in{width:min(100%,520px);margin:0 auto;display:flex;flex-direction:column;gap:14px}
-.pf-in>*{flex:none;min-width:0}
-.pf-card{border:1.5px solid #3b46c9;border-radius:20px;background:linear-gradient(160deg,#121858ee,#080b2bee);box-shadow:0 0 16px #3b46c944,inset 0 1px 0 #ffffff1c}
+/* Una sola interfaz: 1 columna en móvil, 2 columnas desde 600px */
+.pf-in{width:min(100%,520px);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start}
+.pf-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pf-col>*{flex:none;min-width:0}
+.pf-card{border:1.5px solid #3b46c9;border-radius:18px;background:linear-gradient(160deg,#121858ee,#080b2bee);box-shadow:0 0 14px #3b46c944,inset 0 1px 0 #ffffff1c}
 
-.pf-bar{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;min-height:48px}
-.pf-back{width:44px;height:44px;display:grid;place-items:center;padding:0;border-radius:50%;border:1.5px solid #6d5cffaa;background:linear-gradient(145deg,#232a66,#0d1030);box-shadow:0 0 14px #4f46e566}
-.pf-back:active{transform:scale(.93)}
-.pf-ttl{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:900;font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase}
+.pf-ttl{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:30px;font-weight:900;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase}
 .pf-ttl::before,.pf-ttl::after{content:"";width:26px;height:2px;background:linear-gradient(90deg,transparent,#8b9bff);box-shadow:0 0 8px #6d7bff}
 .pf-ttl::after{transform:scaleX(-1)}
 
-.pf-hero{padding:16px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(120% 80% at 0 0,#6d28d933,transparent 60%),linear-gradient(160deg,#141a58,#080b2b)}
-.pf-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
-.pf-avw{position:relative;width:96px;height:96px}
-.pf-ring{width:100%;height:100%;padding:4px;border-radius:50%;background:conic-gradient(from 200deg,#a78bfa,#fff9,#6d28d9,#a78bfa);filter:drop-shadow(0 0 14px #8b5cf6aa)}
-.pf-av{width:100%;height:100%;display:grid;place-items:center;border-radius:50%;font-size:3rem;background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c)}
-.pf-lv{position:absolute;left:-6px;bottom:-4px;min-width:44px;height:28px;padding:0 8px;display:grid;place-items:center;border-radius:10px;border:2px solid #0b0e2e;
-  background:linear-gradient(145deg,#fde68a,#d9a928);color:#3a2200;font:900 .74rem Inter,system-ui,sans-serif;box-shadow:0 4px 10px #0009}
-.pf-edit{position:absolute;right:-4px;bottom:-4px;width:34px;height:34px;display:grid;place-items:center;padding:0;border-radius:50%;border:2px solid #0b0e2e;
+.pf-hero{padding:12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(120% 80% at 0 0,#6d28d933,transparent 60%),linear-gradient(160deg,#141a58,#080b2b)}
+.pf-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.pf-avw{position:relative;width:clamp(68px,19vw,92px);aspect-ratio:1}
+.pf-ring{width:100%;height:100%;padding:3px;border-radius:50%;background:conic-gradient(from 200deg,#a78bfa,#fff9,#6d28d9,#a78bfa);filter:drop-shadow(0 0 12px #8b5cf6aa)}
+.pf-av{width:100%;height:100%;display:grid;place-items:center;border-radius:50%;font-size:clamp(2rem,9vw,2.8rem);background:radial-gradient(circle at 35% 30%,#3b3f75,#12152c)}
+.pf-lv{position:absolute;left:-4px;bottom:-5px;min-width:40px;height:22px;padding:0 7px;display:grid;place-items:center;border-radius:9px;border:2px solid #0b0e2e;
+  background:linear-gradient(145deg,#fde68a,#d9a928);color:#3a2200;font:900 .62rem Inter,system-ui,sans-serif;box-shadow:0 4px 10px #0009}
+.pf-edit{position:absolute;right:-4px;bottom:-4px;width:28px;height:28px;display:grid;place-items:center;padding:0;border-radius:50%;border:2px solid #0b0e2e;
   background:linear-gradient(145deg,#8b5cf6,#5b21b6);color:#fff;box-shadow:0 4px 10px #0009}
+.pf-edit svg{width:14px;height:14px}
 .pf-edit:active{transform:scale(.93)}
-.pf-id{min-width:0;display:flex;flex-direction:column;gap:6px}
-.pf-name{margin:0;display:flex;align-items:center;gap:4px;min-width:0;font-size:1.3rem;font-weight:900;letter-spacing:-.01em;overflow-wrap:anywhere}
-.pf-name .gxb{margin-left:2px}
-.pf-st{display:flex;align-items:center;gap:7px;font-size:.84rem;font-weight:800}
-.pf-st i{flex:none;width:10px;height:10px;border-radius:50%;background:#64748b}
+.pf-id{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.pf-name{margin:0;display:flex;align-items:center;gap:4px;min-width:0;font-size:clamp(1.05rem,4.8vw,1.3rem);font-weight:900;letter-spacing:-.01em;overflow-wrap:anywhere;line-height:1.15}
+.pf-st{display:flex;align-items:center;gap:6px;font-size:.76rem;font-weight:800}
+.pf-st i{flex:none;width:9px;height:9px;border-radius:50%;background:#64748b}
 .pf-st.on{color:#4ade80}.pf-st.on i{background:#22c55e;box-shadow:0 0 10px #22c55e}
 .pf-st.off{color:#94a3b8}
-.pf-bio{margin:0;color:#d4d9f4;font-size:.9rem;line-height:1.35;overflow-wrap:anywhere}
-.pf-biolnk{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;border:1px solid #a78bfa66;background:#8b5cf620;color:#c4b5fd;font-weight:800;font-size:.7rem}
-.pf-bioedit{display:flex;flex-direction:column;gap:6px}
-.pf-bioedit input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid #6d5cff;background:#0a0d30;color:#fff;outline:0;font-size:16px;font-weight:600}
-.pf-bioedit .pf-cnt{align-self:flex-end;color:#9aa4d6;font-size:.68rem;font-weight:700}
+.pf-bio{margin:0;color:#d4d9f4;font-size:.84rem;line-height:1.3;overflow-wrap:anywhere}
+.pf-biolnk{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;border:1px solid #a78bfa66;background:#8b5cf620;color:#c4b5fd;font-weight:800;font-size:.64rem}
+.pf-biolnk svg{width:11px;height:11px}
+.pf-bioedit{width:100%;display:flex;flex-direction:column;gap:5px}
+.pf-bioedit input{width:100%;padding:9px 11px;border-radius:12px;border:1.5px solid #6d5cff;background:#0a0d30;color:#fff;outline:0;font-size:16px;font-weight:600}
+.pf-bioedit .pf-cnt{align-self:flex-end;color:#9aa4d6;font-size:.66rem;font-weight:700}
 .pf-bioedit .pf-cnt.max{color:#fbbf24}
 .pf-row2{display:flex;gap:8px}
-.pf-btn{flex:1;min-height:40px;padding:0 12px;border:0;border-radius:12px;font-weight:900;font-size:.8rem;color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 3px 0 #3b1d8f}
+.pf-btn{flex:1;min-height:38px;padding:0 12px;border:0;border-radius:12px;font-weight:900;font-size:.78rem;color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 3px 0 #3b1d8f}
 .pf-btn.ghost{background:#ffffff12;box-shadow:none;border:1px solid #ffffff22}
 .pf-btn:disabled{opacity:.55}
 .pf-btn:active{transform:translateY(2px)}
-.pf-country{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff1c;font-size:.74rem;font-weight:800;color:#e5e9ff}
-.pf-rt{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:10px}
-.pf-rk,.pf-tr{display:flex;align-items:center;gap:10px;min-width:0;padding:10px 12px;border-radius:16px;background:#070a2899;border:1px solid #ffffff1c}
-.pf-rk{border-color:color-mix(in srgb,var(--rc,#6d7bff) 55%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--rc,#6d7bff) 25%,transparent)}
+.pf-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;margin-top:2px}
+.pf-country{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff1c;font-size:.68rem;font-weight:800;color:#e5e9ff;white-space:nowrap}
+.pf-country svg{width:18px;height:12px}
+.pf-hero .gx-likes{margin:0;min-height:0;justify-content:flex-start;gap:6px}
+.pf-hero .mj-lk-n{font-size:.72rem}
+.pf-hero .mj-lk-b{padding:4px 10px;font-size:.64rem}
+.pf-rt{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:8px}
+.pf-rk,.pf-tr{display:flex;align-items:center;gap:9px;min-width:0;padding:7px 10px;border-radius:14px;background:#070a2899;border:1px solid #ffffff1c}
+.pf-rk{border-color:color-mix(in srgb,var(--rc,#6d7bff) 55%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--rc,#6d7bff) 22%,transparent)}
 .pf-rk .rkb{flex:none}
-.pf-rk div,.pf-tr div{min-width:0;line-height:1.15}
-.pf-rk small,.pf-tr small{display:block;color:#9aa4d6;font:800 .5rem Inter,system-ui,sans-serif;letter-spacing:.14em}
-.pf-rk b{display:block;margin-top:3px;font-size:1rem;font-weight:900;color:var(--rc,#c4b5fd);white-space:nowrap}
+.pf-rk div,.pf-tr div{min-width:0;line-height:1.1}
+.pf-rk small,.pf-tr small{display:block;color:#9aa4d6;font:800 .48rem Inter,system-ui,sans-serif;letter-spacing:.14em}
+.pf-rk b{display:block;margin-top:2px;font-size:.92rem;font-weight:900;color:var(--rc,#c4b5fd);white-space:nowrap}
 .pf-tr{border-color:#fbbf2455}
-.pf-tr b{display:block;margin-top:3px;font-size:1.25rem;font-weight:900;color:#fbbf24}
-.pf-likes .gx-likes{margin-top:0}
-.pf-fr{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 16px;border-radius:16px;font-weight:900;font-size:.9rem;letter-spacing:.06em;text-align:center}
-.pf-fr.add{border:0;color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 5px 0 #3b1d8f,0 0 20px #7c3aed55}
-.pf-fr.add:active{transform:translateY(3px);box-shadow:0 2px 0 #3b1d8f}
+.pf-tr svg{width:20px;height:20px;flex:none}
+.pf-tr b{display:block;margin-top:2px;font-size:1.15rem;font-weight:900;color:#fbbf24}
+.pf-xpl{display:flex;align-items:center;gap:8px;font-weight:900;font-size:.68rem;color:#a5b0ff;white-space:nowrap}
+.pf-xpb{flex:1;min-width:0;height:9px;border-radius:99px;border:1.5px solid #6d5cff;background:#0a0d30;overflow:hidden}
+.pf-xpb i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa,#fbbf24)}
+
+.pf-fr{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border-radius:14px;font-weight:900;font-size:.84rem;letter-spacing:.06em;text-align:center}
+.pf-fr.add{border:0;color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 4px 0 #3b1d8f,0 0 18px #7c3aed55}
+.pf-fr.add:active{transform:translateY(3px);box-shadow:0 1px 0 #3b1d8f}
 .pf-fr.ok{color:#4ade80;border:1.5px solid #22c55e88;background:#22c55e1c}
 .pf-fr.wait{color:#fde68a;border:1.5px solid #fbbf2477;background:#fbbf2418}
 .pf-fr.no{color:#fca5a5;border:1.5px solid #ef444477;background:#ef44441a}
 .pf-fr:disabled{opacity:.6}
-.pf-msg{margin:0;padding:10px 12px;border-radius:12px;font-size:.8rem;font-weight:700;border:1px solid #ef444455;background:#ef444422;color:#fca5a5}
+.pf-msg{margin:0;padding:8px 12px;border-radius:12px;font-size:.78rem;font-weight:700;border:1px solid #ef444455;background:#ef444422;color:#fca5a5}
 .pf-msg.ok{border-color:#22c55e55;background:#22c55e22;color:#86efac}
+.pf-note{margin:0;color:#7f89b8;font-size:.66rem;line-height:1.3}
 
-.pf-xp{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.pf-xph{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:900;font-size:.8rem}
-.pf-xph span{color:#a5b0ff}
-.pf-xpb{height:10px;border-radius:99px;border:1.5px solid #6d5cff;background:#0a0d30;overflow:hidden}
-.pf-xpb i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa,#fbbf24)}
+.pf-sec{display:flex;align-items:center;gap:10px;font:900 .7rem Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.pf-sec i{flex:1;height:2px;background:linear-gradient(90deg,#6d5cff88,transparent)}
+.pf-more{flex:none;padding:3px 10px;border-radius:99px;border:1px solid #a78bfa66;background:#8b5cf620;color:#c4b5fd;font:800 .64rem Inter,system-ui,sans-serif;letter-spacing:.04em;text-transform:none}
+.pf-more:active{transform:scale(.95)}
 
-.pf-sec{display:flex;align-items:center;gap:10px;font:900 .8rem Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase}
-.pf-sec::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,#6d5cff88,transparent)}
-.pf-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.pf-s{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;text-align:center}
-.pf-si{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;font-size:1.35rem;background:#0b1038;border:1px solid #ffffff1a}
-.pf-si.pct{color:#38bdf8;font-weight:900;font-size:1.1rem}
-.pf-s small{color:#9aa4d6;font:800 .6rem Inter,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase}
-.pf-s b{font-size:1.3rem;font-weight:900;line-height:1}
+.pf-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pf-s{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 4px;text-align:center}
+.pf-sv{display:flex;align-items:center;gap:7px;line-height:1}
+.pf-si{font-size:1.2rem;line-height:1}
+.pf-si.pct{color:#38bdf8;font-weight:900}
+.pf-s b{font-size:1.2rem;font-weight:900;line-height:1}
+.pf-s small{color:#9aa4d6;font:800 .54rem Inter,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 
-.pf-ach{padding:14px;display:flex;flex-direction:column;gap:12px}
-.pf-ah{display:flex;align-items:center;gap:12px}
-.pf-ah>span{font-size:1.6rem}
-.pf-ah div{flex:1;min-width:0}
-.pf-ah b{display:block;font-size:.95rem;font-weight:900}
-.pf-ah small{color:#9aa4d6;font-size:.75rem;font-weight:700}
-.pf-ab{height:8px;border-radius:99px;border:1.5px solid #6d5cff;background:#0a0d30;overflow:hidden}
+.pf-ach{padding:10px 12px 8px;display:flex;flex-direction:column;gap:8px}
+.pf-ah{display:flex;align-items:center;gap:10px}
+.pf-ah>span{font-size:1.3rem;line-height:1}
+.pf-ah div{flex:1;min-width:0;line-height:1.15}
+.pf-ah b{display:block;font-size:.88rem;font-weight:900}
+.pf-ah small{color:#9aa4d6;font-size:.7rem;font-weight:700}
+.pf-ab{height:6px;border-radius:99px;border:1px solid #6d5cff;background:#0a0d30;overflow:hidden}
 .pf-ab i{display:block;height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b)}
-.pf-strip{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding:4px 2px 8px;margin:0 -2px}
-.pf-bd{flex:none;width:82px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:0;background:none;scroll-snap-align:start;text-align:center}
-.pf-hex{position:relative;width:60px;height:66px;display:grid;place-items:center;font-size:1.6rem;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(145deg,#fde68a,#7c3aed)}
+.pf-strip{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding:2px 2px 6px;margin:0 -2px}
+.pf-bd{flex:none;width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0;background:none;scroll-snap-align:start;text-align:center}
+.pf-hex{position:relative;width:48px;height:54px;display:grid;place-items:center;font-size:1.3rem;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(145deg,#fde68a,#7c3aed)}
 .pf-hex::before{content:"";position:absolute;inset:3px;clip-path:inherit;background:linear-gradient(160deg,#2a2370,#0d1030)}
 .pf-hex span{position:relative}
 .pf-bd.lock .pf-hex{background:#4b5280}
 .pf-bd.lock .pf-hex span{filter:grayscale(1);opacity:.5}
-.pf-bd.lock .pf-hex::after{content:"🔒";position:absolute;right:2px;bottom:6px;font-size:.7rem}
-.pf-bd em{font-style:normal;font-size:.64rem;font-weight:800;line-height:1.15;color:#e5e9ff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pf-bd.lock .pf-hex::after{content:"🔒";position:absolute;right:1px;bottom:5px;font-size:.6rem}
+.pf-bd em{font-style:normal;font-size:.58rem;font-weight:800;line-height:1.15;color:#e5e9ff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pf-bd.lock em{color:#8e97c4}
-.pf-note{margin:0;color:#7f89b8;font-size:.66rem;line-height:1.3}
 
 .pf-pref{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.pf-p{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;text-align:center}
-.pf-p i{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;font-style:normal;font-size:1.15rem;background:#0b1038;border:1px solid #ffffff1a}
-.pf-p small{color:#9aa4d6;font:800 .52rem Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
-.pf-p b{font-size:.74rem;font-weight:900;line-height:1.15;overflow-wrap:anywhere}
-.pf-p .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.pf-p{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 3px;text-align:center}
+.pf-p i{font-style:normal;font-size:1.15rem;line-height:1}
+.pf-p small{color:#9aa4d6;font:800 .48rem Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.pf-p b{font-size:.7rem;font-weight:900;line-height:1.15;overflow-wrap:anywhere}
+.pf-p .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 
-.pf-rec{display:flex;align-items:center;gap:12px;padding:12px}
-.pf-rec .ic{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;font-size:1.5rem;background:#0b1038;border:1px solid #ffffff1a}
-.pf-rec div{flex:1;min-width:0}
-.pf-rec b{display:block;font-size:.9rem;font-weight:900}
-.pf-rec small{display:block;margin-top:2px;color:#a3abbd;font-size:.74rem;line-height:1.3}
-.pf-rec .rw{display:block;margin-top:4px;color:#fde68a;font-size:.7rem;font-weight:800}
-.pf-empty{padding:16px;text-align:center;color:#94a3b8;font-size:.82rem}
-.pf-admin{padding:12px;border-radius:16px;border:1px dashed #fbbf2488;background:#fbbf240d;text-align:center}
-.pf-admin small{display:block;color:#fbbf24;font:800 .58rem monospace;letter-spacing:.14em}
-.pf-admin code{display:block;margin:6px 0 10px;font:700 .7rem monospace;word-break:break-all;color:#fde68a}
-.pf-admin button{min-height:38px;padding:0 16px;border:0;border-radius:12px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3a2200;font-weight:900;font-size:.78rem}
+.pf-recs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pf-rec{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 5px;text-align:center}
+.pf-rec .ic{font-size:1.4rem;line-height:1}
+.pf-rec b{font-size:.68rem;font-weight:900;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pf-empty{padding:14px;text-align:center;color:#94a3b8;font-size:.8rem}
+.pf-admin{padding:10px;border-radius:14px;border:1px dashed #fbbf2488;background:#fbbf240d;text-align:center}
+.pf-admin small{display:block;color:#fbbf24;font:800 .55rem monospace;letter-spacing:.14em}
+.pf-admin code{display:block;margin:5px 0 8px;font:700 .66rem monospace;word-break:break-all;color:#fde68a}
+.pf-admin button{min-height:34px;padding:0 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3a2200;font-weight:900;font-size:.74rem}
 
+/* ventanas (Ver todos, detalle, avatar) */
 .pf-md{position:fixed;inset:0;z-index:1060;display:grid;place-items:center;padding:20px;background:rgba(5,6,12,.86);animation:pfF .18s ease both}
 @keyframes pfF{from{opacity:0}to{opacity:1}}
-.pf-mdc{position:relative;width:min(360px,100%);max-height:88vh;overflow-y:auto;padding:22px 18px 18px;border-radius:26px;text-align:center;border:1.5px solid #a78bfa77;background:linear-gradient(160deg,#252b60,#0d1027);box-shadow:0 25px 70px #000b}
-.pf-mdc h3{margin:0 0 12px;font-size:1.1rem;font-weight:900}
+.pf-mdc{position:relative;width:min(360px,100%);max-height:86vh;max-height:86dvh;overflow-y:auto;padding:20px 16px 16px;border-radius:24px;text-align:center;border:1.5px solid #a78bfa77;background:linear-gradient(160deg,#252b60,#0d1027);box-shadow:0 25px 70px #000b}
+.pf-mdc.wide{width:min(560px,100%)}
+.pf-mdc h3{margin:0 0 12px;font-size:1.05rem;font-weight:900}
 .pf-mdc p{margin:8px 0 14px;color:#cbd5e1;font-size:.85rem;line-height:1.45}
 .pf-avg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .pf-avp{aspect-ratio:1;display:grid;place-items:center;padding:0;border-radius:50%;font-size:1.8rem;border:2px solid #ffffff1c;background:radial-gradient(circle at 35% 30%,#3b3f75,#14172e)}
 .pf-avp.sel{border-color:#fde68a;box-shadow:0 0 0 4px #fbbf2433,0 0 18px #8b5cf6}
 .pf-chip{display:inline-block;padding:3px 10px;border-radius:99px;background:#ffffff14;font:800 .6rem Inter,system-ui,sans-serif;letter-spacing:.08em}
 .pf-chip.on{background:#22c55e26;color:#4ade80}
+.pf-all{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:12px 6px;margin-bottom:14px}
+.pf-all .pf-bd{width:auto}
+.pf-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;text-align:left}
+.pf-li{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;border:1px solid #ffffff1a;background:#ffffff0a}
+.pf-li .ic{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;font-size:1.4rem;background:#0b1038}
+.pf-li div{min-width:0}
+.pf-li b{display:block;font-size:.88rem}
+.pf-li small{display:block;margin-top:2px;color:#a3abbd;font-size:.74rem;line-height:1.3}
+.pf-li .rw{color:#fde68a;font-weight:800}
 
 /* la barra inferior sigue siendo la independiente de siempre; aquí solo se marca la pestaña */
 body:has(#gxPerfil) .gx-fab{display:none!important}
@@ -173,8 +188,47 @@ body:has(#gxPerfil) .gx6-nav button.on::after{display:none}
 body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]{color:#b9adff}
 body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"] svg{filter:drop-shadow(0 0 7px #7c6cff)}
 body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:"";display:block;width:40px;height:3px;border-radius:3px;background:#7c6cff;box-shadow:0 0 10px #7c6cff}
-@media (max-width:350px){.pf-top{grid-template-columns:1fr;justify-items:center;text-align:center}.pf-id{align-items:center}.pf-country,.pf-biolnk{align-self:center}.pf-rt{grid-template-columns:1fr}.pf-pref{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:768px){#gxPerfil{padding-left:24px;padding-right:24px}.pf-in{width:min(100%,600px)}}
+
+@media (max-width:350px){.pf-rt{grid-template-columns:1fr}.pf-pref{grid-template-columns:repeat(2,minmax(0,1fr))}.pf-top{gap:10px}}
+/* Tabletas */
+@media (min-width:600px){
+  #gxPerfil{padding-left:20px;padding-right:20px}
+  .pf-in{width:min(100%,780px);grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);column-gap:14px;row-gap:12px}
+  .pf-col{gap:12px}
+  .pf-hero{padding:14px;gap:12px}
+  .pf-s{padding:11px 4px}
+  .pf-rec b{font-size:.72rem}
+}
+/* Laptops */
+@media (min-width:900px){
+  .pf-in{width:min(100%,1040px);column-gap:18px}
+  .pf-avw{width:96px}.pf-av{font-size:3rem}
+  .pf-name{font-size:1.4rem}.pf-bio{font-size:.9rem}
+  .pf-bd{width:72px}.pf-hex{width:54px;height:60px;font-size:1.45rem}.pf-bd em{font-size:.64rem}
+  .pf-p b{font-size:.78rem}.pf-p i{font-size:1.3rem}
+}
+/* Con espacio de sobra, el contenido se centra y las tarjetas crecen (sin cambiar de estructura) */
+@media (min-width:600px){.pf-in{min-height:calc(100vh - 92px - env(safe-area-inset-top,0px));min-height:calc(100dvh - 92px - env(safe-area-inset-top,0px));align-content:center}}
+@media (min-width:900px) and (min-height:720px){
+  .pf-in{row-gap:16px}.pf-col{gap:16px}
+  .pf-hero{padding:20px;gap:16px}
+  .pf-avw{width:118px}.pf-av{font-size:3.6rem}.pf-lv{height:24px;font-size:.7rem}.pf-edit{width:32px;height:32px}
+  .pf-name{font-size:1.6rem}.pf-bio{font-size:1rem}.pf-st{font-size:.85rem}.pf-country{font-size:.76rem}
+  .pf-rk,.pf-tr{padding:12px 14px}.pf-rk b{font-size:1.1rem}.pf-tr b{font-size:1.4rem}.pf-rk small,.pf-tr small{font-size:.54rem}
+  .pf-xpl{font-size:.76rem}.pf-xpb{height:11px}
+  .pf-s{padding:20px 6px;gap:8px}.pf-s b{font-size:1.6rem}.pf-si{font-size:1.5rem}.pf-s small{font-size:.66rem}
+  .pf-ach{padding:16px 18px 12px;gap:12px}.pf-ah b{font-size:1rem}.pf-hex{width:60px;height:66px;font-size:1.6rem}.pf-bd{width:80px}.pf-bd em{font-size:.7rem}
+  .pf-p{padding:16px 6px;gap:5px}.pf-p i{font-size:1.5rem}.pf-p b{font-size:.86rem}.pf-p small{font-size:.54rem}
+  .pf-rec{padding:16px 8px;gap:7px}.pf-rec .ic{font-size:1.8rem}.pf-rec b{font-size:.8rem}
+  .pf-sec{font-size:.78rem}
+}
+/* Escritorios */
+@media (min-width:1280px){
+  .pf-in{width:min(100%,1180px);column-gap:22px}
+  .pf-hero{padding:18px;gap:14px}
+  .pf-s b{font-size:1.35rem}.pf-s small{font-size:.6rem}
+  .pf-ttl{font-size:1.05rem}
+}
 `;
   const st = document.createElement("style");
   st.id = "gxPerfilCss";
@@ -183,7 +237,7 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
 
   /* ---------------- Estado ---------------- */
   const v = { me: false, uid: null, d: null, loading: false, err: "", req: 0,
-              editBio: false, bioDraft: "", pickAv: null, detail: null, busy: false, msg: "", ok: false };
+              editBio: false, bioDraft: "", pickAv: null, detail: null, sheet: null, busy: false, msg: "", ok: false };
   let el = null;
 
   /* ---------------- Datos ---------------- */
@@ -269,12 +323,14 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
 
   /* ---------------- Dibujo ---------------- */
   function heroHtml(d) {
-    const g = G(), S = d.S, lv = g.xpLevelFromTotal(S.xp || 0);
+    const g = G(), S = d.S, xp = S.xp || 0, lv = g.xpLevelFromTotal(xp), max = lv >= 100;
     const r = window.GXRank && window.GXRank.rankOf ? window.GXRank.rankOf(S.trophies) : null;
-    const rbadge = r && window.GXRank.badgeFor ? window.GXRank.badgeFor(r, 38) : "";
+    const rbadge = r && window.GXRank.badgeFor ? window.GXRank.badgeFor(r, 30) : "";
     const status = d.online === true ? `<div class="pf-st on"><i></i>En línea</div>`
                  : d.online === false ? `<div class="pf-st off"><i></i>Desconectado</div>` : "";
-    const ownerB = d.owner && window.GXOwnerIcon ? window.GXOwnerIcon(20) : "";
+    const ownerB = d.owner && window.GXOwnerIcon ? window.GXOwnerIcon(18) : "";
+    const base = g.xpForLevel(lv), next = g.xpForLevel(lv + 1);
+    const pct = max ? 100 : Math.max(0, Math.min(100, Math.round((xp - base) / (next - base) * 100)));
     const bioHtml = v.me && v.editBio
       ? `<div class="pf-bioedit">
            <input id="pfBio" type="text" maxlength="${BIO_MAX}" value="${esc(v.bioDraft)}" autocomplete="off" autocapitalize="sentences" spellcheck="false" aria-label="Descripción">
@@ -282,7 +338,7 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
            <div class="pf-row2"><button class="pf-btn ghost" data-p="biocancel" type="button">Cancelar</button>
              <button class="pf-btn" data-p="biosave" type="button" ${v.busy ? "disabled" : ""}>${v.busy ? "Guardando…" : "Guardar"}</button></div>
          </div>`
-      : `<p class="pf-bio">${esc(d.bio)}</p>${v.me ? `<button class="pf-biolnk" data-p="bioedit" type="button">${PENCIL}Editar descripción</button>` : ""}`;
+      : `<p class="pf-bio">${esc(d.bio)}</p>${v.me ? `<button class="pf-biolnk" data-p="bioedit" type="button">${PENCIL}Editar</button>` : ""}`;
 
     return `
     <section class="pf-card pf-hero">
@@ -296,14 +352,14 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
           <h2 class="pf-name">@${esc(d.username)}${ownerB}</h2>
           ${status}
           ${bioHtml}
-          <span class="pf-country">${FLAG_DO}Rep. Dominicana</span>
+          <div class="pf-meta"><span class="pf-country">${FLAG_DO}Rep. Dominicana</span><div class="gx-likes" data-uid="${esc(d.uid)}"></div></div>
         </div>
       </div>
       <div class="pf-rt">
         <div class="pf-rk" style="--rc:${r ? r.tier.c1 : "#7c86ad"}">${rbadge}<div><small>RANGO</small><b>${r ? esc(r.label) : "Sin rango"}</b></div></div>
         <div class="pf-tr">${CUP}<div><small>TROFEOS</small><b>${fmt(S.trophies)}</b></div></div>
       </div>
-      <div class="pf-likes"><div class="gx-likes" data-uid="${esc(d.uid)}"></div></div>
+      <div class="pf-xpl"><span>NV. ${lv}</span><div class="pf-xpb"><i style="width:${pct}%"></i></div><span>${max ? "MÁXIMO" : (xp - base) + " / " + (next - base) + " XP"}</span></div>
     </section>`;
   }
 
@@ -319,35 +375,27 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
     return `<button class="pf-fr add" data-p="add" type="button" ${v.busy ? "disabled" : ""}>${v.busy ? "ENVIANDO…" : "+ AGREGAR AMIGO"}</button>`;
   }
 
-  function xpHtml(d) {
-    const g = G(), xp = d.S.xp || 0, lv = g.xpLevelFromTotal(xp), max = lv >= 100;
-    const base = g.xpForLevel(lv), next = g.xpForLevel(lv + 1);
-    const pct = max ? 100 : Math.max(0, Math.min(100, Math.round((xp - base) / (next - base) * 100)));
-    return `<section class="pf-card pf-xp"><div class="pf-xph"><span>${max ? "NIVEL MÁXIMO" : (xp - base) + " / " + (next - base) + " XP"}</span><span>NV. ${lv}</span></div>
-      <div class="pf-xpb"><i style="width:${pct}%"></i></div></section>`;
-  }
-
   function statsHtml(d) {
     const S = d.S, rate = S.played ? Math.round(S.wins * 100 / S.played) + "%" : "0%";
     const cells = [["🏆", "Trofeos", fmt(S.trophies)], ["🎮", "Partidas", fmt(S.played)], ["🥇", "Victorias", fmt(S.wins)],
       ["💔", "Derrotas", fmt(S.losses)], ["%", "% Victorias", rate], ["📈", "Racha actual", S.streak == null ? "—" : fmt(S.streak)]];
-    return `<div class="pf-sec">Estadísticas</div>
-      <div class="pf-stats">${cells.map(c => `<div class="pf-card pf-s"><span class="pf-si ${c[0] === "%" ? "pct" : ""}">${c[0]}</span><small>${c[1]}</small><b>${c[2]}</b></div>`).join("")}</div>`;
+    return `<div class="pf-stats">${cells.map(c => `<div class="pf-card pf-s"><div class="pf-sv"><span class="pf-si ${c[0] === "%" ? "pct" : ""}">${c[0]}</span><b>${c[2]}</b></div><small>${c[1]}</small></div>`).join("")}</div>`;
   }
+
+  const badgeBtn = x => {
+    const hide = x.a.secret && !x.done;
+    return `<button class="pf-bd ${x.done ? "" : "lock"}" data-p="ach" data-id="${esc(x.a.id)}" type="button">
+      <span class="pf-hex"><span>${hide ? "❔" : esc(x.a.icon)}</span></span><em>${hide ? "Secreto" : esc(x.a.name)}</em></button>`;
+  };
 
   function achHtml(d) {
     const A = achievements(d);
     const pct = A.total ? Math.round(A.got * 100 / A.total) : 0;
-    const strip = A.list.map(x => {
-      const hide = x.a.secret && !x.done;
-      return `<button class="pf-bd ${x.done ? "" : "lock"}" data-p="ach" data-id="${esc(x.a.id)}" type="button">
-        <span class="pf-hex"><span>${hide ? "❔" : esc(x.a.icon)}</span></span><em>${hide ? "Secreto" : esc(x.a.name)}</em></button>`;
-    }).join("");
     return `<section class="pf-card pf-ach">
-      <div class="pf-ah"><span>🏆</span><div><b>Logros</b><small>${A.got}/${A.total} desbloqueados</small></div></div>
+      <div class="pf-ah"><span>🏆</span><div><b>Logros</b><small>${A.got}/${A.total} desbloqueados</small></div>
+        <button class="pf-more" data-p="sheet" data-s="ach" type="button">Ver todos ›</button></div>
       <div class="pf-ab"><i style="width:${pct}%"></i></div>
-      ${strip ? `<div class="pf-strip">${strip}</div>` : `<div class="pf-empty">Sin datos de logros.</div>`}
-      ${A.partial ? `<p class="pf-note">${v.me ? "Los logros de coleccionista no se muestran aquí." : "Se muestran los logros que se pueden comprobar con los datos públicos."}</p>` : ""}
+      ${A.list.length ? `<div class="pf-strip">${A.list.map(badgeBtn).join("")}</div>` : `<div class="pf-empty">Sin datos de logros.</div>`}
     </section>`;
   }
 
@@ -359,18 +407,19 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
       ["🎮", "Modo", s.mode === "solo" ? "Reto IA" : "Local"],
       ["🌐", "Idioma", esc((G().LANGS || {})[s.lang] || "Español")]
     ];
-    return `<div class="pf-sec">Mis preferidos</div>
+    return `<div class="pf-sec"><span>Mis preferidos</span><i></i></div>
       <div class="pf-pref">${cells.map(c => `<div class="pf-card pf-p"><i>${c[0]}</i><small>${c[1]}</small><b>${c[2]}</b></div>`).join("")}</div>`;
   }
 
+  const unlockedSorted = d => achievements(d).list.filter(x => x.done)
+    .sort((x, y) => (RAR[y.a.rarity] - RAR[x.a.rarity]) || (y.i - x.i));
+
   function recentHtml(d) {
-    const C = window.GreyxCatalog, A = achievements(d);
-    const items = A.list.filter(x => x.done).sort((x, y) => (RAR[y.a.rarity] - RAR[x.a.rarity]) || (y.i - x.i)).slice(0, 3);
-    const body = items.length ? items.map(x => {
-      const rw = x.a.reward && C ? C.ITEMS.find(i => i.id === x.a.reward) : null;
-      return `<div class="pf-card pf-rec"><span class="ic">${esc(x.a.icon)}</span><div><b>${esc(x.a.name)}</b><small>${esc(x.a.desc)}</small>${rw ? `<span class="rw">Premio: ${esc(rw.name)}</span>` : ""}</div></div>`;
-    }).join("") : `<div class="pf-card pf-empty">Aún no has desbloqueado logros.</div>`;
-    return `<div class="pf-sec">Logros recientes</div>${body}`;
+    const all = unlockedSorted(d), items = all.slice(0, 3);
+    const body = items.length
+      ? `<div class="pf-recs">${items.map(x => `<button class="pf-card pf-rec" data-p="ach" data-id="${esc(x.a.id)}" type="button"><span class="ic">${esc(x.a.icon)}</span><b>${esc(x.a.name)}</b></button>`).join("")}</div>`
+      : `<div class="pf-card pf-empty">Aún no has desbloqueado logros.</div>`;
+    return `<div class="pf-sec"><span>Logros recientes</span><i></i>${all.length > 3 ? `<button class="pf-more" data-p="sheet" data-s="rec" type="button">Ver todos ›</button>` : ""}</div>${body}`;
   }
 
   function detailHtml(d) {
@@ -384,6 +433,26 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
       <span class="pf-chip" style="color:${rar.c}">${esc(rar.n)}</span> <span class="pf-chip ${done ? "on" : ""}">${done ? "DESBLOQUEADO" : "PENDIENTE"}</span>
       <p>${hide ? "Sigue jugando para descubrirlo." : esc(a.desc)}</p>
       <button class="pf-btn" data-p="achclose" type="button" style="width:100%">Cerrar</button></div></div>`;
+  }
+
+  function sheetHtml(d) {
+    if (!v.sheet || !d) return "";
+    const C = window.GreyxCatalog, A = achievements(d);
+    let title, body;
+    if (v.sheet === "ach") {
+      title = "Todos los logros · " + A.got + "/" + A.total;
+      body = `<div class="pf-all">${A.list.map(badgeBtn).join("")}</div>` +
+        (A.partial ? `<p class="pf-note" style="margin:0 0 12px">${v.me ? "Los logros de coleccionista no se muestran aquí." : "Se muestran los logros que se pueden comprobar con los datos públicos."}</p>` : "");
+    } else {
+      const list = unlockedSorted(d);
+      title = "Logros desbloqueados · " + list.length;
+      body = `<div class="pf-list">${list.map(x => {
+        const rw = x.a.reward && C ? C.ITEMS.find(i => i.id === x.a.reward) : null;
+        return `<div class="pf-li"><span class="ic">${esc(x.a.icon)}</span><div><b>${esc(x.a.name)}</b><small>${esc(x.a.desc)}</small>${rw ? `<small class="rw">Premio: ${esc(rw.name)}</small>` : ""}</div></div>`;
+      }).join("")}</div>`;
+    }
+    return `<div class="pf-md" data-p="sheetclose"><div class="pf-mdc wide" role="dialog" aria-modal="true"><h3>${esc(title)}</h3>${body}
+      <button class="pf-btn" data-p="sheetclose" type="button" style="width:100%">Cerrar</button></div></div>`;
   }
 
   function avatarSheet() {
@@ -403,17 +472,13 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
     if (!el) return;
     const y = el.scrollTop, d = v.d;
     let body;
-    if (v.loading || !d) body = `<div class="pf-card pf-empty">${v.err ? esc(v.err) : "Cargando…"}</div>`;
-    else if (d.missing) body = `<div class="pf-card pf-empty">Este jugador aún no tiene perfil público.</div>`;
-    else body = `${heroHtml(d)}
-      ${v.msg ? `<p class="pf-msg ${v.ok ? "ok" : ""}">${esc(v.msg)}</p>` : ""}
-      ${friendHtml(d)}${xpHtml(d)}${statsHtml(d)}${achHtml(d)}
-      ${v.me ? prefHtml() + recentHtml(d) : ""}${adminHtml(d)}`;
+    if (v.loading || !d) body = `<div class="pf-card pf-empty" style="grid-column:1/-1">${v.err ? esc(v.err) : "Cargando…"}</div>`;
+    else if (d.missing) body = `<div class="pf-card pf-empty" style="grid-column:1/-1">Este jugador aún no tiene perfil público.</div>`;
+    else body = `
+      <div class="pf-col">${heroHtml(d)}${v.msg ? `<p class="pf-msg ${v.ok ? "ok" : ""}">${esc(v.msg)}</p>` : ""}${friendHtml(d)}${statsHtml(d)}${adminHtml(d)}</div>
+      <div class="pf-col">${achHtml(d)}${v.me ? prefHtml() + recentHtml(d) : ""}</div>`;
     el.className = v.me ? "pf-mine" : "pf-other";
-    el.innerHTML = `<div class="pf-in">
-      <div class="pf-bar"><button class="pf-back" data-p="close" type="button" aria-label="Volver">${BACK}</button>
-        <div class="pf-ttl">${v.me ? "Mi perfil" : "Perfil de jugador"}</div><span></span></div>
-      ${body}</div>${d ? detailHtml(d) : ""}${avatarSheet()}`;
+    el.innerHTML = `<div class="pf-in"><div class="pf-ttl">${v.me ? "Mi perfil" : "Perfil de jugador"}</div>${body}</div>${d ? sheetHtml(d) + detailHtml(d) : ""}${avatarSheet()}`;
     el.scrollTop = y;
   }
 
@@ -427,7 +492,7 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
       el.addEventListener("input", onInput);
       document.body.appendChild(el);
     }
-    Object.assign(v, { me: isMe, uid, d: null, loading: true, err: "", editBio: false, bioDraft: "", pickAv: null, detail: null, busy: false, msg: "", ok: false, copied: false });
+    Object.assign(v, { me: isMe, uid, d: null, loading: true, err: "", editBio: false, bioDraft: "", pickAv: null, detail: null, sheet: null, busy: false, msg: "", ok: false, copied: false });
     const my = ++v.req;
     el.scrollTop = 0;
     draw();
@@ -476,7 +541,8 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
     const b = e.target.closest("[data-p]"); if (!b) return;
     if (b.classList.contains("pf-md") && e.target !== b) return;
     const a = b.dataset.p, d = v.d;
-    if (a === "close") return close();
+    if (a === "sheet") { v.sheet = b.dataset.s; return draw(); }
+    if (a === "sheetclose") { v.sheet = null; v.detail = null; return draw(); }
     if (a === "ach") { v.detail = b.dataset.id; return draw(); }
     if (a === "achclose") { v.detail = null; return draw(); }
     if (!d) return;
@@ -565,6 +631,12 @@ body:has(#gxPerfil.pf-mine) .gx6-nav button[data-go="profile"]::after{content:""
     const pl = t.closest('[data-action="player-open"]');
     if (pl && !(el && el.contains(pl))) { e.preventDefault(); e.stopImmediatePropagation(); openOther(pl.dataset.uid); }
   }, true);
+
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape" || !el) return;
+    if (v.detail) v.detail = null; else if (v.sheet) v.sheet = null; else if (v.pickAv) v.pickAv = null; else return;
+    draw();
+  });
 
   // Ranking y otras pantallas abren jugadores con GreyxExtras.open("user", uid)
   const hook = setInterval(() => {
