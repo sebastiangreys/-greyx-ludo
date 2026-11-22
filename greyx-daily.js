@@ -51,14 +51,52 @@
     for (let i = 0; i < tries; i++) { try { return await api(path); } catch (e) { last = e; if (e.code !== "net") throw e; await sleep(1200 * (i + 1)); } }
     throw last;
   }
+  /* ---------- Firestore directo (las reglas de Firebase validan el reclamo) ---------- */
+  async function fsCtx() { const g = G(); return { fs: await g.fsModule(), db: g.fb.db, uid: g.state.user.uid }; }
+  const fail = (code, msg) => Object.assign(new Error(msg), { code });
+  async function fsLoad() {
+    const { fs, db, uid } = await fsCtx(), ref = fs.doc(db, "wallet", uid);
+    let s = await fs.getDoc(ref);
+    if (!s.exists()) {                       // cuenta nueva: bono de registro, una sola vez
+      await fs.setDoc(ref, { coins: 500, bonusGiven: true, daily: { streak: 0, lastDay: -99 }, games: { day: -99, count: 0 }, createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp() });
+      s = await fs.getDoc(ref);
+    }
+    const d = s.data();
+    return { coins: d.coins, daily: d.daily || { streak: 0, lastDay: -99 } };
+  }
+  async function fsClaim() {
+    const { fs, db, uid } = await fsCtx(), ref = fs.doc(db, "wallet", uid);
+    const snap = await fs.getDoc(ref);
+    if (!snap.exists()) throw fail("nowallet", "Tu billetera aún no está lista. Intenta de nuevo.");
+    const w = snap.data(), d = w.daily || { streak: 0, lastDay: -99 }, today = dayKey(Date.now());
+    if (d.lastDay === today) throw fail("already", "Ya reclamaste hoy.");
+    const day = d.lastDay === today - 1 ? (d.streak % 7) + 1 : 1, amount = AMOUNTS[day - 1];
+    const b = fs.writeBatch(db);
+    b.update(ref, { coins: w.coins + amount, daily: { streak: day, lastDay: today }, updatedAt: fs.serverTimestamp() });
+    b.set(fs.doc(db, "walletTx", uid + "_daily_" + today), { uid, type: "daily", day, coins: amount, at: fs.serverTimestamp() });
+    try { await b.commit(); }
+    catch (e) {
+      if (e.code === "unavailable" || e.code === "deadline-exceeded") throw fail("net", "Sin conexión. Intenta de nuevo.");
+      if (e.code === "permission-denied" || e.code === "already-exists") {
+        const again = await fs.getDoc(ref);
+        if (again.exists() && again.data().daily && again.data().daily.lastDay === today) throw fail("already", "Ya reclamaste hoy.");
+        throw fail("rules", "Firebase rechazó el reclamo. Revisa que publicaste las reglas y que la hora de tu teléfono sea correcta.");
+      }
+      throw e;
+    }
+    return { day, gained: amount, coins: w.coins + amount };
+  }
+
   async function load() {
     if (S.loading) return;
     S.loading = true;
     try {
-      const r = await retry("/wallet/sync");
-      S.wallet = { coins: r.coins, daily: r.daily || { streak: 0, lastDay: -99 } };
+      S.wallet = await fsLoad();
       setGold();
-    } catch (e) { console.warn("[daily] sync", e.code); }
+    } catch (e) {
+      console.warn("[daily] load", e.code || e);
+      if (S.open) toast("No se pudo leer tu billetera. ¿Publicaste las reglas de Firebase?", true);
+    }
     S.loading = false;
     if (S.open) draw();
   }
@@ -208,7 +246,7 @@
     S.busy = true; draw();
     const cell = $(`.gd-day[data-d="${i.next}"]`); if (cell) cell.classList.add("shake");   // solo "tiembla" mientras espera
     try {
-      const r = await retry("/wallet/daily");
+      const r = await fsClaim();
       S.wallet = { coins: r.coins, daily: { streak: r.day, lastDay: dayKey(Date.now()) } };
       setGold();
       S.reward = { day: r.day, gained: r.gained };
