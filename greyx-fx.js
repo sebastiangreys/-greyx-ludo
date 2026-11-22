@@ -223,5 +223,23 @@
     if (bb) { bb.classList.remove("gx-bump"); void bb.offsetWidth; bb.classList.add("gx-bump"); }
   }, true);
 
+  /* ================= TIENDA / INVENTARIO: reemplazan el aviso "MUY PRONTO" ================= */
+  const hook = document.createElement("style");
+  hook.textContent = ".gd-sub{display:none!important}.gd-card h2{font-size:1.5rem;margin:4px 0 14px}";
+  document.head.appendChild(hook);
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest(".g8-tile");
+    if (!t) return;
+    const name = (t.dataset.name || "").toUpperCase();
+    if (name !== "TIENDA" && name !== "INVENTARIO") return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    document.querySelectorAll(".g8-soon").forEach(x => x.remove());
+    if (!window.GXShop) {
+      const m = document.createElement("div"); m.className = "gs-toast bad"; m.textContent = "La tienda no cargó. Revisa que greyx-shop.js esté en index.html.";
+      document.body.appendChild(m); setTimeout(() => m.remove(), 3000); return;
+    }
+    if (name === "TIENDA") window.GXShop.openShop(); else window.GXShop.openInventory();
+  }, true);
+
   window.GXFx = { mute: toggleMute, sounds: SND };
 })();
