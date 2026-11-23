@@ -282,12 +282,49 @@ export function firestoreStore(env) {
   const base = `https://firestore.googleapis.com/v1/${root}/documents`;
   const nm = p => `${root}/documents/${p}`;
   const strip = n => n.slice(`${root}/documents/`.length);
-  const call = async (suffix, body) => {
-    const r = await fetch(base + suffix, { method: "POST", headers: { Authorization: "Bearer " + await accessToken(env), "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error((j.error && j.error.message) || "firestore"); e.fs = j.error && j.error.status; e.http = r.status; throw e; }
-    return j;
-  };
+  
+const call = async (suffix, body) => {
+  const r = await fetch(base + suffix, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + await accessToken(env),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  const raw = await r.text();
+  let j = {};
+
+  if (raw.trim()) {
+    if (suffix === ":batchGet") {
+      try {
+        j = JSON.parse(raw);
+        if (!Array.isArray(j)) j = [j];
+      } catch {
+        j = raw
+          .split(/\r?\n/)
+          .filter(line => line.trim())
+          .map(line => JSON.parse(line));
+      }
+    } else {
+      j = JSON.parse(raw);
+    }
+  }
+
+  if (!r.ok) {
+    const detail = Array.isArray(j)
+      ? (j.find(x => x.error)?.error || {})
+      : (j.error || {});
+
+    const e = new Error(detail.message || "firestore");
+    e.fs = detail.status;
+    e.http = r.status;
+    throw e;
+  }
+
+  return j;
+};
   const toWrite = w => {
     const name = nm(w.path);
     if (w.t === "del") return { delete: name };
