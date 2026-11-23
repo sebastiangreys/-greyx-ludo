@@ -11689,6 +11689,83 @@ fab.style.display = ok && !blocked && !onMenu ? "grid" : "none";
 .trophy-popup.down .trophy-popup-label{color:#fca5a5}
 
 </style>
+ <script>
+  // ============================================
+  // PROTECCIÓN COMPLETA CONTRA VER CÓDIGO
+  // ============================================
 
+  // --- Desactivar clic derecho ---
+  document.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    return false;
+  });
+
+  // --- Bloquear teclas peligrosas ---
+  document.addEventListener('keydown', function(e) {
+    // Ctrl + U
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl + S
+    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl + Shift + I / J / C / K
+    if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) {
+      e.preventDefault();
+      return false;
+    }
+    // F12
+    if (e.key === 'F12') {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl + Shift + Delete (por si acaso)
+    if (e.ctrlKey && e.shiftKey && e.key === 'Delete') {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // --- Detectar DevTools (método más agresivo) ---
+  (function() {
+    const threshold = 160;
+    let opened = false;
+
+    const check = () => {
+      const widthDiff = window.outerWidth - window.innerWidth > threshold;
+      const heightDiff = window.outerHeight - window.innerHeight > threshold;
+
+      if ((widthDiff || heightDiff) && !opened) {
+        opened = true;
+        // Borra todo el contenido de la página
+        document.documentElement.innerHTML = `
+          <body style="margin:0;background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;">
+            <div>
+              <h1 style="font-size:2rem;margin-bottom:10px;">Acceso denegado</h1>
+              <p style="opacity:0.7;">No se permite inspeccionar el código</p>
+            </div>
+          </body>
+        `;
+      }
+    };
+
+    setInterval(check, 700);
+
+    // También detectar con debugger
+    setInterval(() => {
+      debugger;
+    }, 100);
+  })();
+
+  // --- Desactivar selección de texto ---
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  // --- Evitar que abran la consola fácilmente ---
+  console.log = console.warn = console.error = console.info = console.debug = () => {};
+</script>
 </body>
 </html>
