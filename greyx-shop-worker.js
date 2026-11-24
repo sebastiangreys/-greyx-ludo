@@ -1,9 +1,7 @@
 /* GREYX LUDO — SERVIDOR DE LA TIENDA (Cloudflare Worker, módulo ES)
-   Es el ÚNICO que puede cambiar: monedas, inventario, equipamiento, tarjetas activas y XP extra.
-   El navegador solo lo pide; este servidor verifica quién eres (token de Firebase) y decide.
-   Variables/secretos necesarios (ver LEEME):  FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY */
+   Esta versión NO usa comillas invertidas, para que se pueda copiar y pegar sin errores.
+   Variables necesarias (Settings > Variables and Secrets): FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY */
 
-/* ======================= REGLAS OFICIALES (aquí viven los precios) ======================= */
 const PRODUCTS = {
   dice_gold:      { cat: "dice",  price: 2500, perm: true },
   dice_crystal:   { cat: "dice",  price: 1800, perm: true },
@@ -27,58 +25,59 @@ const GAME_COINS = { 1: 100, 2: 60, 3: 35, 4: 20 };
 const GAME_LIMIT = 10;
 const SIGNUP = 500;
 const RESERVED = ["admin", "administrador", "greyx", "ludogreyx", "soporte", "support", "moderador", "mod", "root", "sistema", "system"];
-const TZ = -4 * 3600000, DAY = 86400000;                       // República Dominicana (UTC-4)
+const TZ = -4 * 3600000, DAY = 86400000;
 const dayKey = ms => Math.floor((ms + TZ) / DAY);
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Allow-Methods": "POST, GET, OPTIONS", "Access-Control-Max-Age": "86400" };
-const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", ...CORS } });
+const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: Object.assign({ "Content-Type": "application/json" }, CORS) });
 const ERR = (code, message, status = 400) => Object.assign(new Error(message), { code, status });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-/* ======================= MANEJADORES ======================= */
 const pubWallet = w => ({ coins: w.coins, daily: w.daily });
 const newWallet = now => ({ coins: SIGNUP, bonusGiven: true, daily: { streak: 0, lastDay: -99 }, games: { day: -99, count: 0 }, createdAt: new Date(now), updatedAt: new Date(now) });
-const signupTx = (uid, now) => ({ t: "create", path: `walletTx/${uid}_signup`, data: { uid, type: "signup", coins: SIGNUP, at: new Date(now) } });
+const signupTx = (uid, now) => ({ t: "create", path: "walletTx/" + uid + "_signup", data: { uid: uid, type: "signup", coins: SIGNUP, at: new Date(now) } });
 const walletWrites = (uid, w, isNew, now) => {
   w.updatedAt = new Date(now);
-  const out = [{ t: isNew ? "create" : "set", path: `wallet/${uid}`, data: w }];
+  const out = [{ t: isNew ? "create" : "set", path: "wallet/" + uid, data: w }];
   if (isNew) out.push(signupTx(uid, now));
   return out;
 };
 const qtyWrite = (path, inv, qty, now) => qty > 0
-  ? { t: "set", path, data: { qty, cat: inv.cat, acquiredAt: inv.acquiredAt, updatedAt: new Date(now) } }
-  : { t: "del", path };
+  ? { t: "set", path: path, data: { qty: qty, cat: inv.cat, acquiredAt: inv.acquiredAt, updatedAt: new Date(now) } }
+  : { t: "del", path: path };
 
 const H = {
-  async "/wallet/sync"({ uid, store, now }) {
-    return store.tx([`wallet/${uid}`], async d => {
-      const w = d[`wallet/${uid}`];
+  "/wallet/sync": async function (c) {
+    const uid = c.uid, store = c.store, now = c.now, key = "wallet/" + uid;
+    return store.tx([key], async d => {
+      const w = d[key];
       if (w) return { writes: [], result: pubWallet(w) };
       const nw = newWallet(now);
       return { writes: walletWrites(uid, nw, true, now), result: pubWallet(nw) };
     });
   },
 
-  async "/wallet/daily"({ uid, store, now }) {
-    return store.tx([`wallet/${uid}`], async d => {
-      let w = d[`wallet/${uid}`], isNew = false;
+  "/wallet/daily": async function (c) {
+    const uid = c.uid, store = c.store, now = c.now, key = "wallet/" + uid;
+    return store.tx([key], async d => {
+      let w = d[key], isNew = false;
       if (!w) { w = newWallet(now); isNew = true; }
       const today = dayKey(now), last = w.daily || { streak: 0, lastDay: -99 };
       if (last.lastDay === today) throw ERR("already", "Ya reclamaste la recompensa de hoy.");
-      const day = last.lastDay === today - 1 ? (last.streak % 7) + 1 : 1;   // si pierde un día vuelve al 1
+      const day = last.lastDay === today - 1 ? (last.streak % 7) + 1 : 1;
       const amount = DAILY[day - 1];
       w.coins += amount; w.daily = { streak: day, lastDay: today };
       const writes = walletWrites(uid, w, isNew, now);
-      writes.push({ t: "create", path: `walletTx/${uid}_daily_${today}`, data: { uid, type: "daily", day, coins: amount, at: new Date(now) } });
-      return { writes, result: { day, gained: amount, coins: w.coins } };
+      writes.push({ t: "create", path: "walletTx/" + uid + "_daily_" + today, data: { uid: uid, type: "daily", day: day, coins: amount, at: new Date(now) } });
+      return { writes: writes, result: { day: day, gained: amount, coins: w.coins } };
     });
   },
 
-  // Monedas por partida terminada + XP extra de la tarjeta activa. Solo cuenta si la partida quedó registrada.
-  async "/wallet/game"({ uid, body, store, now }) {
+  "/wallet/game": async function (c) {
+    const uid = c.uid, body = c.body, store = c.store, now = c.now;
     const gameId = String(body.gameId || "");
     if (!/^[A-Za-z0-9_-]{8,40}$/.test(gameId)) throw ERR("badgame", "Partida no válida.");
-    const P = { w: `wallet/${uid}`, m: `matches/${uid}_${gameId}`, t: `walletTx/${uid}_game_${gameId}`, b: `boosts/${uid}`, s: `stats/${uid}`, p: `publicProfiles/${uid}` };
+    const P = { w: "wallet/" + uid, m: "matches/" + uid + "_" + gameId, t: "walletTx/" + uid + "_game_" + gameId, b: "boosts/" + uid, s: "stats/" + uid, p: "publicProfiles/" + uid };
     return store.tx(Object.values(P), async d => {
       if (d[P.t]) return { writes: [], result: { already: true, coins: d[P.w] ? d[P.w].coins : 0 } };
       const m = d[P.m];
@@ -92,26 +91,26 @@ const H = {
       const coins = capped ? 0 : (GAME_COINS[m.place] || 0);
       w.games = { day: today, count: g.count + (coins > 0 ? 1 : 0) };
       w.coins += coins;
-      // XP extra: la tarjeta tenía que estar activa cuando se jugó la partida
       const b = d[P.b];
       let bonus = 0;
       if (b && b.mult > 0 && b.startedAt && b.until && b.startedAt.getTime() <= at && at <= b.until.getTime()) bonus = Math.floor((m.xp || 0) * b.mult);
       const writes = walletWrites(uid, w, isNew, now);
       if (bonus > 0 && d[P.s]) writes.push({ t: "patch", path: P.s, data: { xp: (d[P.s].xp || 0) + bonus } });
       if (bonus > 0 && d[P.p]) writes.push({ t: "patch", path: P.p, data: { xp: (d[P.p].xp || 0) + bonus } });
-      writes.push({ t: "create", path: P.t, data: { uid, type: "game", gameId, place: m.place, players: m.players, coins, bonusXp: bonus, capped, at: new Date(now) } });
-      return { writes, result: { gained: coins, coins: w.coins, bonusXp: bonus, capped, count: w.games.count } };
+      writes.push({ t: "create", path: P.t, data: { uid: uid, type: "game", gameId: gameId, place: m.place, players: m.players, coins: coins, bonusXp: bonus, capped: capped, at: new Date(now) } });
+      return { writes: writes, result: { gained: coins, coins: w.coins, bonusXp: bonus, capped: capped, count: w.games.count } };
     });
   },
 
-  async "/shop/buy"({ uid, body, store, now }) {
+  "/shop/buy": async function (c) {
+    const uid = c.uid, body = c.body, store = c.store, now = c.now;
     const id = String(body.productId || ""), p = PRODUCTS[id], txId = String(body.txId || "");
     if (!p) throw ERR("noproduct", "Ese producto no existe.");
     if (!/^[A-Za-z0-9_-]{16,64}$/.test(txId)) throw ERR("badtx", "Compra no válida.");
-    const P = { w: `wallet/${uid}`, pu: `purchases/${txId}`, i: `shopInventory/${uid}/items/${id}`, bn: `bans/${uid}` };
+    const P = { w: "wallet/" + uid, pu: "purchases/" + txId, i: "shopInventory/" + uid + "/items/" + id, bn: "bans/" + uid };
     return store.tx(Object.values(P), async d => {
       const w = d[P.w], pu = d[P.pu], inv = d[P.i];
-      if (pu) {                                           // el mismo envío repetido: no se cobra otra vez
+      if (pu) {
         if (pu.uid !== uid) throw ERR("forbidden", "Operación no permitida.", 403);
         return { writes: [], result: { productId: pu.productId, coins: w ? w.coins : 0, qty: inv ? inv.qty : 1, replay: true } };
       }
@@ -124,17 +123,18 @@ const H = {
       w.coins -= p.price;
       const qty = p.perm ? 1 : (inv ? inv.qty : 0) + 1;
       const writes = walletWrites(uid, w, false, now);
-      writes.push({ t: inv ? "set" : "create", path: P.i, data: { qty, cat: p.cat, acquiredAt: inv ? inv.acquiredAt : new Date(now), updatedAt: new Date(now) } });
-      writes.push({ t: "create", path: P.pu, data: { uid, productId: id, price: p.price, currency: "greyx_coins", at: new Date(now), txId, status: "completed", balanceAfter: w.coins } });
-      return { writes, result: { productId: id, coins: w.coins, qty } };
+      writes.push({ t: inv ? "set" : "create", path: P.i, data: { qty: qty, cat: p.cat, acquiredAt: inv ? inv.acquiredAt : new Date(now), updatedAt: new Date(now) } });
+      writes.push({ t: "create", path: P.pu, data: { uid: uid, productId: id, price: p.price, currency: "greyx_coins", at: new Date(now), txId: txId, status: "completed", balanceAfter: w.coins } });
+      return { writes: writes, result: { productId: id, coins: w.coins, qty: qty } };
     });
   },
 
-  async "/shop/equip"({ uid, body, store, now }) {
+  "/shop/equip": async function (c) {
+    const uid = c.uid, body = c.body, store = c.store, now = c.now;
     const cat = String(body.category || ""), id = body.productId ? String(body.productId) : null;
-    if (!["dice", "token", "board"].includes(cat)) throw ERR("badcat", "Categoría no válida.");
+    if (["dice", "token", "board"].indexOf(cat) < 0) throw ERR("badcat", "Categoría no válida.");
     if (id && (!PRODUCTS[id] || PRODUCTS[id].cat !== cat)) throw ERR("noproduct", "Ese producto no existe.");
-    const P = { e: `shopEquip/${uid}`, i: id ? `shopInventory/${uid}/items/${id}` : null };
+    const P = { e: "shopEquip/" + uid, i: id ? "shopInventory/" + uid + "/items/" + id : null };
     return store.tx([P.e, P.i].filter(Boolean), async d => {
       if (id && !d[P.i]) throw ERR("notowned", "No tienes ese artículo.", 403);
       const eq = Object.assign({ dice: null, token: null, board: null }, d[P.e] || {});
@@ -143,53 +143,54 @@ const H = {
     });
   },
 
-  async "/shop/use"({ uid, body, store, now }) {
+  "/shop/use": async function (c) {
+    const uid = c.uid, body = c.body, store = c.store, now = c.now;
     const id = String(body.productId || ""), p = PRODUCTS[id];
     if (!p || p.kind !== "boost") throw ERR("noproduct", "Esa tarjeta no se puede utilizar así.");
-    const P = { i: `shopInventory/${uid}/items/${id}`, b: `boosts/${uid}`, l: `cardUses/${uid}_${now}_${id}` };
+    const P = { i: "shopInventory/" + uid + "/items/" + id, b: "boosts/" + uid, l: "cardUses/" + uid + "_" + now + "_" + id };
     return store.tx(Object.values(P), async d => {
       const inv = d[P.i], b = d[P.b];
       if (!inv || inv.qty < 1) throw ERR("noqty", "No tienes esa tarjeta.", 403);
       if (b && b.until && b.until.getTime() > now) throw ERR("active", "Ya tienes una tarjeta activa. Espera a que termine.");
       const until = new Date(now + p.hours * 3600000);
       return { writes: [
-        { t: "set", path: P.b, data: { cardId: id, mult: p.mult, pro: !!p.pro, startedAt: new Date(now), until } },
+        { t: "set", path: P.b, data: { cardId: id, mult: p.mult, pro: !!p.pro, startedAt: new Date(now), until: until } },
         qtyWrite(P.i, inv, inv.qty - 1, now),
-        { t: "create", path: P.l, data: { uid, cardId: id, at: new Date(now) } }
+        { t: "create", path: P.l, data: { uid: uid, cardId: id, at: new Date(now) } }
       ], result: { cardId: id, until: until.getTime(), mult: p.mult, pro: !!p.pro } };
     });
   },
 
-  async "/shop/rename"({ uid, body, store, now }) {
+  "/shop/rename": async function (c) {
+    const uid = c.uid, body = c.body, store = c.store, now = c.now;
     const name = String(body.name || "").trim();
     if (!/^[A-Za-z0-9_]{3,16}$/.test(name)) throw ERR("badname", "Usa 3 a 16 caracteres: letras, números y _.");
     const lower = name.toLowerCase();
-    const pre = await store.tx([`users/${uid}`], async d => ({ writes: [], result: d[`users/${uid}`] }));
+    const pre = await store.tx(["users/" + uid], async d => ({ writes: [], result: d["users/" + uid] }));
     if (!pre) throw ERR("noprofile", "Primero crea tu perfil.");
     const oldLower = pre.usernameLower;
-    const P = { i: `shopInventory/${uid}/items/card_rename`, u: `users/${uid}`, n: `usernames/${lower}`, o: `usernames/${oldLower}`, p: `publicProfiles/${uid}`, a: `admins/${uid}`, l: `cardUses/${uid}_${now}_card_rename` };
-    return store.tx([...new Set(Object.values(P))], async d => {
+    const P = { i: "shopInventory/" + uid + "/items/card_rename", u: "users/" + uid, n: "usernames/" + lower, o: "usernames/" + oldLower, p: "publicProfiles/" + uid, a: "admins/" + uid, l: "cardUses/" + uid + "_" + now + "_card_rename" };
+    return store.tx(Array.from(new Set(Object.values(P))), async d => {
       const inv = d[P.i], usr = d[P.u];
       if (!inv || inv.qty < 1) throw ERR("noqty", "No tienes una Tarjeta de Renombre.", 403);
       if (!usr || usr.usernameLower !== oldLower) throw ERR("conflict", "Intenta de nuevo.");
-      if (RESERVED.includes(lower) && !d[P.a]) throw ERR("reserved", "Ese nombre no está disponible.");
+      if (RESERVED.indexOf(lower) >= 0 && !d[P.a]) throw ERR("reserved", "Ese nombre no está disponible.");
       if (name === usr.username) throw ERR("same", "Ese ya es tu nombre actual.");
       const changed = lower !== oldLower;
       if (changed && d[P.n]) throw ERR("taken", "Ese nombre ya está en uso.");
       const writes = [{ t: "patch", path: P.u, data: { username: name, usernameLower: lower, updatedAt: new Date(now) } }];
-      if (changed) { writes.push({ t: "create", path: P.n, data: { uid, username: name, avatar: usr.avatar || "a1" } }); writes.push({ t: "del", path: P.o }); }
+      if (changed) { writes.push({ t: "create", path: P.n, data: { uid: uid, username: name, avatar: usr.avatar || "a1" } }); writes.push({ t: "del", path: P.o }); }
       else writes.push({ t: "patch", path: P.n, data: { username: name } });
       if (d[P.p]) writes.push({ t: "patch", path: P.p, data: { username: name, usernameLower: lower } });
       writes.push(qtyWrite(P.i, inv, inv.qty - 1, now));
-      writes.push({ t: "create", path: P.l, data: { uid, cardId: "card_rename", from: usr.username, to: name, at: new Date(now) } });
-      return { writes, result: { username: name, usernameLower: lower } };
+      writes.push({ t: "create", path: P.l, data: { uid: uid, cardId: "card_rename", from: usr.username, to: name, at: new Date(now) } });
+      return { writes: writes, result: { username: name, usernameLower: lower } };
     });
   }
 };
 
-/* ======================= ENTRADA ======================= */
-export async function handle(req, env, store, opts = {}) {
-  const verify = opts.verify || verifyIdToken, now = opts.now ? opts.now() : Date.now();
+async function handle(req, env, store) {
+  const now = Date.now();
   const url = new URL(req.url);
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (url.pathname === "/api/health") return json({ ok: true, time: now });
@@ -197,29 +198,34 @@ export async function handle(req, env, store, opts = {}) {
   const route = H[url.pathname.replace(/^\/api/, "")];
   if (!route) return json({ ok: false, code: "notfound", message: "Ruta no encontrada." }, 404);
   let uid;
-  try { uid = await verify((req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, ""), env); }
+  try { uid = await verifyIdToken((req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, ""), env); }
   catch (e) { return json({ ok: false, code: "auth", message: "Sesión no válida. Vuelve a iniciar sesión." }, 401); }
   let body = {};
-  try { body = await req.json(); } catch (e) { /* sin cuerpo */ }
-  try { return json({ ok: true, ...(await route({ uid, body, store, now })) }); }
+  try { body = await req.json(); } catch (e) { }
+  try { return json(Object.assign({ ok: true }, await route({ uid: uid, body: body, store: store, now: now }))); }
   catch (e) {
     if (e && e.code && e.status) return json({ ok: false, code: e.code, message: e.message }, e.status);
     console.error("shop", e);
     return json({ ok: false, code: "server", message: "Error del servidor. Intenta de nuevo." }, 500);
   }
 }
-export default { async fetch(req, env) { return handle(req, env, firestoreStore(env)); } };
-export const _test = { PRODUCTS, dayKey };
 
-/* ======================= FIREBASE: verificar sesión ======================= */
+export default {
+  async fetch(req, env) {
+    try { return await handle(req, env, firestoreStore(env)); }
+    catch (e) { console.error("fatal", e); return json({ ok: false, code: "server", message: "Error del servidor." }, 500); }
+  }
+};
+
 const enc = new TextEncoder();
 const b64uToBytes = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); s += "=".repeat((4 - s.length % 4) % 4); const b = atob(s); return Uint8Array.from(b, c => c.charCodeAt(0)); };
-const bytesToB64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const bytesToB64u = buf => btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const strB64u = s => bytesToB64u(enc.encode(s));
 let jwks = { at: 0, keys: [] };
 
 async function verifyIdToken(token, env) {
-  const [h, p, s] = String(token).split(".");
+  const parts = String(token).split(".");
+  const h = parts[0], p = parts[1], s = parts[2];
   if (!h || !p || !s) throw new Error("token");
   const head = JSON.parse(new TextDecoder().decode(b64uToBytes(h))), pay = JSON.parse(new TextDecoder().decode(b64uToBytes(p)));
   const pid = env.FIREBASE_PROJECT_ID, now = Math.floor(Date.now() / 1000);
@@ -237,7 +243,6 @@ async function verifyIdToken(token, env) {
   return pay.sub;
 }
 
-/* ======================= FIRESTORE (API REST con transacciones) ======================= */
 let tokCache = { v: null, exp: 0 };
 async function accessToken(env) {
   if (tokCache.v && Date.now() < tokCache.exp - 60000) return tokCache.v;
@@ -277,74 +282,40 @@ const fromV = v => {
 };
 const fromF = f => { const o = {}; for (const k in f) o[k] = fromV(f[k]); return o; };
 
-export function firestoreStore(env) {
-  const root = `projects/${env.FIREBASE_PROJECT_ID}/databases/(default)`;
-  const base = `https://firestore.googleapis.com/v1/${root}/documents`;
-  const nm = p => `${root}/documents/${p}`;
-  const strip = n => n.slice(`${root}/documents/`.length);
-  
-const call = async (suffix, body) => {
-  const r = await fetch(base + suffix, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + await accessToken(env),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  const raw = await r.text();
-  let j = {};
-
-  if (raw.trim()) {
-    if (suffix === ":batchGet") {
-      try {
-        j = JSON.parse(raw);
-        if (!Array.isArray(j)) j = [j];
-      } catch {
-        j = raw
-          .split(/\r?\n/)
-          .filter(line => line.trim())
-          .map(line => JSON.parse(line));
-      }
-    } else {
-      j = JSON.parse(raw);
-    }
-  }
-
-  if (!r.ok) {
-    const detail = Array.isArray(j)
-      ? (j.find(x => x.error)?.error || {})
-      : (j.error || {});
-
-    const e = new Error(detail.message || "firestore");
-    e.fs = detail.status;
-    e.http = r.status;
-    throw e;
-  }
-
-  return j;
-};
+function firestoreStore(env) {
+  const root = "projects/" + env.FIREBASE_PROJECT_ID + "/databases/(default)";
+  const base = "https://firestore.googleapis.com/v1/" + root + "/documents";
+  const nm = p => root + "/documents/" + p;
+  const strip = n => n.slice((root + "/documents/").length);
+  const call = async (suffix, body) => {
+    const r = await fetch(base + suffix, { method: "POST", headers: { Authorization: "Bearer " + await accessToken(env), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const e = new Error((j.error && j.error.message) || "firestore"); e.fs = j.error && j.error.status; e.http = r.status; throw e; }
+    return j;
+  };
   const toWrite = w => {
     const name = nm(w.path);
     if (w.t === "del") return { delete: name };
-    if (w.t === "patch") return { update: { name, fields: toF(w.data) }, updateMask: { fieldPaths: Object.keys(w.data) }, currentDocument: { exists: true } };
-    return { update: { name, fields: toF(w.data) }, ...(w.t === "create" ? { currentDocument: { exists: false } } : {}) };
+    if (w.t === "patch") return { update: { name: name, fields: toF(w.data) }, updateMask: { fieldPaths: Object.keys(w.data) }, currentDocument: { exists: true } };
+    const o = { update: { name: name, fields: toF(w.data) } };
+    if (w.t === "create") o.currentDocument = { exists: false };
+    return o;
   };
   return {
     async tx(paths, fn) {
       for (let attempt = 0; attempt < 4; attempt++) {
-        const { transaction } = await call(":beginTransaction", { options: { readWrite: {} } });
+        const begun = await call(":beginTransaction", { options: { readWrite: {} } });
+        const transaction = begun.transaction;
         let out;
         try {
-          const rows = await call(":batchGet", { documents: paths.map(nm), transaction });
+          const rows = await call(":batchGet", { documents: paths.map(nm), transaction: transaction });
           const docs = {};
           paths.forEach(p => { docs[p] = null; });
           rows.forEach(r => { if (r.found) docs[strip(r.found.name)] = fromF(r.found.fields || {}); });
           out = await fn(docs);
-        } catch (e) { call(":rollback", { transaction }).catch(() => {}); throw e; }
-        if (!out.writes.length) { call(":rollback", { transaction }).catch(() => {}); return out.result; }
-        try { await call(":commit", { transaction, writes: out.writes.map(toWrite) }); return out.result; }
+        } catch (e) { call(":rollback", { transaction: transaction }).catch(() => {}); throw e; }
+        if (!out.writes.length) { call(":rollback", { transaction: transaction }).catch(() => {}); return out.result; }
+        try { await call(":commit", { transaction: transaction, writes: out.writes.map(toWrite) }); return out.result; }
         catch (e) {
           if (e.fs === "ABORTED" || e.fs === "ALREADY_EXISTS" || e.http === 409) { await sleep(80 * (attempt + 1)); continue; }
           throw e;
